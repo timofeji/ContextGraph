@@ -1,0 +1,11 @@
+#include "ThinkGraphDelegates.h"
+
+FThinkGraphDelegates::FOnThinkGraphEvaluated FThinkGraphDelegates::OnGraphNodeEvaluated;
+FThinkGraphDelegates::FOnThinkGraphSelected FThinkGraphDelegates::OnGraphNodeSelected;
+FThinkGraphDelegates::FOnThinkGraphReset FThinkGraphDelegates::OnGraphReset;
+FThinkGraphDelegates::FOnThinkGraphNodeEvaluated FThinkGraphDelegates::OnNodeEvaluated;
+
+
+#if WITH_EDITORONLY_DATA
+#endif
+
