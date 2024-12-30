@@ -32,6 +32,7 @@ public class ThinkGraph : ModuleRules
 		PrivateDependencyModuleNames.AddRange(
 			new string[]
 			{
+				"Http", "Json", "JsonUtilities",
 				"Projects",
 				"InputCore",
 				"EditorFramework",

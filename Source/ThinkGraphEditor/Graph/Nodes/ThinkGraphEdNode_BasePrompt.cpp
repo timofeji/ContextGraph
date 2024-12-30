@@ -6,7 +6,7 @@
 
 UThinkGraphEdNode_BasePrompt::UThinkGraphEdNode_BasePrompt()
 {
-	bCanRenameNode = false;
+	bCanRenameNode = true;
 }
 
 void UThinkGraphEdNode_BasePrompt::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
@@ -19,10 +19,6 @@ void UThinkGraphEdNode_BasePrompt::AllocateDefaultPins()
 	CreatePin(EGPD_Output, UThinkGraphPinNames::PinName_Out, TEXT("Prompt"));
 }
 
-FText UThinkGraphEdNode_BasePrompt::GetNodeTitle(ENodeTitleType::Type TitleType) const
-{
-	return FText::FromString("Prompt");
-}
 
 FLinearColor UThinkGraphEdNode_BasePrompt::GetNodeTitleColor() const
 {

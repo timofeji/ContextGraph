@@ -3,7 +3,10 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Interfaces/IHttpRequest.h"
 
+class IHttpResponse;
+class IHttpRequest;
 class UThinkGraph;
 class UThinkGraphNode_Parse;
 
@@ -53,7 +56,7 @@ public:
 	                                           const TArray<UEdGraphPin*>& EdGraphPins,
 	                                           bool bArg, TDelegate<void()> Delegate);
 
-	void OnGraphSelectionChanged(const TSet<UObject*>& Objects);
+	void OnNodeSelectionChanged(const TSet<UObject*>& Objects);
 
 	void OnGraphNodeDoubleClicked(UEdGraphNode* EdGraphNode);
 	void OnNodeTitleCommitted(const FText& NewText, ETextCommit::Type CommitInfo, UEdGraphNode* NodeBeingChanged);
@@ -70,7 +73,12 @@ public:
 	}
 
 	void ExtendMenu();
+
+	bool CanDebug() const;
+	UFUNCTION()
+	void OnChatGPTResponseReceived(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful) const;
 	
+	void RunDebug() const;
 	void FillToolbar(FToolBarBuilder& ToolBarBuilder);
 	void ExtendToolbar();
 	bool IsPIESimulating() const;
@@ -110,8 +118,6 @@ public:
 	void OnCreateComment() const;
 	
 	//*Tracers
-	void RegenerateActionTracers();
-	bool CanRegenerateTracers();
 	
 
 	TSharedPtr<class FBlueprintEditorToolbar> Toolbar;
@@ -120,6 +126,7 @@ public:
 	float SampleRate = 20.f;
 	float TracerAnimTime = 0.1;
 	FTimerHandle SampleTimerHandle;
+	TSharedPtr<SBorder> DetailsBorder;
 
 	TSharedPtr<class FBlueprintEditorToolbar> GetToolbarBuilder() { return Toolbar; }
 
@@ -193,6 +200,9 @@ public:
 	void DebuggerUpdateGraph(bool bIsPIEActive);
 
 	void OnFinishedChangingProperties(const FPropertyChangedEvent& PropertyChangedEvent);
+	
+	FSlateColor GetDetailsBorderColor() const;
+	
 	void CreatePropertyWidget();
 
 	// The custom details view used

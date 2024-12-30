@@ -8,7 +8,7 @@
 
 FText UThinkGraphNode::GetNodeTitle() const
 {
-	FText DefaultText = LOCTEXT("DefaultNodeTitle", "Think Graph Node");
+	FText DefaultText = LOCTEXT("DefaultNodeTitle", "ThinkGraph Node");
 	return NodeTitle.IsEmpty() ? DefaultText : NodeTitle;
 }
 

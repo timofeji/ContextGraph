@@ -5,6 +5,7 @@
 #include "AssetTypeActions_ThinkGraph.h"
 #include "EdGraphUtilities.h"
 #include "IAssetTools.h"
+#include "ThinkGraphDetails.h"
 #include "ThinkGraphEditorStyle.h"
 #include "ThinkGraphEditorCommands.h"
 #include "Widgets/Docking/SDockTab.h"
@@ -71,11 +72,11 @@ void FThinkGraphEditorModule::StartupModule()
 	ThinkNodeFactory = MakeShareable(new FThinkGraphNodePanelFactory());
 	FEdGraphUtilities::RegisterVisualNodeFactory(ThinkNodeFactory);
 	//
-	// FPropertyEditorModule& PropertyEditorModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>(
-	// 	"PropertyEditor");
-	// PropertyEditorModule.RegisterCustomClassLayout("ThinkGraphEdNode",
-	//                                                FOnGetDetailCustomizationInstance::CreateStatic(
-	// 	                                               &FThinkGraphDetails::MakeInstance));
+	FPropertyEditorModule& PropertyEditorModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>(
+		"PropertyEditor");
+	PropertyEditorModule.RegisterCustomClassLayout("ThinkGraphEdNode",
+	                                               FOnGetDetailCustomizationInstance::CreateStatic(
+		                                               &FThinkGraphDetails::MakeInstance));
 }
 
 void FThinkGraphEditorModule::ShutdownModule()

@@ -39,12 +39,17 @@ const FVector2D Icon16(16.0f, 16.0f);
 const FVector2D Icon32(32.0f, 32.0f);
 const FVector2D IconNode(28.0f, 28.0f);
 
+#define ICON_FONT(RelativePath, ...) FSlateFontInfo(RootToContentDir(RelativePath, TEXT(".ttf")), __VA_ARGS__)
+
 TSharedRef<FSlateStyleSet> FThinkGraphEditorStyle::Create()
 {
 	TSharedRef<FSlateStyleSet> Style = MakeShareable(new FSlateStyleSet("ThinkGraphEditorStyle"));
 	Style->SetContentRoot(IPluginManager::Get().FindPlugin("ThinkGraph")->GetBaseDir() / TEXT("Resources"));
 
 	Style->Set("ThinkGraphEditor.OpenPluginWindow", new IMAGE_BRUSH_SVG(TEXT("PlaceholderButtonIcon"), Icon20x20));
+
+
+	Style->Set("ThinkGraph.Text.Prompt", ICON_FONT("Fonts/Perfect DOS VGA 437", 14));
 
 
 	Style->Set("ThinkGraph.Text.Pin", FTextBlockStyle()
@@ -57,7 +62,8 @@ TSharedRef<FSlateStyleSet> FThinkGraphEditorStyle::Create()
 	);
 
 
-	Style->Set("ThinkGraph.Icon.Buffer", new IMAGE_BRUSH("Icons/Icon_Buffer_64x", IconNode));
+	Style->Set("ThinkGraph.Icon.Stimulus", new IMAGE_BRUSH("Icons/Icon_Stimulus_64x", IconNode));
+	Style->Set("ThinkGraph.Icon.Memory", new IMAGE_BRUSH("Icons/Icon_Memory_64x", IconNode));
 	Style->Set("ThinkGraph.Icon.Prompt", new IMAGE_BRUSH("Icons/Icon_Prompt_64x", IconNode));
 	Style->Set("ThinkGraph.Icon.LLM", new IMAGE_BRUSH("Icons/Icon_LLM_64x", IconNode));
 	Style->Set("ThinkGraph.Icon.Parse", new IMAGE_BRUSH("Icons/Icon_Parse_64x", IconNode));
@@ -113,3 +119,4 @@ const ISlateStyle& FThinkGraphEditorStyle::Get()
 {
 	return *StyleInstance;
 }
+#undef ICON_FONT

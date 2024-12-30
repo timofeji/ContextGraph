@@ -9,7 +9,8 @@
 class UThinkGraphEdNode_BasePrompt;
 class UThinkGraphEdNode_LLM;
 class UThinkGraphEdNode_Parse;
-class UThinkGraphEdNode_Buffer;
+class UThinkGraphEdNode_Memory;
+class UThinkGraphEdNode_Stimulus;
 
 class UThinkGraphNode;
 class UThinkGraphEdNode;
@@ -146,20 +147,39 @@ struct THINKGRAPHEDITOR_API FThinkGraphSchemaAction_NewNode_Parse : public FEdGr
 
 /** Action to add a node Selector to the graph */
 USTRUCT()
-struct THINKGRAPHEDITOR_API FThinkGraphSchemaAction_NewNode_Buffer : public FEdGraphSchemaAction
+struct THINKGRAPHEDITOR_API FThinkGraphSchemaAction_NewNode_Stimulus : public FEdGraphSchemaAction
 {
 	GENERATED_USTRUCT_BODY();
 
-	FThinkGraphSchemaAction_NewNode_Buffer(): NodeTemplate(nullptr) {}
+	FThinkGraphSchemaAction_NewNode_Stimulus(): NodeTemplate(nullptr) {}
 
-	FThinkGraphSchemaAction_NewNode_Buffer(const FText& InNodeCategory, const FText& InMenuDesc, const FText& InToolTip, const int32 InGrouping)
+	FThinkGraphSchemaAction_NewNode_Stimulus(const FText& InNodeCategory, const FText& InMenuDesc, const FText& InToolTip, const int32 InGrouping)
 		: FEdGraphSchemaAction(InNodeCategory, InMenuDesc, InToolTip, InGrouping), NodeTemplate(nullptr) {}
 
 	virtual UEdGraphNode* PerformAction(class UEdGraph* ParentGraph, UEdGraphPin* FromPin, const FVector2D Location, bool bSelectNewNode = true) override;
 	virtual void AddReferencedObjects(FReferenceCollector& Collector) override;
 
 	UPROPERTY()
-	UThinkGraphEdNode_Buffer* NodeTemplate;
+	UThinkGraphEdNode_Stimulus* NodeTemplate;
+};
+
+
+/** Action to add a node Selector to the graph */
+USTRUCT()
+struct THINKGRAPHEDITOR_API FThinkGraphSchemaAction_NewNode_Memory : public FEdGraphSchemaAction
+{
+	GENERATED_USTRUCT_BODY();
+
+	FThinkGraphSchemaAction_NewNode_Memory(): NodeTemplate(nullptr) {}
+
+	FThinkGraphSchemaAction_NewNode_Memory(const FText& InNodeCategory, const FText& InMenuDesc, const FText& InToolTip, const int32 InGrouping)
+		: FEdGraphSchemaAction(InNodeCategory, InMenuDesc, InToolTip, InGrouping), NodeTemplate(nullptr) {}
+
+	virtual UEdGraphNode* PerformAction(class UEdGraph* ParentGraph, UEdGraphPin* FromPin, const FVector2D Location, bool bSelectNewNode = true) override;
+	virtual void AddReferencedObjects(FReferenceCollector& Collector) override;
+
+	UPROPERTY()
+	UThinkGraphEdNode_Memory* NodeTemplate;
 };
 
 /** Action to auto arrange the graph (based off BehaviorTree one) */

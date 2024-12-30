@@ -6,6 +6,8 @@
 
 #include "EditorViewportCommands.h"
 #include "GraphEditorActions.h"
+#include "HttpModule.h"
+#include "SkeletalRenderPublic.h"
 #include "ThinkGraphDebugger.h"
 #include "ThinkGraphEditorCommands.h"
 #include "ThinkGraphEditorLog.h"
@@ -16,10 +18,16 @@
 #include "Graph\Nodes\ThinkGraphEdNodeEdge.h"
 #include "Kismet2/BlueprintEditorUtils.h"
 
+#include "Widgets/Layout/SBox.h"
+
 #include "Animation/AnimMontage.h"
+#include "Graph/Nodes/ThinkGraphEdNode_BasePrompt.h"
+#include "Interfaces/IHttpResponse.h"
 #include "Misc/ScopedSlowTask.h"
 
 #include "ThinkGraph/ThinkGraph.h"
+#include "ThinkGraph/Nodes/ThinkGraphNode_BasePrompt.h"
+#include "Widgets/Input/SMultiLineEditableTextBox.h"
 
 const FName FThinkGraphEditor::DetailsTabID(TEXT("ThinkGraph_Details"));
 const FName FThinkGraphEditor::GraphViewportTabID(TEXT("ThinkGraph_Viewport"));
@@ -57,7 +65,7 @@ void FThinkGraphEditor::CreateInternalWidgets()
 {
 	SGraphEditor::FGraphEditorEvents InEvents;
 	InEvents.OnSelectionChanged = SGraphEditor::FOnSelectionChanged::CreateSP(
-		this, &FThinkGraphEditor::OnGraphSelectionChanged);
+		this, &FThinkGraphEditor::OnNodeSelectionChanged);
 	InEvents.OnNodeDoubleClicked = FSingleNodeEvent::CreateSP(this, &FThinkGraphEditor::OnGraphNodeDoubleClicked);
 	InEvents.OnTextCommitted = FOnNodeTextCommitted::CreateSP(this, &FThinkGraphEditor::OnNodeTitleCommitted);
 
@@ -84,109 +92,20 @@ void FThinkGraphEditor::ExtendMenu()
 {
 }
 
-
-void FThinkGraphEditor::RegenerateActionTracers()
-{
-	// check(GraphBeingEdited);
-	// UThinkGraph* Graph = CastChecked<UThinkGraph>(GraphBeingEdited);
-	// if (!Graph || !Graph->EntryNodes.Num())
-	// {
-	// 	return;
-	// }
-	//
-	// RenderItems.Empty();
-	//
-	// //Find Nodes to regenerate
-	// for (auto Node : Graph->AllNodes)
-	// {
-	// 	if (auto ActionNode = Cast<UHBGraphNodeAction>(Node))
-	// 	{
-	// 		if (!ActionNode->bMarkedForTracerGeneration)
-	// 		{
-	// 			continue;
-	// 		}
-	//
-	// 		for (int j = 0; j < ActionNode->ActionMontageInfo.ActionMontages.Num(); j++)
-	// 		{
-	// 			auto MontageToRender = ActionNode->ActionMontageInfo.ActionMontages[j];
-	// 			for (auto NotifyEvent : MontageToRender->Notifies)
-	// 			{
-	// 				if (UHBAnimNotifyState_WeaponSweep* Sweep = Cast<
-	// 					UHBAnimNotifyState_WeaponSweep>(NotifyEvent.NotifyStateClass))
-	// 				{
-	// 					TSharedRef<FHBTracerRenderItem> RenderItem = MakeShared<
-	// 						FHBTracerRenderItem, ESPMode::ThreadSafe>();
-	// 					Sweep->EditorStartTracer.BindSP(RenderItem,
-	// 					                                &FHBTracerRenderItem::StartSampling);
-	// 					Sweep->EditorStopTracer.BindSP(RenderItem,
-	// 					                               &FHBTracerRenderItem::StopSampling);
-	//
-	// 					RenderItem->Montage = MontageToRender;
-	// 					RenderItem->SampleRate = ActionNode->TracerSampleRate;
-	// 					RenderItem->Node = ActionNode;
-	// 					RenderItems.Add(RenderItem);
-	// 				}
-	// 			}
-	// 		}
-	// 	}
-	// }
-	//
-	// FScopedSlowTask SlowTask(1.0f, NSLOCTEXT("ThinkGraphAsset", "RegenerateTracers", "Generating Tracers..."));
-	// SlowTask.MakeDialog();
-	// SlowTask.EnterProgressFrame();
-	//
-	// UWorld* TracerWorld = GEditor->PlayWorld;
-	// if (!TracerWorld)
-	// {
-	// 	TracerWorld = UWorld::CreateWorld(EWorldType::Game, false);
-	//
-	// 	FWorldContext& WorldContext = GEngine->CreateNewWorldContext(EWorldType::Game);
-	// 	WorldContext.SetCurrentWorld(TracerWorld);
-	// 	TracerWorld->BeginPlay();
-	//
-	//
-	// 	TracerWorld->InitializeActorsForPlay(FURL(),
-	// 	                                     true);
-	// 	TracerWorld->SetShouldTick(true);
-	// }
-	//
-	//
-	// for (int i = 0; i < RenderItems.Num(); i++)
-	// {
-	// 	auto Render = RenderItems[i];
-	//
-	// 	FActorSpawnParameters SpawnParams;
-	// 	SpawnParams.bNoFail = true;
-	// 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
-	// 	ACharacter* TracerPawn = TracerWorld->SpawnActor<ACharacter>(CharacterBeingEdited->PawnClass,
-	// 	                                                             FVector::ZeroVector + FVector(
-	// 		                                                             i * 400.f, 0.f, 0.f),
-	// 	                                                             FRotator::ZeroRotator, SpawnParams);
-	// 	if (TracerPawn)
-	// 	{
-	// 		AHBWeapon* TracerWeapon = TracerWorld->SpawnActor<AHBWeapon>(
-	// 			CharacterBeingEdited->TestWeaponClass, FVector::ZeroVector,
-	// 			FRotator::ZeroRotator);
-	//
-	// 		TracerWeapon->AttachToComponent(TracerPawn->GetMesh(),
-	// 		                                FAttachmentTransformRules::SnapToTargetIncludingScale,
-	// 		                                FName("weapon_right"));
-	//
-	// 		Render->Pawn = TracerPawn;
-	// 		Render->Weapon = TracerWeapon;
-	//
-	// 		TracerPawn->PlayAnimMontage(Render->Montage, TracerAnimTime);
-	// 	}
-	// }
-	//
-
-	// GEngine->DestroyWorldContext(TracerWorld);
-	// TracerWorld->DestroyWorld(false);
-}
-
-bool FThinkGraphEditor::CanRegenerateTracers()
+bool FThinkGraphEditor::CanDebug() const
 {
 	return true;
+}
+
+
+void FThinkGraphEditor::OnChatGPTResponseReceived(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful) const
+{
+
+}
+void FThinkGraphEditor::RunDebug() const
+{
+	
+
 }
 
 void FThinkGraphEditor::ExtendToolbar()
@@ -245,6 +164,15 @@ void FThinkGraphEditor::FillToolbar(FToolBarBuilder& ToolBarBuilder)
 
 	ToolBarBuilder.BeginSection("World");
 	{
+		ToolBarBuilder.AddToolBarButton(FUIAction(
+			                                FExecuteAction::CreateSP(this, &FThinkGraphEditor::RunDebug),
+			                                FCanExecuteAction::CreateSP(this, &FThinkGraphEditor::CanDebug))
+		                                , NAME_None
+		                                , LOCTEXT("PrevConflictLabel", "Debug")
+		                                , LOCTEXT("PrevConflictTooltip", "Runs current graph")
+		                                , FSlateIcon(FAppStyle::GetAppStyleSetName(), "BlueprintMerge.NextDiff")
+		);
+		ToolBarBuilder.AddSeparator();
 		ToolBarBuilder.AddWidget(SelectionBox);
 	}
 	ToolBarBuilder.EndSection();
@@ -499,13 +427,13 @@ TSharedRef<SDockTab> FThinkGraphEditor::SpawnTab_Details(const FSpawnTabArgs& Sp
 	// TODO use DialogueEditor.Tabs.Properties
 	const auto* IconBrush = FAppStyle::GetBrush(TEXT("GenericEditor.Tabs.Properties"));
 
+
 	TSharedRef<SDockTab> NewTab = SNew(SDockTab)
 	.Label(LOCTEXT("ThinkGraphDetailsTitle",
 	               "Details"))
 	.TabColorScale(GetTabColorScale())
 	[
-
-		DetailsView.ToSharedRef()
+		DetailsBorder.ToSharedRef()
 	];
 
 	NewTab->SetTabIcon(IconBrush);
@@ -649,6 +577,14 @@ void FThinkGraphEditor::OnFinishedChangingProperties(const FPropertyChangedEvent
 	// }
 }
 
+FSlateColor FThinkGraphEditor::GetDetailsBorderColor() const
+{
+	uint8 H = static_cast<uint8>(FMath::Fmod(FPlatformTime::Seconds() * 25.5f, 255.0f));
+	return FLinearColor::MakeFromHSV8(H, 255, 255);
+
+	// return FLinearColor::Green;
+}
+
 void FThinkGraphEditor::CreatePropertyWidget()
 {
 	FDetailsViewArgs Args;
@@ -665,6 +601,20 @@ void FThinkGraphEditor::CreatePropertyWidget()
 	DetailsView->SetObject(GraphBeingEdited);
 	DetailsView->OnFinishedChangingProperties().AddSP(
 		this, &FThinkGraphEditor::OnFinishedChangingProperties);
+
+
+	// FSlateBrush CustomBrush;
+	// CustomBrush.DrawAs = ESlateBrushDrawType::Box;
+	// CustomBrush.Margin = FMargin(20.f); // Controls border width
+	// CustomBrush.TintColor = FSlateColor(FLinearColor::White); // Optional tint
+	//
+	SAssignNew(DetailsBorder, SBorder)
+	.Padding(FMargin(2.f))
+							.BorderImage( FAppStyle::GetBrush("ErrorReporting.Box") )
+					// .BorderImage(FAppStyle::GetBrush("NotificationList.ItemBackground"))
+	// .BorderImage(&CustomBrush)
+	.BorderBackgroundColor(this, &FThinkGraphEditor::GetDetailsBorderColor);
+	DetailsBorder->SetContent(DetailsView.ToSharedRef());
 }
 
 void FThinkGraphEditor::AddReferencedObjects(FReferenceCollector& Collector)
@@ -1046,9 +996,9 @@ void FThinkGraphEditor::OnCreateComment() const
 }
 
 // ReSharper disable once CppMemberFunctionMayBeConst
-void FThinkGraphEditor::OnGraphSelectionChanged(const TSet<UObject*>& NewSelection)
+void FThinkGraphEditor::OnNodeSelectionChanged(const TSet<UObject*>& NewSelection)
 {
-	MG_ERROR(Verbose, TEXT("OnGraphSelectionChanged - %d"), NewSelection.Num())
+	TG_ERROR(Verbose, TEXT("OnNodeSelectionChanged - %d"), NewSelection.Num())
 
 	TArray<UObject*> SelectedNodes;
 	TArray<UThinkGraphEdNode*> GraphNodes;
@@ -1062,20 +1012,49 @@ void FThinkGraphEditor::OnGraphSelectionChanged(const TSet<UObject*>& NewSelecti
 		}
 	}
 
-	if (SelectedNodes.Num() > 0)
+
+	FSlateFontInfo FontInfo = FThinkGraphEditorStyle::Get().GetFontStyle("ThinkGraph.Text.Prompt");
+	FontInfo.Size = 10;
+
+
+	if (GraphNodes.Num() > 0)
 	{
+		if (auto PromptEdNode = Cast<UThinkGraphEdNode_BasePrompt>(GraphNodes[0]))
+		{
+			auto PromptNode = Cast<UThinkGraphNode_BasePrompt>(PromptEdNode->RuntimeNode);
+			auto TextEdit =
+				SNew(SMultiLineEditableTextBox)
+				.Font(FontInfo)
+				.BackgroundColor(FLinearColor::Black)
+				.ForegroundColor(FLinearColor(FColor::FromHex("5b8c3f")))
+				.WrappingPolicy(ETextWrappingPolicy::AllowPerCharacterWrapping)
+				.AllowMultiLine(true)
+				.Margin(0.f)
+				.Text_Lambda([PromptNode]() { return PromptNode->Prompt; })
+				.OnTextCommitted_Lambda([PromptNode](const FText& NewText, ETextCommit::Type CommitType)
+				                               {
+					                               PromptNode->Prompt = NewText;
+				                               });
+
+			DetailsBorder->SetContent(TextEdit);
+
+			return;
+		}
 		DetailsView->SetObjects(SelectedNodes);
 	}
 	else
 	{
 		DetailsView->SetObject(GraphBeingEdited);
 	}
+
+
+	DetailsBorder->SetContent(DetailsView->AsShared());
 }
 
 // ReSharper disable once CppMemberFunctionMayBeConst
 void FThinkGraphEditor::OnGraphNodeDoubleClicked(UEdGraphNode* Node)
 {
-	MG_ERROR(Verbose, TEXT("OnGraphNodeDoubleClicked - %s"), *GetNameSafe(Node))
+	TG_ERROR(Verbose, TEXT("OnGraphNodeDoubleClicked - %s"), *GetNameSafe(Node))
 
 	// TODO: Handle rename of node on double click
 	// or opening of animation editor
@@ -1088,8 +1067,8 @@ void FThinkGraphEditor::OnNodeTitleCommitted(const FText& NewText, ETextCommit::
 	{
 		static const FText TransactionTitle = FText::FromString(FString(TEXT("Rename Node")));
 		const FScopedTransaction Transaction(TransactionTitle);
-		NodeBeingChanged->Modify();
 		NodeBeingChanged->OnRenameNode(NewText.ToString());
+		NodeBeingChanged->Modify();
 	}
 }
 

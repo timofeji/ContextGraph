@@ -8,7 +8,8 @@
 // #include "ThinkGraph/ThinkGraphNode_Entry.h"
 #include "Animation/AnimMontage.h"
 #include "Nodes/ThinkGraphEdNode_BasePrompt.h"
-#include "Nodes/ThinkGraphEdNode_Buffer.h"
+#include "Nodes/ThinkGraphEdNode_Stimulus.h"
+#include "Nodes\ThinkGraphEdNode_Memory.h"
 #include "ThinkGraph/ThinkGraph.h"
 #include "ThinkGraph/ThinkGraphEdge.h"
 #include "Slate/SThinkGraphNode.h"
@@ -19,7 +20,8 @@
 #include "Nodes\ThinkGraphEdNode_Parse.h"
 #include "ThinkGraph/Nodes/ThinkGraphNode.h"
 #include "ThinkGraph/Nodes/ThinkGraphNode_BasePrompt.h"
-#include "ThinkGraph/Nodes/ThinkGraphNode_Buffer.h"
+#include "ThinkGraph/Nodes/ThinkGraphNode_Memory.h"
+#include "ThinkGraph/Nodes/ThinkGraphNode_Stimulus.h"
 #include "ThinkGraph/Nodes/ThinkGraphNode_LLM.h"
 #include "ThinkGraph/Nodes/ThinkGraphNode_Parse.h"
 
@@ -228,10 +230,9 @@ void FThinkGraphSchemaAction_NewNodeAction::AddReferencedObjects(FReferenceColle
 	Collector.AddReferencedObject(NodeTemplate);
 }
 
-
 /////////////////////////////////////////////////////
-// FThinkGraphSchemaAction_NewNode_Buffer
-UEdGraphNode* FThinkGraphSchemaAction_NewNode_Buffer::PerformAction(UEdGraph* ParentGraph, UEdGraphPin* FromPin,
+// FThinkGraphSchemaAction_NewNode_Stimulus
+UEdGraphNode* FThinkGraphSchemaAction_NewNode_Stimulus::PerformAction(UEdGraph* ParentGraph, UEdGraphPin* FromPin,
                                                                   const FVector2D Location, bool bSelectNewNode)
 {
 	UEdGraphNode* ResultNode = nullptr;
@@ -266,14 +267,61 @@ UEdGraphNode* FThinkGraphSchemaAction_NewNode_Buffer::PerformAction(UEdGraph* Pa
 }
 
 
-void FThinkGraphSchemaAction_NewNode_Buffer::AddReferencedObjects(FReferenceCollector& Collector)
+void FThinkGraphSchemaAction_NewNode_Stimulus::AddReferencedObjects(FReferenceCollector& Collector)
 {
 	FEdGraphSchemaAction::AddReferencedObjects(Collector);
 	Collector.AddReferencedObject(NodeTemplate);
 }
 
 /////////////////////////////////////////////////////
-// FThinkGraphSchemaAction_NewNode_Buffer
+// FThinkGraphSchemaAction_NewNode_Stimulus
+
+
+/////////////////////////////////////////////////////
+// FThinkGraphSchemaAction_NewNode_Memory
+UEdGraphNode* FThinkGraphSchemaAction_NewNode_Memory::PerformAction(UEdGraph* ParentGraph, UEdGraphPin* FromPin,
+                                                                  const FVector2D Location, bool bSelectNewNode)
+{
+	UEdGraphNode* ResultNode = nullptr;
+
+	// If there is a template, we actually use it
+	if (NodeTemplate != nullptr)
+	{
+		const FScopedTransaction Transaction(LOCTEXT("New Entry Node", "Think Graph Editor: New Entry"));
+		ParentGraph->Modify();
+		if (FromPin)
+		{
+			FromPin->Modify();
+		}
+
+		// set outer to be the graph so it doesn't go away
+		NodeTemplate->Rename(nullptr, ParentGraph);
+		ParentGraph->AddNode(NodeTemplate, true, bSelectNewNode);
+
+		NodeTemplate->CreateNewGuid();
+		NodeTemplate->PostPlacedNewNode();
+		NodeTemplate->AllocateDefaultPins();
+
+		NodeTemplate->NodePosX = Location.X;
+		NodeTemplate->NodePosY = Location.Y;
+
+		ResultNode = NodeTemplate;
+
+		ResultNode->SetFlags(RF_Transactional);
+	}
+
+	return ResultNode;
+}
+
+
+void FThinkGraphSchemaAction_NewNode_Memory::AddReferencedObjects(FReferenceCollector& Collector)
+{
+	FEdGraphSchemaAction::AddReferencedObjects(Collector);
+	Collector.AddReferencedObject(NodeTemplate);
+}
+
+/////////////////////////////////////////////////////
+// FThinkGraphSchemaAction_NewNode_Memory
 
 
 /////////////////////////////////////////////////////
@@ -425,7 +473,7 @@ UEdGraphNode* FThinkGraphSchemaAction_AutoArrangeVertical::PerformAction(
 	UThinkGraphEdGraph* Graph = Cast<UThinkGraphEdGraph>(ParentGraph);
 	if (Graph)
 	{
-		MG_ERROR(Verbose, TEXT("FThinkGraphSchemaAction_AutoArrangeVertical::PerformAction"))
+		TG_ERROR(Verbose, TEXT("FThinkGraphSchemaAction_AutoArrangeVertical::PerformAction"))
 		Graph->AutoArrange(true);
 	}
 
@@ -441,7 +489,7 @@ UEdGraphNode* FThinkGraphSchemaAction_AutoArrangeHorizontal::PerformAction(
 	UThinkGraphEdGraph* Graph = Cast<UThinkGraphEdGraph>(ParentGraph);
 	if (Graph)
 	{
-		MG_ERROR(Verbose, TEXT("FThinkGraphSchemaAction_AutoArrangeVertical::PerformAction Horizontal"))
+		TG_ERROR(Verbose, TEXT("FThinkGraphSchemaAction_AutoArrangeVertical::PerformAction Horizontal"))
 		Graph->AutoArrange(false);
 	}
 
@@ -455,7 +503,7 @@ UEdGraphNode* FThinkGraphSchemaAction_AutoArrangeHorizontal::PerformAction(
 void UThinkGraphSchema::CreateDefaultNodesForGraph(UEdGraph& Graph) const
 {
 	UThinkGraph* ThinkGraph = Cast<UThinkGraph>(Graph.GetOuter());
-	MG_ERROR(Verbose, TEXT("CreateDefaultNodesForGraph - Graph, Outer ThinkGraph: %s"), *GetNameSafe(ThinkGraph))
+	TG_ERROR(Verbose, TEXT("CreateDefaultNodesForGraph - Graph, Outer ThinkGraph: %s"), *GetNameSafe(ThinkGraph))
 
 	// Create the entry/exit tunnels
 	FGraphNodeCreator<UThinkGraphEdNode_LLM> NodeCreator(Graph);
@@ -525,6 +573,7 @@ void UThinkGraphSchema::GetGraphContextActions(FGraphContextMenuBuilder& Context
 		));
 	PromptNodeAction->NodeTemplate = NewObject<UThinkGraphEdNode_BasePrompt>(ContextMenuBuilder.OwnerOfTemporaries);
 	PromptNodeAction->NodeTemplate->RuntimeNode = NewObject<UThinkGraphNode_BasePrompt>(PromptNodeAction->NodeTemplate);
+	PromptNodeAction->NodeTemplate->RuntimeNode->SetNodeTitle(FText::FromString("Base Prompt"));
 	ContextMenuBuilder.AddAction(PromptNodeAction);
 	
 	const TSharedPtr<FThinkGraphSchemaAction_NewNode_LLM> LLMNodeAction(
@@ -537,6 +586,7 @@ void UThinkGraphSchema::GetGraphContextActions(FGraphContextMenuBuilder& Context
     		));
     	LLMNodeAction->NodeTemplate = NewObject<UThinkGraphEdNode_LLM>(ContextMenuBuilder.OwnerOfTemporaries);
     	LLMNodeAction->NodeTemplate->RuntimeNode = NewObject<UThinkGraphNode_LLM>(LLMNodeAction->NodeTemplate);
+		LLMNodeAction->NodeTemplate->RuntimeNode->SetNodeTitle(FText::FromString("LLM"));
     	ContextMenuBuilder.AddAction(LLMNodeAction);
 	
 	
@@ -552,17 +602,32 @@ void UThinkGraphSchema::GetGraphContextActions(FGraphContextMenuBuilder& Context
     	ParseNodeAction->NodeTemplate->RuntimeNode = NewObject<UThinkGraphNode_Parse>(ParseNodeAction->NodeTemplate);
     	ContextMenuBuilder.AddAction(ParseNodeAction);
 
-	const TSharedPtr<FThinkGraphSchemaAction_NewNode_Buffer> BufferNodeAction(
-    		new FThinkGraphSchemaAction_NewNode_Buffer(
-    			LOCTEXT("ThinkGraphNode_Buffer", "Think Graph"),
-    			LOCTEXT("Add Buffer Node", "Add Buffer..."),
-    			LOCTEXT("AddBufferNode",
-    			        "Add Buffer Node "),
+	const TSharedPtr<FThinkGraphSchemaAction_NewNode_Memory> MemoryNodeAction(
+    		new FThinkGraphSchemaAction_NewNode_Memory(
+    			LOCTEXT("ThinkGraphNode_Memory", "Think Graph"),
+    			LOCTEXT("Add Memory Node", "Add Memory..."),
+    			LOCTEXT("AddMemoryNode",
+    			        "Add Memory Node "),
     			1
     		));
-    	BufferNodeAction->NodeTemplate = NewObject<UThinkGraphEdNode_Buffer>(ContextMenuBuilder.OwnerOfTemporaries);
-    	BufferNodeAction->NodeTemplate->RuntimeNode = NewObject<UThinkGraphNode_Buffer>(BufferNodeAction->NodeTemplate);
-    	ContextMenuBuilder.AddAction(BufferNodeAction);
+	MemoryNodeAction->NodeTemplate = NewObject<UThinkGraphEdNode_Memory>(ContextMenuBuilder.OwnerOfTemporaries);
+	MemoryNodeAction->NodeTemplate->RuntimeNode = NewObject<UThinkGraphNode_Memory>(MemoryNodeAction->NodeTemplate);
+	MemoryNodeAction->NodeTemplate->RuntimeNode->SetNodeTitle(FText::FromString("Memory"));
+	ContextMenuBuilder.AddAction(MemoryNodeAction);
+
+	
+	const TSharedPtr<FThinkGraphSchemaAction_NewNode_Stimulus> StimulusNodeAction(
+    		new FThinkGraphSchemaAction_NewNode_Stimulus(
+    			LOCTEXT("ThinkGraphNode_Stimulus", "Think Graph"),
+    			LOCTEXT("Add Stimulus Node", "Add Stimulus..."),
+    			LOCTEXT("AddStimulusNode",
+    			        "Add Stimulus Node "),
+    			1
+    		));
+	StimulusNodeAction->NodeTemplate = NewObject<UThinkGraphEdNode_Stimulus>(ContextMenuBuilder.OwnerOfTemporaries);
+	StimulusNodeAction->NodeTemplate->RuntimeNode = NewObject<UThinkGraphNode_Stimulus>(StimulusNodeAction->NodeTemplate);
+	StimulusNodeAction->NodeTemplate->RuntimeNode->SetNodeTitle(FText::FromString("Stimulus"));
+	ContextMenuBuilder.AddAction(StimulusNodeAction);
 
 	UThinkGraph* ThinkGraph = CastChecked<UThinkGraph>(ContextMenuBuilder.CurrentGraph->GetOuter());
 	// Now, build up actions for anim nodes
@@ -587,7 +652,7 @@ void UThinkGraphSchema::GetGraphContextActions(FGraphContextMenuBuilder& Context
 				continue;
 			}
 
-			MG_ERROR(Verbose, TEXT("GetGraphContextActions - Create action from %s"), *NodeType->GetName())
+			TG_ERROR(Verbose, TEXT("GetGraphContextActions - Create action from %s"), *NodeType->GetName())
 			CreateAndAddActionToContextMenu(ContextMenuBuilder, NodeType);
 			Visited.Add(NodeType);
 		}
@@ -719,11 +784,11 @@ bool UThinkGraphSchema::CreateAutomaticConversionNodeAndConnections(UEdGraphPin*
 	// Are nodes and pins all valid?
 	if (!NodeA || !NodeA->GetOutputPin() || !NodeB || !NodeB->GetInputPin())
 	{
-		MG_ERROR(Verbose, TEXT("CreateAutomaticConversionNodeAndConnections failed"));
+		TG_ERROR(Verbose, TEXT("CreateAutomaticConversionNodeAndConnections failed"));
 		return false;
 	}
 
-	MG_ERROR(Verbose, TEXT("CreateAutomaticConversionNodeAndConnections ok"));
+	TG_ERROR(Verbose, TEXT("CreateAutomaticConversionNodeAndConnections ok"));
 	CreateEdgeConnection(A, B, NodeA, NodeB);
 
 	return true;
@@ -997,7 +1062,7 @@ void UThinkGraphSchema::SpawnNodeFromAsset(UAnimationAsset* Asset, const FVector
 		UClass* NewRuntimeClass = GetRuntimeClassForAnimAsset(Asset, Graph);
 		if (NewNodeClass && NewRuntimeClass)
 		{
-			MG_ERROR(Verbose, TEXT("SpawnNodeFromAsset - NewNodeClass: %s, NewRuntimeClass: %s"),
+			TG_ERROR(Verbose, TEXT("SpawnNodeFromAsset - NewNodeClass: %s, NewRuntimeClass: %s"),
 			         *NewNodeClass->GetName(), *NewRuntimeClass->GetName());
 			UThinkGraphEdNode* NewNode = NewObject<UThinkGraphEdNode>(Graph, NewNodeClass);
 			NewNode->RuntimeNode = NewObject<UThinkGraphNode>(NewNode, NewRuntimeClass);

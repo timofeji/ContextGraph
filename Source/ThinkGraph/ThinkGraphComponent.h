@@ -21,6 +21,9 @@ public:
 	// Sets default values for this component's properties
 	UThinkGraphComponent();
 
+	UFUNCTION(BlueprintCallable)
+	void InvokeStimulus(FName StimulusName);
+
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;

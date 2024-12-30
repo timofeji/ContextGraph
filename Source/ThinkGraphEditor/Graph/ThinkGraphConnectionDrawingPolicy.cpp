@@ -3,8 +3,6 @@
 #include "BlueprintConnectionDrawingPolicy.h"
 #include "ThinkGraphEdGraph.h"
 #include "ThinkGraphEditorStyle.h"
-#include "Nodes/ThinkGraphEdNode.h"
-#include "Nodes\ThinkGraphEdNode_LLM.h"
 #include "Slate/SThinkGraphPin.h"
 
 FThinkGraphConnectionDrawingPolicy::FThinkGraphConnectionDrawingPolicy(
@@ -212,11 +210,6 @@ void FThinkGraphConnectionDrawingPolicy::Internal_DrawLineWithArrow(const FVecto
 	DrawConnection(WireLayerID, P2, P3, Params);
 	DrawConnection(WireLayerID, P3, EndPoint, Params);
 
-
-	FSlateFontInfo FontInfo = FThinkGraphEditorStyle::Get().GetFontStyle("HB.Font.Small");
-	FontInfo.OutlineSettings.OutlineSize = 1;
-	FontInfo.OutlineSettings.OutlineColor = FLinearColor::Black;
-	FontInfo.Size = 19;
 
 	// if (auto EntryNode = Cast<UThinkGraphEdNode_LLM>(Params.AssociatedPin1->GetOwningNode()))
 	// {

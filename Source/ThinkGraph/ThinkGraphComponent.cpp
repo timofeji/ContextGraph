@@ -16,6 +16,10 @@ UThinkGraphComponent::UThinkGraphComponent()
 	// ...
 }
 
+void UThinkGraphComponent::InvokeStimulus(FName StimulusName)
+{
+}
+
 
 // Called when the game starts
 void UThinkGraphComponent::BeginPlay()

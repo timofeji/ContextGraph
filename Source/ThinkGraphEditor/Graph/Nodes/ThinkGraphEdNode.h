@@ -31,6 +31,7 @@ public:
 	// Nodes are now inheriting from UK2Node to avoid ensure condition on startup with pure check (see #3)
 	virtual void AutowireNewNode(UEdGraphPin* FromPin) override ;
 	virtual void PinConnectionListChanged(UEdGraphPin* Pin) override {}
+	virtual void OnRenameNode(const FString& NewName) override;
 	//~ End UEdGraphNode Interface
 
 	

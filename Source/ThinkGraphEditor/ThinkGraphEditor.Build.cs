@@ -28,7 +28,7 @@ public class ThinkGraphEditor : ModuleRules
 			{
 				
 				"Core",
-			"ThinkGraph"
+				"ThinkGraph"
 				// ... add other public dependencies that you statically link with here ...
 			}
 			);

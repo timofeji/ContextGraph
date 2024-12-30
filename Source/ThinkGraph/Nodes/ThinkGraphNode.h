@@ -22,8 +22,6 @@ public:
 	
 	
 
-	/** When not empty, will draw title with specified value instead of using Animation Asset name (Montage or Sequence) */
-	FText NodeTitle;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Think Graph")
 	TArray<UThinkGraphNode*> ChildrenNodes;
@@ -36,8 +34,6 @@ public:
 	
 	
 
-	/** Simply returns the value of NodeTitle, and is overridden in child classes to fallback to animation asset name if NodeTitle is empty. */
-	virtual FText GetNodeTitle() const;
 
 	// UFUNCTION(BlueprintCallable, Category = "ThinkGraph")
 	// virtual UThinkGraphEdge* GetEdge(UThinkGraphNode* ChildNode);
@@ -69,12 +65,17 @@ public:
 
 	// UPROPERTY(EditDefaultsOnly, Category = "ThinkGraph" , meta = (ClampMin = "0", EditCondition = "ChildrenLimitType == ENodeLimit::Limited", EditConditionHides))
 	int32 ChildrenLimit = 0;
+
+	UPROPERTY()
+	FText NodeTitle;
+	
 #endif
 
 #if WITH_EDITOR
 	virtual bool IsNameEditable() const;
-
+	virtual FText GetNodeTitle() const;
 	virtual void SetNodeTitle(const FText& NewTitle);
+
 
 	virtual FLinearColor GetBackgroundColor() const { return FLinearColor::White; };
 

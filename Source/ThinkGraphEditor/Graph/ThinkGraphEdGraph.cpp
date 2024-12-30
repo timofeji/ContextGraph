@@ -19,7 +19,7 @@ UThinkGraph* UThinkGraphEdGraph::GetThinkGraphModel() const
 
 void UThinkGraphEdGraph::RebuildGraph()
 {
-	MG_ERROR(Verbose, TEXT("UThinkGraphEdGraph::RebuildGraph has been called. Nodes Num: %d"), Nodes.Num())
+	TG_ERROR(Verbose, TEXT("UThinkGraphEdGraph::RebuildGraph has been called. Nodes Num: %d"), Nodes.Num())
 
 	UThinkGraph* ThinkGraph = GetThinkGraphModel();
 	check(ThinkGraph)
@@ -28,7 +28,7 @@ void UThinkGraphEdGraph::RebuildGraph()
 
 	for (UEdGraphNode* CurrentNode : Nodes)
 	{
-		MG_ERROR(Verbose, TEXT("UThinkGraphEdGraph::RebuildGraph for node: %s (%s)"), *CurrentNode->GetName(),
+		TG_ERROR(Verbose, TEXT("UThinkGraphEdGraph::RebuildGraph for node: %s (%s)"), *CurrentNode->GetName(),
 		         *CurrentNode->GetClass()->GetName())
 
 		if (UThinkGraphEdNode_LLM* GraphEntryNode = Cast<UThinkGraphEdNode_LLM>(CurrentNode))
@@ -68,7 +68,7 @@ void UThinkGraphEdGraph::RebuildGraphForEdge(UThinkGraph* OwningGraph, UThinkGra
 
 	if (StartNode == nullptr || EndNode == nullptr || Edge == nullptr)
 	{
-		MG_ERROR(
+		TG_ERROR(
 			Error,
 			TEXT("UThinkGraphEdGraph::RebuildGraph add edge failed. StartNode: %s, EndNode: %s, Edge: %s"),
 			StartNode ? *StartNode->GetName() : TEXT("NONE"),
@@ -155,7 +155,7 @@ void UThinkGraphEdGraph::RebuildGraphForEntry(UThinkGraph* OwningGraph, UThinkGr
 
 	UThinkGraphEdNode* ConnectedToNode = Cast<UThinkGraphEdNode>(NodeEntry->GetOutputNode());
 
-	MG_ERROR(Verbose, TEXT("UThinkGraphEdGraph::RebuildGraphForEntry ... Node: %s"),
+	TG_ERROR(Verbose, TEXT("UThinkGraphEdGraph::RebuildGraphForEntry ... Node: %s"),
 	         ConnectedToNode ? *ConnectedToNode->GetName() : TEXT("NONE"))
 
 	if (ConnectedToNode)
@@ -361,7 +361,7 @@ void UThinkGraphEdGraph::AutoArrange(const bool bVertical)
 		return;
 	}
 
-	MG_ERROR(Verbose, TEXT("UThinkGraphEdGraph::AutoArrange Strategy: %s"),
+	TG_ERROR(Verbose, TEXT("UThinkGraphEdGraph::AutoArrange Strategy: %s"),
 	         bVertical ? TEXT("Vertical") : TEXT("Horizontal"))
 	const FScopedTransaction Transaction(NSLOCTEXT("ACEGraph", "ThinkGraphEditorAutoArrange",
 	                                               "Think Graph Editor: Auto Arrange"));

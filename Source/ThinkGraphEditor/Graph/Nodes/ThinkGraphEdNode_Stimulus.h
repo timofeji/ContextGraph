@@ -4,23 +4,22 @@
 
 #include "CoreMinimal.h"
 #include "ThinkGraphEdNode.h"
-#include "ThinkGraphEdNode_Buffer.generated.h"
+#include "ThinkGraphEdNode_Stimulus.generated.h"
 
 class UThinkGraphNode;
 /** Editor Graph Node for entry point in Think Graphs. Based off UAnimStateEntryNode for state machine graphs in Anim BP. */
 UCLASS(MinimalAPI)
-class UThinkGraphEdNode_Buffer : public UThinkGraphEdNode
+class UThinkGraphEdNode_Stimulus : public UThinkGraphEdNode
 {
 	GENERATED_BODY()
 
 public:
-	UThinkGraphEdNode_Buffer();
+	UThinkGraphEdNode_Stimulus();
 
 
 	//~ Begin UEdGraphNode Interface
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 	virtual void AllocateDefaultPins() override;
-	virtual FText GetNodeTitle(ENodeTitleType::Type TitleType) const override;
 	virtual FLinearColor GetNodeTitleColor() const override;
 	virtual FSlateIcon GetIconAndTint(FLinearColor& OutColor) const override;
 	virtual bool ShowPaletteIconOnNode() const override;

@@ -20,15 +20,6 @@ class THINKGRAPH_API UThinkGraphNode_BasePrompt : public UThinkGraphNode
 public:
 	UThinkGraphNode_BasePrompt();
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Animation", meta=(DisplayPriority=1))
-	FString Prompt;
-
-	virtual bool SupportsAssetClass(UClass* AssetClass);
-	virtual FText GetNodeTitle() const override;
-
-#if WITH_EDITOR
-	virtual FText GetAnimAssetLabel() const;
-	virtual FText GetAnimAssetLabelTooltip() const;
-	virtual FLinearColor GetBackgroundColor() const override;
-#endif
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(DisplayPriority=1))
+	FText Prompt;
 };

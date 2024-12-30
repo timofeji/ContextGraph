@@ -4,17 +4,17 @@
 
 #include "CoreMinimal.h"
 #include "ThinkGraphEdNode.h"
-#include "ThinkGraphEdNode_LLM.generated.h"
+#include "ThinkGraphEdNode_Memory.generated.h"
 
 class UThinkGraphNode;
 /** Editor Graph Node for entry point in Think Graphs. Based off UAnimStateEntryNode for state machine graphs in Anim BP. */
 UCLASS(MinimalAPI)
-class UThinkGraphEdNode_LLM : public UThinkGraphEdNode
+class UThinkGraphEdNode_Memory : public UThinkGraphEdNode
 {
 	GENERATED_BODY()
 
 public:
-	UThinkGraphEdNode_LLM();
+	UThinkGraphEdNode_Memory();
 
 
 	//~ Begin UEdGraphNode Interface

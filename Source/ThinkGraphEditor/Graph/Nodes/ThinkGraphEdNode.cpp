@@ -94,6 +94,11 @@ void UThinkGraphEdNode::AutowireNewNode(UEdGraphPin* FromPin)
 	}
 }
 
+void UThinkGraphEdNode::OnRenameNode(const FString& NewName)
+{
+	RuntimeNode->SetNodeTitle(FText::FromString(NewName));
+}
+
 void UThinkGraphEdNode::ValidateNodeDuringCompilation(FCompilerResultsLog& MessageLog) const
 {
 	// TODO: Move most of the editor stuff into Developer module (or UncookedOnly). See how ControlRig is done regarding this

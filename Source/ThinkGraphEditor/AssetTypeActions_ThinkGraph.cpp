@@ -36,38 +36,6 @@ void FAssetTypeActions_ThinkGraph::OpenAssetEditor(const TArray<UObject*>& InObj
 		// Only handle dialogues
 		if (UThinkGraph* GraphToEdit = Cast<UThinkGraph>(Object))
 		{
-			// USkeleton* AnimSkeleton = GraphToEdit->GetSkeleton();
-			// if (!AnimSkeleton)
-			// {
-			// 	FText ShouldRetargetMessage = LOCTEXT("ShouldRetargetAnimAsset_Message",
-			// 	                                      "Could not find the skeleton for Think Graph '{GraphName}' Would you like to choose a new one?");
-			//
-			// 	FFormatNamedArguments Arguments;
-			// 	Arguments.Add(TEXT("GraphName"), FText::FromString(GraphToEdit->GetName()));
-			//
-			// 	if (FMessageDialog::Open(EAppMsgType::YesNo, FText::Format(ShouldRetargetMessage, Arguments)) ==
-			// 		EAppReturnType::Yes)
-			// 	{
-			// 		TArray<TObjectPtr<UObject>> AssetsToRetarget;
-			// 		AssetsToRetarget.Add(GraphToEdit);
-			// 		const bool bSkeletonReplaced = ReplaceMissingSkeleton(AssetsToRetarget);
-			// 		if (!bSkeletonReplaced)
-			// 		{
-			// 			return; // Persona will crash if trying to load asset without a skeleton
-			// 		}
-			// 	}
-			// 	else
-			// 	{
-			// 		return;
-			// 	}
-			// }
-			//
-
-			// MG_ERROR(
-			// 	Warning,
-			// 	TEXT("Tried to create a Character = `%s`"),
-			// 	*GraphToEdit->GetPathName());
-			//
 			const TSharedRef<FThinkGraphEditor> NewCharacterEditor(new
 				FThinkGraphEditor());
 			NewCharacterEditor->InitThinkGraphEditor(Mode,

@@ -7,7 +7,7 @@
 
 UThinkGraphEdNode_LLM::UThinkGraphEdNode_LLM()
 {
-	bCanRenameNode = false;
+	bCanRenameNode = true;
 }
 
 void UThinkGraphEdNode_LLM::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
@@ -22,10 +22,6 @@ void UThinkGraphEdNode_LLM::AllocateDefaultPins()
 	CreatePin(EGPD_Output, UThinkGraphPinNames::PinName_Out, TEXT("Output"));
 }
 
-FText UThinkGraphEdNode_LLM::GetNodeTitle(ENodeTitleType::Type TitleType) const
-{
-	return FText::FromString("LLM");
-}
 
 FLinearColor UThinkGraphEdNode_LLM::GetNodeTitleColor() const
 {
