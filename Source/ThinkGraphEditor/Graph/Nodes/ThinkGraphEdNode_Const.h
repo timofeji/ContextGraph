@@ -4,30 +4,30 @@
 
 #include "CoreMinimal.h"
 #include "ThinkGraphEdNode.h"
-#include "ThinkGraphEdNode_Parse.generated.h"
+#include "ThinkGraphEdNode_Const.generated.h"
 
 class UTGNode;
 /** Editor Graph Node for entry point in Think Graphs. Based off UAnimStateEntryNode for state machine graphs in Anim BP. */
 UCLASS(MinimalAPI)
-class UThinkGraphEdNode_Parse : public UThinkGraphEdNode
+class UThinkGraphEdNode_Const : public UThinkGraphEdNode
 {
 	GENERATED_BODY()
 
 public:
-	UThinkGraphEdNode_Parse();
+	UThinkGraphEdNode_Const();
 
 
 	//~ Begin UEdGraphNode Interface
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 	virtual void AllocateDefaultPins() override;
-	virtual FText GetNodeTitle(ENodeTitleType::Type TitleType) const override;
 	virtual FLinearColor GetNodeTitleColor() const override;
 	virtual FText GetTooltipText() const override;
-	virtual FSlateIcon GetIconAndTint(FLinearColor& OutColor) const override;
-	virtual bool ShowPaletteIconOnNode() const override;
 
 	virtual bool CanDuplicateNode() const override	{ return false; }
 	//~ End UEdGraphNode Interface
 
 	THINKGRAPHEDITOR_API UEdGraphNode* GetOutputNode();
+
+	UPROPERTY()
+	FText Prompt;
 };

@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "UObject/Object.h"
 #include "ThinkGraphEdge.generated.h"
-class UThinkGraphNode;
+class UTGNode;
 /**
  * 
  */
@@ -17,11 +17,11 @@ public:
 
 	/** Start or parent node for this edge */
 	UPROPERTY(BlueprintReadOnly, Category = "ThinkGraph")
-	UThinkGraphNode* StartNode;
+	UTGNode* StartNode;
 
 	/** End or child node for this edge */
 	UPROPERTY(BlueprintReadOnly, Category = "ThinkGraph")
-	UThinkGraphNode* EndNode;
+	UTGNode* EndNode;
 
 	/** Updates ref to OwningActor to send back event when receiving input */
 	void SetOwningActor(AActor* InActor) { OwningActor = InActor; }

@@ -6,7 +6,7 @@
 #include "ThinkGraphEdNode.h"
 #include "ThinkGraphEdNode_LLM.generated.h"
 
-class UThinkGraphNode;
+class UTGNode;
 /** Editor Graph Node for entry point in Think Graphs. Based off UAnimStateEntryNode for state machine graphs in Anim BP. */
 UCLASS(MinimalAPI)
 class UThinkGraphEdNode_LLM : public UThinkGraphEdNode

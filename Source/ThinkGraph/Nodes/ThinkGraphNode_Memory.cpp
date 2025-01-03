@@ -1,6 +1,6 @@
-
 #include "ThinkGraphNode_Memory.h"
 
+#include "ThinkGraphNode_LLM.h"
 #include "Animation/AnimMontage.h"
 #include "Animation/AnimSequence.h"
 
@@ -9,21 +9,25 @@
 UThinkGraphNode_Memory::UThinkGraphNode_Memory()
 {
 #if WITH_EDITORONLY_DATA
-	ContextMenuName = LOCTEXT("ThinkGraphNodeSequence_ContextMenuName", "Montage Action Node");
+	ContextMenuName = LOCTEXT("ThinkGraphNodeMemory_ContextMenuName", "ThinkGraph Memory Node");
 #endif
 }
 
-
-
-bool UThinkGraphNode_Memory::SupportsAssetClass(UClass* AssetClass)
+#if WITH_EDITOR
+void UThinkGraphNode_Memory::RecallMemory()
 {
-	return AssetClass->IsChildOf(UAnimSequence::StaticClass());
+	//we just wanna invalidate the data buffer and have the system automatically populate it
+	if(InBufferIDS.Num() > 0)
+	{
+		
+	}
+	
+	bIsGenerating = true;
 }
 
-#if WITH_EDITOR
 FLinearColor UThinkGraphNode_Memory::GetBackgroundColor() const
 {
-	return  FLinearColor::Blue.Desaturate(0.24f);
+	return FLinearColor::Blue.Desaturate(0.24f);
 }
 #endif
 

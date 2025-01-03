@@ -29,10 +29,12 @@ class UThinkGraphPinNames : public UObject
 	static const FName PinCategory_EntryOut;
 	static const FName PinCategory_MultipleNodes;
 	static const FName PinCategory_Transition;
+	static const FName PinCategory_Value;
 	static const FName PinCategory_Edge;
 
 	static const FName PinName_In;
 	static const FName PinName_Out;
+	static const FName PinName_Bind;
 };
 
 

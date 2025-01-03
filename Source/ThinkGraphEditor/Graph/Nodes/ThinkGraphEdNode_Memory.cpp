@@ -40,7 +40,7 @@ FText UThinkGraphEdNode_Memory::GetTooltipText() const
 	return LOCTEXT("StateEntryNodeTooltip", "Entry point for state machine");
 }
 
-UEdGraphNode* UThinkGraphEdNode_Memory::GetOutputNode()
+UEdGraphNode* UThinkGraphEdNode_Memory::GetInputNode()
 {
 	if (Pins.Num() > 0 && Pins[0] != nullptr)
 	{

@@ -1,36 +1,36 @@
-#include "ThinkGraphEdNode_BasePrompt.h"
+#include "ThinkGraphEdNode_Const.h"
 
 #include "ThinkGraphEditorTypes.h"
 
 #define LOCTEXT_NAMESPACE "ThinkGraphEdNodeEntry"
 
-UThinkGraphEdNode_BasePrompt::UThinkGraphEdNode_BasePrompt()
+UThinkGraphEdNode_Const::UThinkGraphEdNode_Const()
 {
 	bCanRenameNode = true;
 }
 
-void UThinkGraphEdNode_BasePrompt::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
+void UThinkGraphEdNode_Const::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
 	Super::PostEditChangeProperty(PropertyChangedEvent);
 }
 
-void UThinkGraphEdNode_BasePrompt::AllocateDefaultPins()
+void UThinkGraphEdNode_Const::AllocateDefaultPins()
 {
 	CreatePin(EGPD_Output, UThinkGraphPinNames::PinName_Out, TEXT("Prompt"));
 }
 
 
-FLinearColor UThinkGraphEdNode_BasePrompt::GetNodeTitleColor() const
+FLinearColor UThinkGraphEdNode_Const::GetNodeTitleColor() const
 {
 	return FLinearColor(FColor::FromHex(TEXT("27332b")));
 }
 
-FText UThinkGraphEdNode_BasePrompt::GetTooltipText() const
+FText UThinkGraphEdNode_Const::GetTooltipText() const
 {
 	return LOCTEXT("StateEntryNodeTooltip", "Entry point for state machine");
 }
 
-UEdGraphNode* UThinkGraphEdNode_BasePrompt::GetOutputNode()
+UEdGraphNode* UThinkGraphEdNode_Const::GetOutputNode()
 {
 	if (Pins.Num() > 0 && Pins[0] != nullptr)
 	{

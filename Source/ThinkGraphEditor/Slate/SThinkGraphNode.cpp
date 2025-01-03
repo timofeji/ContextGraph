@@ -14,7 +14,7 @@
 #include "Graph/Nodes/ThinkGraphEdNode.h"
 
 
-#include "ThinkGraph/Nodes/ThinkGraphNode.h"
+#include "..\..\ThinkGraph\Nodes\TGNode.h"
 
 #define LOCTEXT_NAMESPACE "SThinkGraphNode"
 
@@ -427,6 +427,29 @@ int32 SThinkGraphNode::OnPaint(const FPaintArgs& Args, const FGeometry& Allotted
 			DebugMode = Debugger->GetDebugMode();
 		}
 	}
+	
+	// const FSlateBrush* BackgroundBrush = Style.GetBrush("HBEditor.ThinkGraph.Entry");
+	// FSlateFontInfo FontInfo = Style.GetFontStyle("HB.Font.Small");
+	// FontInfo.OutlineSettings.OutlineSize = 1;
+	// FontInfo.OutlineSettings.OutlineColor = FLinearColor::Black;
+	//
+	// FSlateDrawElement::MakeBox(
+	// 	OutDrawElements,
+	// 	LayerId + 1,
+	// 	AllottedGeometry.ToPaintGeometry(FVector2D(0, 0),
+	// 	                                 FVector2D(AllottedGeometry.Size.X, AllottedGeometry.Size.Y) * 0.1f),
+	// 	BackgroundBrush,
+	// 	ESlateDrawEffect::None
+	// );
+
+	//
+	// FSlateDrawElement::MakeText(
+	// 	OutDrawElements,
+	// 	LayerId + 2,
+	// 	AllottedGeometry.ToPaintGeometry(FVector2D(0, 0),
+	// 	                                 FVector2D(AllottedGeometry.Size.X, AllottedGeometry.Size.Y) * 0.1f),
+	// 	FString::FromInt(TagIndex),
+	// 	FontInfo);
 
 
 	return SGraphNode::OnPaint(Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle,
@@ -458,7 +481,7 @@ void SThinkGraphNode::GetNodeInfoPopups(FNodeInfoContext* Context, TArray<FGraph
 		return;
 	}
 
-	const UThinkGraphNode* DebuggedNode = CachedGraphNode->GetDebuggedNode();
+	const UTGNode* DebuggedNode = CachedGraphNode->GetDebuggedNode();
 	if (!DebuggedNode)
 	{
 		return;

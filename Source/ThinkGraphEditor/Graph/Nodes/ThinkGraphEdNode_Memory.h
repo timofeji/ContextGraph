@@ -6,7 +6,7 @@
 #include "ThinkGraphEdNode.h"
 #include "ThinkGraphEdNode_Memory.generated.h"
 
-class UThinkGraphNode;
+class UTGNode;
 /** Editor Graph Node for entry point in Think Graphs. Based off UAnimStateEntryNode for state machine graphs in Anim BP. */
 UCLASS(MinimalAPI)
 class UThinkGraphEdNode_Memory : public UThinkGraphEdNode
@@ -28,5 +28,5 @@ public:
 	virtual bool CanDuplicateNode() const override	{ return false; }
 	//~ End UEdGraphNode Interface
 
-	THINKGRAPHEDITOR_API UEdGraphNode* GetOutputNode();
+	THINKGRAPHEDITOR_API UEdGraphNode* GetInputNode();
 };

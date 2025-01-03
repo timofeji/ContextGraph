@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
-#include "ThinkGraphNode.h"
+#include "TGNode.h"
 #include "ThinkGraphNode_Parse.generated.h"
 
 
@@ -14,7 +14,7 @@
  *  Holds runtime properties for animation and effects / cues containers.
  */
 UCLASS(Blueprintable)
-class THINKGRAPH_API UThinkGraphNode_Parse : public UThinkGraphNode
+class THINKGRAPH_API UThinkGraphNode_Parse : public UTGNode
 {
 	GENERATED_BODY()
 

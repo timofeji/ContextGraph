@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "TGNode.h"
-#include "ThinkGraphNode_Memory.generated.h"
+#include "ThinkGraphNode_Pretraining.generated.h"
 
 
 /**
@@ -13,19 +13,15 @@
  *  Holds runtime properties for animation and effects / cues containers.
  */
 UCLASS(Blueprintable)
-class THINKGRAPH_API UThinkGraphNode_Memory : public UTGNode
+class THINKGRAPH_API UThinkGraphNode_Pretraining : public UTGNode
 {
 	GENERATED_BODY()
 
 public:
-	UThinkGraphNode_Memory();
+	UThinkGraphNode_Pretraining();
 
-
-	UFUNCTION()
-	void RecallMemory();
-	
-	FText Prompt;
-
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Animation", meta=(DisplayPriority=1))
+	FString Prompt;
 #if WITH_EDITOR
 	virtual FLinearColor GetBackgroundColor() const override;
 #endif

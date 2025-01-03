@@ -12,9 +12,9 @@ FThinkGraphConnectionDrawingPolicy::FThinkGraphConnectionDrawingPolicy(
 	  , GraphObj(InGraphObj)
 {
 	HBActionEdGraph = Cast<UThinkGraphEdGraph>(GraphObj);
-	
-	ArrowImage = FAppStyle::GetBrush( TEXT("Graph.Arrow") );
-	ArrowStartImage = FThinkGraphEditorStyle::Get().GetBrush( TEXT("ThinkGraph.Pin.ArrowConnectorStart") );
+
+	ArrowImage = FAppStyle::GetBrush(TEXT("Graph.Arrow"));
+	ArrowStartImage = FThinkGraphEditorStyle::Get().GetBrush(TEXT("ThinkGraph.Pin.ArrowConnectorStart"));
 }
 
 void FThinkGraphConnectionDrawingPolicy::DetermineWiringStyle(UEdGraphPin* OutputPin, UEdGraphPin* InputPin,
@@ -125,7 +125,11 @@ void FThinkGraphConnectionDrawingPolicy::BuildPinToPinWidgetMap(
 		};
 
 		TSharedPtr<SGraphPin> GraphPinWidget = StaticCastSharedRef<SGraphPin>(ConnectorIt.Key());
-		Local::AddSubPins_Recursive(GraphPinWidget->GetPinObj(), PinToPinWidgetMap, GraphPinWidget);
+		auto PinObj = GraphPinWidget->GetPinObj();
+		if (PinObj)
+		{
+			Local::AddSubPins_Recursive(PinObj, PinToPinWidgetMap, GraphPinWidget);
+		}
 	}
 }
 
@@ -190,8 +194,8 @@ void FThinkGraphConnectionDrawingPolicy::Internal_DrawLineWithArrow(const FVecto
 	// Come up with the final start/end points
 	const FVector2D DirectionBias = Normal * LineSeparationAmount;
 	const FVector2D LengthBias = ArrowRadius.X * UnitDelta;
-	const FVector2D StartPoint = StartAnchorPoint ;
-	const FVector2D EndPoint = EndAnchorPoint ;
+	const FVector2D StartPoint = StartAnchorPoint;
+	const FVector2D EndPoint = EndAnchorPoint;
 	const FVector2D Mid = DeltaPos / LineSeparationAmount;
 
 	const FVector2D P2 = StartPoint + ((Normal.X < Normal.Y)
@@ -227,8 +231,8 @@ void FThinkGraphConnectionDrawingPolicy::Internal_DrawLineWithArrow(const FVecto
 
 	// Draw the arrow
 	const FVector2D ArrowDrawPos = EndPoint - ArrowRadius;
-	const FVector2D StartImgDrawPos = StartPoint - .5f*ArrowStartImage->ImageSize * ZoomFactor;
-	const float AngleInRadians = static_cast<float>(FMath::Atan2((EndPoint-P3).Y, (EndPoint-P3).X));
+	const FVector2D StartImgDrawPos = StartPoint - .5f * ArrowStartImage->ImageSize * ZoomFactor;
+	const float AngleInRadians = static_cast<float>(FMath::Atan2((EndPoint - P3).Y, (EndPoint - P3).X));
 
 	FSlateDrawElement::MakeRotatedBox(
 		DrawElementsList,
@@ -243,16 +247,16 @@ void FThinkGraphConnectionDrawingPolicy::Internal_DrawLineWithArrow(const FVecto
 	);
 
 	FSlateDrawElement::MakeRotatedBox(
-    		DrawElementsList,
-    		ArrowLayerID + 5,
-    		FPaintGeometry(ArrowDrawPos, ArrowImage->ImageSize * ZoomFactor, ZoomFactor),
-    		ArrowImage,
-    		ESlateDrawEffect::None,
-    		AngleInRadians,
-    		TOptional<FVector2D>(),
-    		FSlateDrawElement::RelativeToElement,
-    		Params.WireColor
-    	);
+		DrawElementsList,
+		ArrowLayerID + 5,
+		FPaintGeometry(ArrowDrawPos, ArrowImage->ImageSize * ZoomFactor, ZoomFactor),
+		ArrowImage,
+		ESlateDrawEffect::None,
+		AngleInRadians,
+		TOptional<FVector2D>(),
+		FSlateDrawElement::RelativeToElement,
+		Params.WireColor
+	);
 }
 
 void FThinkGraphConnectionDrawingPolicy::DrawSplineWithArrow(const FGeometry& StartGeom, const FGeometry& EndGeom,

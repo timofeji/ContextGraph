@@ -1,6 +1,8 @@
 #include "ThinkGraphNode_LLM.h"
 
 #include "HttpModule.h"
+#include "ThinkGraph.h"
+#include "ThinkGraphNode_Const.h"
 #include "Animation/AnimMontage.h"
 #include "Animation/AnimSequence.h"
 #include "Interfaces/IHttpResponse.h"
@@ -14,38 +16,70 @@ UThinkGraphNode_LLM::UThinkGraphNode_LLM()
 #endif
 }
 
-void UThinkGraphNode_LLM::Activate()
+void UThinkGraphNode_LLM::Activate(UThinkGraph* ThinkGraph)
 {
+	if (InBufferIDS.Num() < 1)
+	{
+		return;
+	}
+	if(!ThinkGraph)
+	{
+		return;
+	}
+	//
+
 	TSharedRef<IHttpRequest, ESPMode::ThreadSafe> HttpRequest = FHttpModule::Get().CreateRequest();
 
 	// Set up HTTP headers
 	HttpRequest->SetURL(Settings.APIEndpoint);
 	HttpRequest->SetVerb(TEXT("POST"));
 	HttpRequest->SetHeader(TEXT("Content-Type"), TEXT("application/json"));
-	// HttpRequest->SetHeader(TEXT("Authorization"), FString::Printf(TEXT("Bearer %s"), *APIKey));
+	HttpRequest->SetHeader(TEXT("Authorization"), FString::Printf(TEXT("Bearer %s"), *Settings.APIKey));
 
-	TSharedPtr<FJsonObject> Msgs = MakeShareable(new FJsonObject());
-	Msgs->SetStringField(TEXT("role"), TEXT("user"));
-	Msgs->SetStringField(TEXT("content"), TEXT("What is your name?"));
+	Graph = ThinkGraph;
+
+	TArray<TSharedPtr<FJsonValue>> MessagesArray;
+	for (int i = 0; i < InputRoles.Num(); i++)
+	{
+		FDataBuffer Buffer = ThinkGraph->GetBuffer(InBufferIDS[i]);
+
+		if (!Buffer.Text.IsEmpty())
+		{
+			// Create the first message object (system message)
+			TSharedPtr<FJsonObject> Message = MakeShareable(new FJsonObject());
+			Message->SetStringField(TEXT("role"), InputRoles[i].ToLower());
+			Message->SetStringField(TEXT("content"), Buffer.Text.ToString());
+
+			MessagesArray.Add(MakeShareable(new FJsonValueObject(Message)));
+		}
+	}
+
 
 	// Build JSON payload
-	TSharedPtr<FJsonObject> JsonObject = MakeShareable(new FJsonObject());
-	JsonObject->SetStringField(TEXT("prompt"), TEXT("What is your name?"));
-	// JsonObject->SetStringField(TEXT("model"), TEXT("gpt-3.5-turbo"));
-	// JsonObject->SetArrayField(TEXT("messages"), TArray<TSharedPtr<FJsonValue>>{
-	// 	                          MakeShareable(new FJsonValueObject(Msgs))
-	//                           });
-	JsonObject->SetNumberField(TEXT("max_tokens"), 100);
+	TSharedPtr<FJsonObject> Request = MakeShareable(new FJsonObject());
+	Request->SetStringField(TEXT("model"), TEXT("gpt-4"));
+	Request->SetArrayField(TEXT("messages"), MessagesArray);
+	Request->SetNumberField(TEXT("max_tokens"), NumTokensToGenerate);
+	Request->SetNumberField(TEXT("temperature"), Temperature);
 
 	FString RequestBody;
 	TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&RequestBody);
-	FJsonSerializer::Serialize(JsonObject.ToSharedRef(), Writer);
+	FJsonSerializer::Serialize(Request.ToSharedRef(), Writer);
 
 	HttpRequest->SetContentAsString(RequestBody);
 
 	// Set up the response callback
 	HttpRequest->OnProcessRequestComplete().BindUObject(this, &ThisClass::OnAPICallback);
 	HttpRequest->ProcessRequest();
+
+#if WITH_EDITOR
+	bIsGenerating = true;
+#endif
+}
+
+void UThinkGraphNode_LLM::AddPromptInput(const FString Role)
+{
+	InputRoles.Add(Role);
 }
 
 void UThinkGraphNode_LLM::OnAPICallback(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
@@ -60,25 +94,33 @@ void UThinkGraphNode_LLM::OnAPICallback(FHttpRequestPtr Request, FHttpResponsePt
 		if (FJsonSerializer::Deserialize(Reader, JsonResponse) && JsonResponse.IsValid())
 		{
 			// Extract the result
-			// const TArray<TSharedPtr<FJsonValue>>* Choices;
-			// if (JsonResponse->TryGetArrayField(TEXT("choices"), Choices) && Choices->Num() > 0)
-			// {
-				// const TSharedPtr<FJsonObject>* Message;
-				// if (JsonResponse->TryGetStringField(TEXT("content"), Message))
-				// {
+			const TArray<TSharedPtr<FJsonValue>>* Choices;
+			if (JsonResponse->TryGetArrayField(TEXT("choices"), Choices) && Choices->Num() > 0)
+			{
+				const TSharedPtr<FJsonObject>* Message;
+				if ((*Choices)[0]->AsObject()->TryGetObjectField(TEXT("message"), Message))
+				{
 					FString Content;
-					if ((JsonResponse->TryGetStringField(TEXT("content"), Content)))
+					if ((*Message)->TryGetStringField(TEXT("content"), Content))
 					{
-						UE_LOG(LogTemp, Log, TEXT("ChatGPT Response: %s"), *Content);
+						UE_LOG(LogTemp, Verbose, TEXT("LanguageModel API Response: %s"), *Content);
+						
+						FDataBuffer& OutputBuffer = Graph->GetBuffer(OutBufferIDS[0]);
+						OutputBuffer.Text = FText::FromString(Content);
+						// OutputPrompt = FText::FromString(Content);
 					}
-				// }
-			// }
+				}
+			}
 		}
 	}
 	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("Failed to get a response from ChatGPT API"));
+		UE_LOG(LogTemp, Error, TEXT("ThinkGraph: Failed to get a response from LanguageModel API call"));
 	}
+
+#if WITH_EDITOR
+	bIsGenerating = false;
+#endif
 }
 
 

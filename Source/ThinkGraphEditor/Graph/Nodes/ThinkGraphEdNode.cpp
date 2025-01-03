@@ -1,7 +1,6 @@
-
 #include "ThinkGraphEdNode.h"
 
-#include "ThinkGraph/Nodes/ThinkGraphNode.h"
+#include "..\..\..\ThinkGraph\Nodes\TGNode.h"
 #include "ThinkGraphDebugger.h"
 #include "Graph/ThinkGraphEdGraph.h"
 #include "Slate/SThinkGraphNode.h"
@@ -44,6 +43,7 @@ FLinearColor UThinkGraphEdNode::GetBackgroundColor() const
 	// const FLinearColor DebugActiveColor = Settings->DebugActiveColor;
 	const FLinearColor DefaultColor = RuntimeNode->GetBackgroundColor();
 
+
 	// if (IsDebugActive())
 	// {
 	// 	return DebugActiveColor;
@@ -54,7 +54,7 @@ FLinearColor UThinkGraphEdNode::GetBackgroundColor() const
 	// const float ActiveTime = WasActiveTime();
 	// if (WasDebugActive() && ActiveTime < 3.f)
 	// {
-		// return FLinearColor::LerpUsingHSV(DebugActiveColor, DefaultColor, ActiveTime / DebugFadeTime);
+	// return FLinearColor::LerpUsingHSV(DebugActiveColor, DefaultColor, ActiveTime / DebugFadeTime);
 	// }
 
 	return DefaultColor;
@@ -68,7 +68,8 @@ void UThinkGraphEdNode::AllocateDefaultPins()
 
 void UThinkGraphEdNode::PrepareForCopying()
 {
-	RuntimeNode->Rename(nullptr, this, REN_DontCreateRedirectors | REN_DoNotDirty);
+	RuntimeNode->Rename(*RuntimeNode->GetNodeTitle().ToString(), GetGraph()->GetOuter(),
+	                    REN_DontCreateRedirectors | REN_DoNotDirty);
 }
 
 FText UThinkGraphEdNode::GetNodeTitle(const ENodeTitleType::Type TitleType) const
@@ -125,7 +126,7 @@ void UThinkGraphEdNode::UpdateTime(const float DeltaTime)
 		return;
 	}
 
-	const UThinkGraphNode* DebuggedNode = GetDebuggedNode();
+	const UTGNode* DebuggedNode = GetDebuggedNode();
 	if (!DebuggedNode)
 	{
 		bIsDebugActive = bWasDebugActive = false;
@@ -177,11 +178,11 @@ void UThinkGraphEdNode::UpdateErrorReporting(USkeletalMesh* InSkeletalMesh, cons
 	// 	return;
 	// }
 
-	#if ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION == 26
+#if ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION == 26
 	const USkeleton* MeshSkeleton = InSkeletalMesh ? InSkeletalMesh->Skeleton : nullptr;
-	#else
+#else
 	const USkeleton* MeshSkeleton = InSkeletalMesh ? InSkeletalMesh->GetSkeleton() : nullptr;
-	#endif
+#endif
 
 	// FText ErrorText;
 	// if (!AnimSkeleton->IsCompatible(MeshSkeleton))
@@ -246,7 +247,7 @@ void UThinkGraphEdNode::UpdateTimeCurrentNode(const float DeltaTime, const float
 	}
 }
 
-const UThinkGraphNode* UThinkGraphEdNode::GetDebuggedNode() const
+const UTGNode* UThinkGraphEdNode::GetDebuggedNode() const
 {
 	UThinkGraphEdGraph* ThinkGraph = Cast<UThinkGraphEdGraph>(GetOuter());
 

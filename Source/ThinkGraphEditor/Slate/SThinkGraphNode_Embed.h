@@ -10,15 +10,15 @@
 #include "SThinkGraphNode.h"
 
 
-class UThinkGraphEdNode_Const ;
+class UThinkGraphEdNode_Embed ;
 
-class SThinkGraphNode_Prompt : public SThinkGraphNode
+class SThinkGraphNode_Embed : public SThinkGraphNode
 {
 public:
-	SLATE_BEGIN_ARGS(SThinkGraphNode_Prompt){}
+	SLATE_BEGIN_ARGS(SThinkGraphNode_Embed){}
 	SLATE_END_ARGS()
 
-	void Construct(const FArguments& InArgs, UThinkGraphEdNode_Const* InNode);
+	void Construct(const FArguments& InArgs, UThinkGraphEdNode_Embed* InNode);
 
 	// SNodePanel::SNode interface
 	virtual void GetNodeInfoPopups(FNodeInfoContext* Context, TArray<FGraphInformationPopupInfo>& Popups) const override;
@@ -26,8 +26,15 @@ public:
 
 	// SGraphNode interface
 	// virtual void UpdateGraphNode() override;
-	// virtual void AddPin(const TSharedRef<SGraphPin>& PinToAdd) override;
-	// virtual void CreatePinWidgets() override;
+	virtual void AddValuePin(const TSharedRef<SGraphPin>& PinToAdd);
+	virtual void CreatePinWidgets() override;
+	virtual void UpdateGraphNode() override;
+
+	
+	TSharedPtr<SVerticalBox> ValuesBox;
+	
+	
+	TArray< TSharedRef<SGraphPin> > ValuePins;
 	
 	// End of SGraphNode interface
 

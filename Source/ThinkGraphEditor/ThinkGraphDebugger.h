@@ -8,7 +8,7 @@ class FThinkGraphEditor;
 class UThinkGraphComponent;
 class UThinkGraphNodeBase;
 class UThinkGraph;
-class UThinkGraphNode;
+class UTGNode;
 
 
 UENUM()
@@ -41,13 +41,13 @@ public:
 
 	AActor* GetSelectedActor() const;
 
-	void OnGraphNodeSelected(const UThinkGraphNode& SelectedNode);
+	void OnGraphNodeSelected(const UTGNode& SelectedNode);
 	void OnBeginPIE(const bool bIsSimulating);
 	void OnEndPIE(const bool bIsSimulating);
 	void OnPausePIE(const bool bIsSimulating);
 
 	void OnObjectSelected(UObject* Object);
-	void OnGraphEvaluated(const UThinkGraphComponent& ActionComponent, const UThinkGraphNode& EvaluatedNode);
+	void OnNodeGenerating(const UTGNode& EvaluatedNode);
 	// void OnThinkGraphStarted(const UHBThinkGraphAbilityTask_StartGraph& InOwnerTask, const UHBThinkGraph& InComboGraphAsset);
 	void OnGraphReset(const UThinkGraphComponent& OwnerActionComponent);
 	UThinkGraphComponent* GetDebuggedTaskForSelectedActor();
@@ -65,7 +65,7 @@ public:
 
 
 
-	TArray<const UThinkGraphNode*> SelectedNodesDebug;
+	TArray<const UTGNode*> SelectedNodesDebug;
 	// TArray<const UHBThinkGraphNode*> SelectedNodes;
 private:
 

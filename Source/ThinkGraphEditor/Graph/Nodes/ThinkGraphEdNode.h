@@ -4,7 +4,7 @@
 #include "CoreMinimal.h"
 #include "ThinkGraphEdNode.generated.h"
 
-class UThinkGraphNode;
+class UTGNode;
 class SThinkGraphNode;
 
 
@@ -38,7 +38,7 @@ public:
 
 
 	UPROPERTY(VisibleAnywhere, Instanced, Category = "ThinkGraph")
-	UThinkGraphNode* RuntimeNode;
+	UTGNode* RuntimeNode;
 
 	SThinkGraphNode* SlateNode;
 	
@@ -57,7 +57,7 @@ public:
 #endif
 	//~ End UEdGraphNode interface
 
-	const UThinkGraphNode* GetDebuggedNode() const;
+	const UTGNode* GetDebuggedNode() const;
 
 	bool IsDebugActive() const { return bIsDebugActive; }
 	bool WasDebugActive() const { return bWasDebugActive; }

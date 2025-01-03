@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "ThinkGraphNode.h"
+#include "TGNode.h"
 #include "ThinkGraphNode_Stimulus.generated.h"
 
 
@@ -13,7 +13,7 @@
  *  Holds runtime properties for animation and effects / cues containers.
  */
 UCLASS(Blueprintable)
-class THINKGRAPH_API UThinkGraphNode_Stimulus : public UThinkGraphNode
+class THINKGRAPH_API UThinkGraphNode_Stimulus : public UTGNode
 {
 	GENERATED_BODY()
 

@@ -6,13 +6,13 @@
 #include "ThinkGraphEditorStyle.h"
 #include "Widgets/SBoxPanel.h"
 #include "SThinkGraphPin.h"
-#include "Graph/Nodes/ThinkGraphEdNode_BasePrompt.h"
+#include "Graph/Nodes/ThinkGraphEdNode_Const.h"
 
 #define LOCTEXT_NAMESPACE "SThinkGraphNode_Prompt"
 /////////////////////////////////////////////////////
 // SThinkGraphNode_Prompt
 
-void SThinkGraphNode_Prompt::Construct(const FArguments& InArgs, UThinkGraphEdNode_BasePrompt* InNode)
+void SThinkGraphNode_Prompt::Construct(const FArguments& InArgs, UThinkGraphEdNode_Const* InNode)
 {
 
 	SThinkGraphNode::Construct(SThinkGraphNode::FArguments(), InNode);

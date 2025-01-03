@@ -89,7 +89,7 @@ AActor* FThinkGraphDebugger::GetSelectedActor() const
 	return ThinkGraphComponentOwner.IsValid() ? ThinkGraphComponentOwner.Get() : nullptr;
 }
 
-void FThinkGraphDebugger::OnGraphNodeSelected(const UThinkGraphNode& SelectedNode)
+void FThinkGraphDebugger::OnGraphNodeSelected(const UTGNode& SelectedNode)
 {
 	// SelectedNodes.Add(&SelectedNode);
 }
@@ -106,12 +106,12 @@ void FThinkGraphDebugger::OnBeginPIE(const bool bIsSimulating)
 
 	// remove these delegates first as we can get multiple calls to OnBeginPIE()
 	USelection::SelectObjectEvent.RemoveAll(this);
-	FThinkGraphDelegates::OnGraphNodeEvaluated.RemoveAll(this);
+	FThinkGraphDelegates::OnNodeStartedGenerating.RemoveAll(this);
 	FThinkGraphDelegates::OnGraphReset.RemoveAll(this);
 
 	USelection::SelectObjectEvent.AddRaw(this, &FThinkGraphDebugger::OnObjectSelected);
-	FThinkGraphDelegates::OnGraphNodeEvaluated.AddRaw(this, &FThinkGraphDebugger::OnGraphEvaluated);
-	FThinkGraphDelegates::OnGraphNodeSelected.AddRaw(this, &FThinkGraphDebugger::OnGraphNodeSelected);
+	// FThinkGraphDelegates::OnNodeStartedGenerating.AddRaw(this, &FThinkGraphDebugger::OnNodeGenerating);
+	FThinkGraphDelegates::OnConstGraphUpdated.AddRaw(this, &FThinkGraphDebugger::OnGraphNodeSelected);
 	// FThinkGraphDelegates::OnGraphReset.AddRaw(this, &FThinkGraphDebugger::OnGraphReset);
 }
 
@@ -129,7 +129,7 @@ void FThinkGraphDebugger::OnEndPIE(const bool bIsSimulating)
 	}
 
 	USelection::SelectObjectEvent.RemoveAll(this);
-	FThinkGraphDelegates::OnGraphNodeEvaluated.RemoveAll(this);
+	FThinkGraphDelegates::OnNodeStartedGenerating.RemoveAll(this);
 	FThinkGraphDelegates::OnGraphReset.RemoveAll(this);
 }
 
@@ -158,8 +158,7 @@ void FThinkGraphDebugger::OnObjectSelected(UObject* Object)
 }
 
 
-void FThinkGraphDebugger::OnGraphEvaluated(const UThinkGraphComponent& EvaluatedGraph,
-                                             const UThinkGraphNode& EvaluatedNode)
+void FThinkGraphDebugger::OnNodeGenerating(const UTGNode& EvaluatedNode)
 {
 	// const bool bAssetMatches = HBThinkGraphAsset && HBThinkGraphAsset == &InHBThinkGraphAsset;
 	// TG_ERROR(Verbose, TEXT("FThinkGraphDebugger TestDebugger OnHBThinkGraphStarted %s - %d (Ability: %s)"), *GetNameSafe(&InHBThinkGraphAsset), InHBThinkGraphAsset.GetUniqueID(), *GetNameSafe(&InOwnerTask))

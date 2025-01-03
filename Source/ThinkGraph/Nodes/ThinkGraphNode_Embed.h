@@ -3,8 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "ThinkGraphNode.h"
-#include "ThinkGraphNode_BasePrompt.generated.h"
+#include "TGNode.h"
+#include "ThinkGraphNode_Embed.generated.h"
 
 
 /**
@@ -13,13 +13,15 @@
  *  Holds runtime properties for animation and effects / cues containers.
  */
 UCLASS(Blueprintable)
-class THINKGRAPH_API UThinkGraphNode_BasePrompt : public UThinkGraphNode
+class THINKGRAPH_API UThinkGraphNode_Embed : public UTGNode
 {
 	GENERATED_BODY()
 
 public:
-	UThinkGraphNode_BasePrompt();
+	UThinkGraphNode_Embed();
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(DisplayPriority=1))
 	FText Prompt;
+	
+	void AddPinValuePin();
 };

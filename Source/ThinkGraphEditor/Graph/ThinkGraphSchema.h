@@ -6,13 +6,14 @@
 #include "EdGraph/EdGraphSchema.h"
 #include "ThinkGraphSchema.generated.h"
 
-class UThinkGraphEdNode_BasePrompt;
+class UThinkGraphEdNode_Const;
 class UThinkGraphEdNode_LLM;
 class UThinkGraphEdNode_Parse;
 class UThinkGraphEdNode_Memory;
 class UThinkGraphEdNode_Stimulus;
+class UThinkGraphEdNode_Embed;
 
-class UThinkGraphNode;
+class UTGNode;
 class UThinkGraphEdNode;
 class UThinkGraphEdNodeEdge;
 
@@ -107,22 +108,41 @@ struct THINKGRAPHEDITOR_API FThinkGraphSchemaAction_NewNode_LLM : public FEdGrap
 };
 
 
-/** Action to add a node Selector to the graph */
+
+/** Action to add a node Embed to the graph */
 USTRUCT()
-struct THINKGRAPHEDITOR_API FThinkGraphSchemaAction_NewNode_BasePrompt : public FEdGraphSchemaAction
+struct THINKGRAPHEDITOR_API FThinkGraphSchemaAction_NewNode_Embed : public FEdGraphSchemaAction
 {
 	GENERATED_USTRUCT_BODY();
 
-	FThinkGraphSchemaAction_NewNode_BasePrompt(): NodeTemplate(nullptr) {}
+	FThinkGraphSchemaAction_NewNode_Embed(): NodeTemplate(nullptr) {}
 
-	FThinkGraphSchemaAction_NewNode_BasePrompt(const FText& InNodeCategory, const FText& InMenuDesc, const FText& InToolTip, const int32 InGrouping)
+	FThinkGraphSchemaAction_NewNode_Embed(const FText& InNodeCategory, const FText& InMenuDesc, const FText& InToolTip, const int32 InGrouping)
 		: FEdGraphSchemaAction(InNodeCategory, InMenuDesc, InToolTip, InGrouping), NodeTemplate(nullptr) {}
 
 	virtual UEdGraphNode* PerformAction(class UEdGraph* ParentGraph, UEdGraphPin* FromPin, const FVector2D Location, bool bSelectNewNode = true) override;
 	virtual void AddReferencedObjects(FReferenceCollector& Collector) override;
 
 	UPROPERTY()
-	UThinkGraphEdNode_BasePrompt* NodeTemplate;
+	UThinkGraphEdNode_Embed* NodeTemplate;
+};
+
+/** Action to add a node Selector to the graph */
+USTRUCT()
+struct THINKGRAPHEDITOR_API FThinkGraphSchemaAction_NewNode_Const : public FEdGraphSchemaAction
+{
+	GENERATED_USTRUCT_BODY();
+
+	FThinkGraphSchemaAction_NewNode_Const(): NodeTemplate(nullptr) {}
+
+	FThinkGraphSchemaAction_NewNode_Const(const FText& InNodeCategory, const FText& InMenuDesc, const FText& InToolTip, const int32 InGrouping)
+		: FEdGraphSchemaAction(InNodeCategory, InMenuDesc, InToolTip, InGrouping), NodeTemplate(nullptr) {}
+
+	virtual UEdGraphNode* PerformAction(class UEdGraph* ParentGraph, UEdGraphPin* FromPin, const FVector2D Location, bool bSelectNewNode = true) override;
+	virtual void AddReferencedObjects(FReferenceCollector& Collector) override;
+
+	UPROPERTY()
+	UThinkGraphEdNode_Const* NodeTemplate;
 };
 
 
@@ -273,7 +293,7 @@ private:
 	static int32 CurrentCacheRefreshID;
 
 	void CreateEdgeConnection(UEdGraphPin* PinA, UEdGraphPin* PinB, const UThinkGraphEdNode* OwningNodeA, const UThinkGraphEdNode* OwningNodeB) const;
-	void CreateAndAddActionToContextMenu(FGraphContextMenuBuilder& ContextMenuBuilder, TSubclassOf<UThinkGraphNode> NodeType) const;
+	void CreateAndAddActionToContextMenu(FGraphContextMenuBuilder& ContextMenuBuilder, TSubclassOf<UTGNode> NodeType) const;
 
 	static bool IsHoverPinMatching(const UEdGraphPin* InHoverPin);
 

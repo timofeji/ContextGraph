@@ -5,26 +5,23 @@
 
 // #include "ThinkGraphEditorSettings.h"
 #include "ThinkGraphEditorSettings.h"
-#include "Nodes/ThinkGraphEdNode_BasePrompt.h"
+#include "Nodes/ThinkGraphEdNode_Const.h"
+#include "Nodes/ThinkGraphEdNode_Embed.h"
 #include "Nodes/ThinkGraphEdNode_Parse.h"
 #include "Slate/SThinkGraphNode_Prompt.h"
 #include "Slate/SThinkGraphNode.h"
+#include "Slate/SThinkGraphNode_Embed.h"
 
 
 TSharedPtr<SGraphNode> FThinkGraphNodePanelFactory::CreateNode(UEdGraphNode* Node) const
 {
 
-	// if (UThinkGraphEdNodeEdge* GraphEdge = Cast<UThinkGraphEdNodeEdge>(Node))
-	// {
-	// 	return SNew(SThinkGraphEdge, GraphEdge);
-	// }
-	//
-	// if (UThinkGraphEdNode_LLM* EntryNode = Cast<UThinkGraphEdNode_LLM>(Node))
-	// {
-	// 	return SNew(SThinkGraphNode_Prompt, EntryNode);
-	// }
+	if (UThinkGraphEdNode_Embed* GraphEdge = Cast<UThinkGraphEdNode_Embed>(Node))
+	{
+		return SNew(SThinkGraphNode_Embed, GraphEdge);
+	}
 	
-	if (UThinkGraphEdNode_BasePrompt* PromptNode = Cast<UThinkGraphEdNode_BasePrompt>(Node))
+	if (UThinkGraphEdNode_Const* PromptNode = Cast<UThinkGraphEdNode_Const>(Node))
 	{
 		return SNew(SThinkGraphNode_Prompt, PromptNode);
 	}

@@ -4,27 +4,43 @@
 
 #include "CoreMinimal.h"
 #include "ThinkGraphEdNode.h"
-#include "ThinkGraphEdNode_BasePrompt.generated.h"
+#include "ThinkGraphEdNode_Embed.generated.h"
 
-class UThinkGraphNode;
+class UTGNode;
+class UEdGraphPin;
 /** Editor Graph Node for entry point in Think Graphs. Based off UAnimStateEntryNode for state machine graphs in Anim BP. */
 UCLASS(MinimalAPI)
-class UThinkGraphEdNode_BasePrompt : public UThinkGraphEdNode
+class UThinkGraphEdNode_Embed : public UThinkGraphEdNode
 {
 	GENERATED_BODY()
 
 public:
-	UThinkGraphEdNode_BasePrompt();
+	UThinkGraphEdNode_Embed();
 
 
 	//~ Begin UEdGraphNode Interface
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 	virtual void AllocateDefaultPins() override;
 	virtual FLinearColor GetNodeTitleColor() const override;
+	virtual FSlateIcon GetIconAndTint(FLinearColor& OutColor) const override;
+	bool ShowPaletteIconOnNode() const override;
 	virtual FText GetTooltipText() const override;
+	void GetNodeContextMenuActions(UToolMenu* Menu, UGraphNodeContextMenuContext* Context) const override;
+	
+	void ExtractFromContextPrompt();
 
 	virtual bool CanDuplicateNode() const override	{ return false; }
 	//~ End UEdGraphNode Interface
 
 	THINKGRAPHEDITOR_API UEdGraphNode* GetOutputNode();
+	
+	void CreateValueBind(const FString& Key);
+	void ClearBinds();
+
+	TSet<FString> ValueBindKeys;
+	// // UPROPERTY()
+	// // TArray<UEdGraphPin*> InputPins;
+	//
+	// TArray<UEdGraphPin*> GetInputPins(){return InputPins;};
+
 };

@@ -10,7 +10,7 @@ class FThinkGraphEditorCommands : public TCommands<FThinkGraphEditorCommands>
 public:
 
 	FThinkGraphEditorCommands()
-		: TCommands<FThinkGraphEditorCommands>(TEXT("ThinkGraph"), NSLOCTEXT("Contexts", "ThinkGraph", "ThinkGraph Plugin"), NAME_None, FThinkGraphEditorStyle::GetStyleSetName())
+		: TCommands<FThinkGraphEditorCommands>(TEXT("ThinkGraphEditorCommands"), NSLOCTEXT("Contexts", "ThinkGraph", "ThinkGraph Plugin"), NAME_None, FThinkGraphEditorStyle::GetStyleSetName())
 	{
 	}
 
@@ -19,4 +19,7 @@ public:
 
 public:
 	TSharedPtr< FUICommandInfo > OpenPluginWindow;
+	TSharedPtr< FUICommandInfo > Find;
+	TSharedPtr< FUICommandInfo > AddValueBindPin;
+	TSharedPtr< FUICommandInfo > RemoveValueBindPin;
 };

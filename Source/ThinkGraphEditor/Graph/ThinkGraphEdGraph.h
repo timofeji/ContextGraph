@@ -9,12 +9,14 @@ class UThinkGraph;
 class FThinkGraphDebugger;
 class UThinkGraphEdNode;
 class UThinkGraphEdNodeSelector;
-class UThinkGraphNode;
+class UTGNode;
 class UThinkGraphNodeAnim;
 class UThinkGraphEdge;
 class UThinkGraphEdNodeEdge;
 class UThinkGraphEdNode;
 class UThinkGraphEdNode_LLM;
+class UThinkGraphEdNode_Const;
+class UThinkGraphEdNode_Memory;
 
 UCLASS()
 class THINKGRAPHEDITOR_API UThinkGraphEdGraph : public UEdGraph
@@ -27,7 +29,7 @@ public:
 	TArray<UThinkGraphEdNode*> EntryNodes;
 
 	UPROPERTY(Transient)
-	TMap<UThinkGraphNode*, UThinkGraphEdNode*> NodeMap;
+	TMap<UTGNode*, UThinkGraphEdNode*> NodeMap;
 
 	UPROPERTY(Transient)
 	TMap<UThinkGraphEdge*, UThinkGraphEdNodeEdge*> EdgeMap;
@@ -40,8 +42,9 @@ public:
 	UThinkGraph* GetThinkGraphModel() const;
 	void            RebuildGraphForEdge(UThinkGraph* OwningGraph, UThinkGraphEdNodeEdge* EdGraphEdge);
 	void            RebuildGraphForNode(UThinkGraph* OwningGraph, UThinkGraphEdNode* Node);
-	void            RebuildGraphForEntry(UThinkGraph* OwningGraph, UThinkGraphEdNode_LLM* NodeEntry);
-
+	void            RebuildGraphForLLM(UThinkGraph* OwningGraph, UThinkGraphEdNode_LLM* LLMEdNode);
+	void            RebuildGraphForMemory(UThinkGraph* OwningGraph, UThinkGraphEdNode_Memory* MemEdNode);
+	void			RebuildGraphForConst(UThinkGraph* OwningGraph, UThinkGraphEdNode_Const* MemEdNode);
 	/** Goes through each nodes and run a validation pass */
 	void ValidateNodes(FCompilerResultsLog* LogResults);
 
@@ -60,7 +63,7 @@ protected:
 	void Clear();
 
 	// TODO: Is it needed anymore ?
-	void SortNodes(UThinkGraphNode* RootNode);
+	void SortNodes(UTGNode* RootNode);
 
 	
 	uint32 AnimIndex = 0;

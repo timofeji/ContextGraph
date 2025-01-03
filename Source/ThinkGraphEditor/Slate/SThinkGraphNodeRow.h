@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "Widgets/SCompoundWidget.h"
 
-class UThinkGraphNode;
+class UTGNode;
 
 /**
  * Delegate fired to get the path to start picking from.
@@ -30,11 +30,11 @@ public:
 	SLATE_END_ARGS()
 
 	/** Constructs this widget with InArgs */
-	void Construct(const FArguments& InArgs, UThinkGraphNode* InRuntimeNode);
+	void Construct(const FArguments& InArgs, UTGNode* InRuntimeNode);
 
 protected:
 
-	UThinkGraphNode* RuntimeNode = nullptr;
+	UTGNode* RuntimeNode = nullptr;
 	FText LabelText;
 	FText LabelTooltipText;
 	FText ValueTooltipText;

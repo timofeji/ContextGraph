@@ -2,6 +2,7 @@
 
 #include "ThinkGraphEditor.h"
 
+#include "ClearReplacementShaders.h"
 #include "EdGraphUtilities.h"
 
 #include "EditorViewportCommands.h"
@@ -21,15 +22,21 @@
 #include "Widgets/Layout/SBox.h"
 
 #include "Animation/AnimMontage.h"
-#include "Graph/Nodes/ThinkGraphEdNode_BasePrompt.h"
-#include "Interfaces/IHttpResponse.h"
+#include "Graph/Nodes/ThinkGraphEdNode_Const.h"
+#include "Graph/Nodes/ThinkGraphEdNode_Memory.h"
 #include "Misc/ScopedSlowTask.h"
+#include "Slate/SMemoryBufferEditor.h"
+#include "Slate/SPromptBufferEditor.h"
+#include "Slate/ThinkGraphBufferEditor.h"
 
 #include "ThinkGraph/ThinkGraph.h"
-#include "ThinkGraph/Nodes/ThinkGraphNode_BasePrompt.h"
-#include "Widgets/Input/SMultiLineEditableTextBox.h"
+#include "ThinkGraph/Nodes/ThinkGraphNode_Const.h"
+#include "ThinkGraph/Nodes/ThinkGraphNode_Embed.h"
+#include "ThinkGraph/Nodes/ThinkGraphNode_LLM.h"
+#include "ThinkGraph/Nodes/ThinkGraphNode_Memory.h"
 
 const FName FThinkGraphEditor::DetailsTabID(TEXT("ThinkGraph_Details"));
+const FName FThinkGraphEditor::MemoryTabID(TEXT("ThinkGraph_Memory"));
 const FName FThinkGraphEditor::GraphViewportTabID(TEXT("ThinkGraph_Viewport"));
 
 const FName FThinkGraphEditorModes::ThinkGraphEditorMode("ThinkGraphEditor");
@@ -76,6 +83,7 @@ void FThinkGraphEditor::CreateInternalWidgets()
 	FGraphAppearanceInfo AppearanceInfo;
 	AppearanceInfo.CornerText = FText::FromString(GraphBeingEdited->GetName());
 
+
 	// Make full graph editor
 	const bool bGraphIsEditable = EditorGraph->bEditable;
 	GraphEditorView = SNew(SGraphEditor)
@@ -98,14 +106,17 @@ bool FThinkGraphEditor::CanDebug() const
 }
 
 
-void FThinkGraphEditor::OnChatGPTResponseReceived(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful) const
+void FThinkGraphEditor::OnChatGPTResponseReceived(FHttpRequestPtr Request, FHttpResponsePtr Response,
+                                                  bool bWasSuccessful) const
 {
-
 }
+
 void FThinkGraphEditor::RunDebug() const
 {
-	
-
+	if (DebuggedNode)
+	{
+		DebuggedNode->RecallMemory();
+	}
 }
 
 void FThinkGraphEditor::ExtendToolbar()
@@ -168,7 +179,7 @@ void FThinkGraphEditor::FillToolbar(FToolBarBuilder& ToolBarBuilder)
 			                                FExecuteAction::CreateSP(this, &FThinkGraphEditor::RunDebug),
 			                                FCanExecuteAction::CreateSP(this, &FThinkGraphEditor::CanDebug))
 		                                , NAME_None
-		                                , LOCTEXT("PrevConflictLabel", "Debug")
+		                                , LOCTEXT("PrevConflictLabel", "Simulate")
 		                                , LOCTEXT("PrevConflictTooltip", "Runs current graph")
 		                                , FSlateIcon(FAppStyle::GetAppStyleSetName(), "BlueprintMerge.NextDiff")
 		);
@@ -245,6 +256,7 @@ void FThinkGraphEditor::CreateDefaultCommands()
 
 	DefaultCommands = MakeShareable(new FUICommandList);
 
+
 	// Common generic commands
 	DefaultCommands->MapAction(
 		FGenericCommands::Get().SelectAll,
@@ -293,11 +305,37 @@ void FThinkGraphEditor::CreateDefaultCommands()
 		FExecuteAction::CreateRaw(this, &FThinkGraphEditor::OnCreateComment),
 		FCanExecuteAction::CreateRaw(this, &FThinkGraphEditor::CanCreateComment)
 	);
+	DefaultCommands->MapAction(
+		FGenericCommands::Get().SelectAll,
+		FExecuteAction::CreateRaw(this, &FThinkGraphEditor::SelectAllNodes),
+		FCanExecuteAction::CreateRaw(this, &FThinkGraphEditor::CanSelectAllNodes)
+	);
 }
 
-void FThinkGraphEditor::BindToolkitCommands()
+void FThinkGraphEditor::BindThinkGraphCommands()
 {
 	FThinkGraphEditorCommands::Register();
+
+	if (EditorCommands.IsValid())
+	{
+		return;
+	}
+
+	EditorCommands = MakeShareable(new FUICommandList);
+	EditorCommands->MapAction(
+		FThinkGraphEditorCommands::Get().Find,
+		FExecuteAction::CreateRaw(this, &FThinkGraphEditor::Find),
+		FCanExecuteAction());
+
+
+	DefaultCommands.Get()->Append(EditorCommands.ToSharedRef());
+
+	//
+	//
+	// EditorCommands->MapAction(FThinkGraphEditorCommands::Get().AddValueBindPin,
+	//                            FExecuteAction::CreateRaw(this, &FThinkGraphEditor::OnAddValueBindPin),
+	//                            FCanExecuteAction::CreateRaw(this, &FThinkGraphEditor::CanAddValueBindPin)
+	// );
 	// Auto Arrange commands
 	// ToolkitCommands->MapAction(
 	// 	FHBThinkGraphBlueprintEditorCommands::Get().AutoArrange,
@@ -318,6 +356,16 @@ void FThinkGraphEditor::BindToolkitCommands()
 	// );
 }
 
+bool FThinkGraphEditor::CanFind()
+{
+	return true;
+}
+
+void FThinkGraphEditor::Find()
+{
+	BufferEditorWindow->Find();
+}
+
 void FThinkGraphEditor::InitThinkGraphEditor(EToolkitMode::Type Mode,
                                              const TSharedPtr<IToolkitHost>&
                                              InitToolkitHost,
@@ -326,14 +374,12 @@ void FThinkGraphEditor::InitThinkGraphEditor(EToolkitMode::Type Mode,
 	check(GraphToEdit);
 	GraphBeingEdited = GraphToEdit;
 
-
-	CreateDefaultCommands();
-	BindToolkitCommands();
-
-
 	FEditorViewportCommands::Register();
 	FGenericCommands::Register();
 	FGraphEditorCommands::Register();
+
+	CreateDefaultCommands();
+	BindThinkGraphCommands();
 
 
 	CreateEditorGraph();
@@ -380,6 +426,8 @@ void FThinkGraphEditor::InitThinkGraphEditor(EToolkitMode::Type Mode,
 						->SetSizeCoefficient(0.2f)
 						->AddTab(DetailsTabID,
 						         ETabState::OpenedTab)
+						// ->AddTab(MemoryTabID,
+						//          ETabState::ClosedTab)
 					)
 
 				)
@@ -417,6 +465,58 @@ void FThinkGraphEditor::InitThinkGraphEditor(EToolkitMode::Type Mode,
 	ExtendMenu();
 	ExtendToolbar();
 	RegenerateMenusAndToolbars();
+}
+
+
+bool FThinkGraphEditor::CanAddValueBindPin()
+{
+	return true;
+}
+
+void FThinkGraphEditor::OnAddValueBindPin()
+{
+	const FGraphPanelSelectionSet SelectedNodes = GetSelectedNodes();
+	if (SelectedNodes.Num() == 1)
+	{
+		for (FGraphPanelSelectionSet::TConstIterator NodeIt(SelectedNodes); NodeIt; ++NodeIt)
+		{
+			UObject* Node = *NodeIt;
+			if (UThinkGraphNode_Embed* EmbedNode = Cast<UThinkGraphNode_Embed>(Node))
+			{
+				EmbedNode->AddPinValuePin();
+				break;
+			}
+		}
+	}
+}
+
+bool FThinkGraphEditor::CanRemoveValueBindPin()
+{
+	return true;
+}
+
+void FThinkGraphEditor::OnRemoveValueBindPin()
+{
+}
+
+TSharedRef<SDockTab> FThinkGraphEditor::SpawnTab_Memory(const FSpawnTabArgs& SpawnTabArgs) const
+{
+	check(SpawnTabArgs.GetTabId() == MemoryTabID);
+
+	// TODO use DialogueEditor.Tabs.Properties
+	const auto* IconBrush = FAppStyle::GetBrush(TEXT("GenericEditor.Tabs.Properties"));
+
+
+	TSharedRef<SDockTab> NewTab = SNew(SDockTab)
+    	.Label(LOCTEXT("ThinkGraphDetailsTitle",
+                       "Memory"))
+    	.TabColorScale(GetTabColorScale())
+	[
+		DetailsBorder.ToSharedRef()
+	];
+	NewTab->SetTabIcon(IconBrush);
+
+	return NewTab;
 }
 
 
@@ -518,6 +618,13 @@ void FThinkGraphEditor::RegisterTabSpawners(const TSharedRef<FTabManager>& InTab
 	            .SetDisplayName(LOCTEXT("ThinkGraphDetailsTab", "PropertyDetails"))
 	            .SetGroup(WorkspaceMenuCategoryRef)
 	            .SetIcon(FSlateIcon(FAppStyle::GetAppStyleSetName(), "LevelEditor.Tabs.Details"));
+
+
+	InTabManager->RegisterTabSpawner(FThinkGraphEditor::MemoryTabID,
+	                                 FOnSpawnTab::CreateSP(this, &FThinkGraphEditor::SpawnTab_Memory))
+	            .SetDisplayName(LOCTEXT("ThinkGraphMemoryTab", "MemoryDetails"))
+	            .SetGroup(WorkspaceMenuCategoryRef)
+	            .SetIcon(FSlateIcon(FAppStyle::GetAppStyleSetName(), "LevelEditor.Tabs.StatsViewer"));
 }
 
 void FThinkGraphEditor::UnregisterTabSpawners(const TSharedRef<FTabManager>& InTabManager)
@@ -579,10 +686,16 @@ void FThinkGraphEditor::OnFinishedChangingProperties(const FPropertyChangedEvent
 
 FSlateColor FThinkGraphEditor::GetDetailsBorderColor() const
 {
-	uint8 H = static_cast<uint8>(FMath::Fmod(FPlatformTime::Seconds() * 25.5f, 255.0f));
-	return FLinearColor::MakeFromHSV8(H, 255, 255);
+	if (DebuggedNode.Get())
+	{
+		if (DebuggedNode->bIsGenerating)
+		{
+			uint8 H = static_cast<uint8>(FMath::Fmod(FPlatformTime::Seconds() * 255.f, 255.0f));
+			return FLinearColor::MakeFromHSV8(H, 255, 255);
+		}
+	}
 
-	// return FLinearColor::Green;
+	return FLinearColor::Black;
 }
 
 void FThinkGraphEditor::CreatePropertyWidget()
@@ -610,12 +723,13 @@ void FThinkGraphEditor::CreatePropertyWidget()
 	//
 	SAssignNew(DetailsBorder, SBorder)
 	.Padding(FMargin(2.f))
-							.BorderImage( FAppStyle::GetBrush("ErrorReporting.Box") )
+							.BorderImage(FAppStyle::GetBrush("ErrorReporting.Box"))
 					// .BorderImage(FAppStyle::GetBrush("NotificationList.ItemBackground"))
 	// .BorderImage(&CustomBrush)
 	.BorderBackgroundColor(this, &FThinkGraphEditor::GetDetailsBorderColor);
 	DetailsBorder->SetContent(DetailsView.ToSharedRef());
 }
+
 
 void FThinkGraphEditor::AddReferencedObjects(FReferenceCollector& Collector)
 {
@@ -1000,6 +1114,7 @@ void FThinkGraphEditor::OnNodeSelectionChanged(const TSet<UObject*>& NewSelectio
 {
 	TG_ERROR(Verbose, TEXT("OnNodeSelectionChanged - %d"), NewSelection.Num())
 
+	DebuggedNode = nullptr;
 	TArray<UObject*> SelectedNodes;
 	TArray<UThinkGraphEdNode*> GraphNodes;
 	for (UObject* Selection : NewSelection)
@@ -1013,33 +1128,30 @@ void FThinkGraphEditor::OnNodeSelectionChanged(const TSet<UObject*>& NewSelectio
 	}
 
 
-	FSlateFontInfo FontInfo = FThinkGraphEditorStyle::Get().GetFontStyle("ThinkGraph.Text.Prompt");
-	FontInfo.Size = 10;
-
-
 	if (GraphNodes.Num() > 0)
 	{
-		if (auto PromptEdNode = Cast<UThinkGraphEdNode_BasePrompt>(GraphNodes[0]))
+		if (auto ConstEdNode = Cast<UThinkGraphEdNode_Const>(GraphNodes[0]))
 		{
-			auto PromptNode = Cast<UThinkGraphNode_BasePrompt>(PromptEdNode->RuntimeNode);
-			auto TextEdit =
-				SNew(SMultiLineEditableTextBox)
-				.Font(FontInfo)
-				.BackgroundColor(FLinearColor::Black)
-				.ForegroundColor(FLinearColor(FColor::FromHex("5b8c3f")))
-				.WrappingPolicy(ETextWrappingPolicy::AllowPerCharacterWrapping)
-				.AllowMultiLine(true)
-				.Margin(0.f)
-				.Text_Lambda([PromptNode]() { return PromptNode->Prompt; })
-				.OnTextCommitted_Lambda([PromptNode](const FText& NewText, ETextCommit::Type CommitType)
-				                               {
-					                               PromptNode->Prompt = NewText;
-				                               });
-
-			DetailsBorder->SetContent(TextEdit);
-
+			BufferEditorWindow =
+				SNew(SPromptBufferEditor)
+				.Node(ConstEdNode);
+			DetailsBorder->SetContent(BufferEditorWindow.ToSharedRef());
 			return;
 		}
+
+		if (auto MemoryEdNode = Cast<UThinkGraphEdNode_Memory>(GraphNodes[0]))
+		{
+			auto MemoryNode = Cast<UThinkGraphNode_Memory>(MemoryEdNode->RuntimeNode);
+
+			BufferEditorWindow =
+				SNew(SMemoryBufferEditor)
+				.Node(MemoryEdNode);
+			DebuggedNode = MemoryNode;
+			DetailsBorder->SetContent(BufferEditorWindow.ToSharedRef());
+			return;
+		}
+
+
 		DetailsView->SetObjects(SelectedNodes);
 	}
 	else

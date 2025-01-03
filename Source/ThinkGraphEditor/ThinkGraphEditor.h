@@ -4,11 +4,14 @@
 
 #include "CoreMinimal.h"
 #include "Interfaces/IHttpRequest.h"
+#include "ThinkGraph/Nodes/ThinkGraphNode_Memory.h"
 
+class UThinkGraphBufferEditor;
 class IHttpResponse;
 class IHttpRequest;
 class UThinkGraph;
 class UThinkGraphNode_Parse;
+class UThinkGraphNode_LLM;
 
 class AHBWeapon;
 
@@ -55,6 +58,7 @@ public:
 	FActionMenuContent OnCreateGraphActionMenu(UEdGraph* EdGraph, const UE::Math::TVector2<double>& Vector2,
 	                                           const TArray<UEdGraphPin*>& EdGraphPins,
 	                                           bool bArg, TDelegate<void()> Delegate);
+	
 
 	void OnNodeSelectionChanged(const TSet<UObject*>& Objects);
 
@@ -83,8 +87,11 @@ public:
 	void ExtendToolbar();
 	bool IsPIESimulating() const;
 	void CreateDefaultCommands();
-	void BindToolkitCommands();
+	void BindThinkGraphCommands();
 
+	bool CanFind();
+	void Find();
+	
 	void InitThinkGraphEditor(EToolkitMode::Type Mode,
 	                         const TSharedPtr<IToolkitHost>& InitToolkitHost,
 	                         UThinkGraph* GraphToEdit);
@@ -127,6 +134,8 @@ public:
 	float TracerAnimTime = 0.1;
 	FTimerHandle SampleTimerHandle;
 	TSharedPtr<SBorder> DetailsBorder;
+	
+	TObjectPtr<UThinkGraphNode_Memory> DebuggedNode;
 
 	TSharedPtr<class FBlueprintEditorToolbar> GetToolbarBuilder() { return Toolbar; }
 
@@ -135,6 +144,7 @@ public:
 	static const FName GraphViewportTabID;
 	static const FName ActionNameTabID;
 	static const FName DetailsTabID;
+	static const FName MemoryTabID;
 	static const FName PaletteTabID;
 
 
@@ -150,7 +160,12 @@ public:
 	// IToolkit interface
 	//
 
+	bool CanAddValueBindPin();
+	void OnAddValueBindPin();
+	bool CanRemoveValueBindPin();
+	void OnRemoveValueBindPin();
 	TSharedRef<SDockTab> SpawnTab_Details(const FSpawnTabArgs& SpawnTabArgs) const;
+	TSharedRef<SDockTab>  SpawnTab_Memory(const FSpawnTabArgs& SpawnTabArgs) const;
 	FEdGraphPinType GetTargetPinType() const;
 	void HandlePinTypeChanged(const FEdGraphPinType& EdGraphPin);
 	TSharedRef<SDockTab> SpawnTab_GraphViewport(const FSpawnTabArgs& SpawnTabArgs);
@@ -159,7 +174,7 @@ public:
 	void UnregisterTabSpawners(const TSharedRef<FTabManager>& InTabManager) override;
 	FText GetBaseToolkitName() const override;
 	FText GetToolkitName() const override;
-	FName GetToolkitFName() const override { return FName(TEXT("HBCollectibleEditor")); }
+	FName GetToolkitFName() const override { return FName(TEXT("ThinkGraphEditor")); }
 
 	FText GetToolkitToolTipText() const override
 	{
@@ -183,12 +198,14 @@ public:
 
 	/** The command list for this asset editor with common functionality such as copy paste and so on */
 	TSharedPtr<FUICommandList> DefaultCommands;
+	TSharedPtr<FUICommandList> EditorCommands;
 
 	/** Toolbar extender */
 	TSharedPtr<FExtender> ToolbarExtender;
 	TSharedPtr<IPropertyHandle> TypePropertyHandle;
 	FEdGraphPinType LastGraphPinType;
 	int ActionIndex = 0;
+	TSharedPtr<UThinkGraphBufferEditor> BufferEditorWindow;
 
 
 
@@ -217,4 +234,5 @@ public:
 
 protected:
 	UThinkGraph* GraphBeingEdited;
+	
 };

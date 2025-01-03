@@ -2,7 +2,7 @@
 #include "ThinkGraphEditorStyle.h"
 #include "DetailLayoutBuilder.h"
 #include "DetailWidgetRow.h"
-#include "Graph/Nodes/ThinkGraphEdNode_BasePrompt.h"
+#include "Graph/Nodes/ThinkGraphEdNode_Const.h"
 #include "Widgets/Input/SButton.h"
 #include "Widgets/Input/SMultiLineEditableTextBox.h"
 #include "Widgets/Text/STextBlock.h"
@@ -22,7 +22,7 @@ void FThinkGraphDetails::CustomizeDetails(IDetailLayoutBuilder& DetailBuilder)
 	//
 	// if (CustomizedObjects.Num() > 0)
 	// {
-	// 	if (auto PromptEdNode = Cast<UThinkGraphEdNode_BasePrompt>(CustomizedObjects[0].Get()))
+	// 	if (auto PromptEdNode = Cast<UThinkGraphEdNode_Const>(CustomizedObjects[0].Get()))
 	// 	{
 	// 		auto TextEdit =
 	// 			SNew(SMultiLineEditableTextBox)

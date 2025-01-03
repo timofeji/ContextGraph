@@ -4,18 +4,17 @@
 
 class APawn;
 class UThinkGraph;
-class UThinkGraphNode;
+class UTGNode;
 class UThinkGraphComponent;
 
 struct THINKGRAPH_API FThinkGraphDelegates
 {
 	/** delegate type for combo graph execution events (Params: const UComboGraphAbilityTask_StartGraph*, const UComboGraph* ComboGraphAsset) */
-	DECLARE_MULTICAST_DELEGATE_TwoParams(FOnThinkGraphEvaluated,
-	                                     const UThinkGraphComponent& Component,
-	                                     const UThinkGraphNode& Node);
+	DECLARE_MULTICAST_DELEGATE_OneParam(FOnThinkGraphEvaluated,
+	                                     const UTGNode& Node);
 	
-	DECLARE_MULTICAST_DELEGATE_OneParam(FOnThinkGraphSelected,
-	                                     const UThinkGraphNode& ActionComponent);
+	DECLARE_MULTICAST_DELEGATE_OneParam(ConstNodeUpdated,
+	                                     const UTGNode& Node);
 
 
 	
@@ -24,11 +23,11 @@ struct THINKGRAPH_API FThinkGraphDelegates
 
 
 	/** Called when the Graph activates a node*/
-	static FOnThinkGraphEvaluated OnGraphNodeEvaluated;
+	static FOnThinkGraphEvaluated OnNodeStartedGenerating;
 
 	
 	/** Called when the Graph tries to find a node. */
-	static FOnThinkGraphSelected OnGraphNodeSelected;
+	static ConstNodeUpdated OnConstGraphUpdated;
 
 	/** Called when the Combo Graph ends execution. */
 	static FOnThinkGraphReset OnGraphReset;
@@ -36,7 +35,7 @@ struct THINKGRAPH_API FThinkGraphDelegates
 
 	/** delegate type for combo graph execution events (Params: const UComboGraphAbilityTask_StartGraph*, const UComboGraph* ComboGraphAsset) */
 	DECLARE_MULTICAST_DELEGATE_OneParam(FOnThinkGraphNodeEvaluated,
-	                                     const UThinkGraphNode *Node);
+	                                     const UTGNode *Node);
 
 	static FOnThinkGraphNodeEvaluated OnNodeEvaluated;
 

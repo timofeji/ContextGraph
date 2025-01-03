@@ -5,13 +5,13 @@
 
 #include "EditorStyleSet.h"
 #include "SlateOptMacros.h"
-#include "ThinkGraph/Nodes/ThinkGraphNode.h"
+#include "..\..\ThinkGraph\Nodes\TGNode.h"
 
 #define LOCTEXT_NAMESPACE "SACEGraphNode"
 
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 
-void SThinkGraphNodeRow::Construct(const FArguments& InArgs, UThinkGraphNode* InRuntimeNode)
+void SThinkGraphNodeRow::Construct(const FArguments& InArgs, UTGNode* InRuntimeNode)
 {
 	check(InRuntimeNode);
 	RuntimeNode = InRuntimeNode;

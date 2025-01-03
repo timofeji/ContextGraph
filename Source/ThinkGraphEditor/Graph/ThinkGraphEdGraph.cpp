@@ -1,16 +1,24 @@
 #include "ThinkGraphEdGraph.h"
 
 
+#include "ClearReplacementShaders.h"
 #include "..\ThinkGraphEditorLog.h"
 #include "SGraphNode.h"
 #include "SGraphPanel.h"
+#include "ThinkGraphEditorTypes.h"
+#include "ThinkGraphSchema.h"
 #include "ThinkGraph/ThinkGraph.h"
 #include "ThinkGraph/ThinkGraphEdge.h"
 #include "Nodes/ThinkGraphEdNode.h"
 
 #include "Nodes/ThinkGraphEdNodeEdge.h"
 #include "Nodes\ThinkGraphEdNode_LLM.h"
-#include "ThinkGraph/Nodes/ThinkGraphNode.h"
+#include "Nodes\ThinkGraphEdNode_Memory.h"
+#include "..\..\ThinkGraph\Nodes\TGNode.h"
+#include "Nodes/ThinkGraphEdNode_Const.h"
+#include "Nodes/ThinkGraphEdNode_Embed.h"
+#include "ThinkGraph/TGTypes.h"
+#include "ThinkGraph/Nodes/ThinkGraphNode_Const.h"
 
 UThinkGraph* UThinkGraphEdGraph::GetThinkGraphModel() const
 {
@@ -28,36 +36,29 @@ void UThinkGraphEdGraph::RebuildGraph()
 
 	for (UEdGraphNode* CurrentNode : Nodes)
 	{
-		TG_ERROR(Verbose, TEXT("UThinkGraphEdGraph::RebuildGraph for node: %s (%s)"), *CurrentNode->GetName(),
-		         *CurrentNode->GetClass()->GetName())
+		UE_LOG(LogThinkGraphEditor, Verbose, TEXT("UThinkGraphEdGraph::RebuildGraph for node: %s (%s)"),
+		       *CurrentNode->GetName(),
+		       *CurrentNode->GetClass()->GetName())
 
-		if (UThinkGraphEdNode_LLM* GraphEntryNode = Cast<UThinkGraphEdNode_LLM>(CurrentNode))
+		if (UThinkGraphEdNode_Memory* MemoryNode = Cast<UThinkGraphEdNode_Memory>(CurrentNode))
 		{
-			RebuildGraphForEntry(ThinkGraph, GraphEntryNode);
+			RebuildGraphForMemory(ThinkGraph, MemoryNode);
 		}
-		else if (UThinkGraphEdNodeEdge* GraphEdge = Cast<UThinkGraphEdNodeEdge>(CurrentNode))
-		{
-			RebuildGraphForEdge(ThinkGraph, GraphEdge);
-		}
-		else if (UThinkGraphEdNode* Node = Cast<UThinkGraphEdNode>(CurrentNode))
-		{
-			RebuildGraphForNode(ThinkGraph, Node);
-		}
-
+		
 	}
 
 
-	for (UThinkGraphNode* Node : ThinkGraph->AllNodes)
-	{
-		if (Node->ParentNodes.Num() == 0)
-		{
-			// ThinkGraph->RootNodes.Add(Node);
-			// May cause a weird issue, no crash but editor goes unresponsive
-			// SortNodes(Node);
-		}
-
-		Node->Rename(nullptr, ThinkGraph, REN_DontCreateRedirectors | REN_DoNotDirty);
-	}
+	// for (UTGNode* Node : ThinkGraph->AllNodes)
+	// {
+	// 	if (Node->ParentNodes.Num() == 0)
+	// 	{
+	// 		// ThinkGraph->RootNodes.Add(Node);
+	// 		// May cause a weird issue, no crash but editor goes unresponsive
+	// 		// SortNodes(Node);
+	// 	}
+	//
+	// 	Node->Rename(nullptr, ThinkGraph, REN_DontCreateRedirectors | REN_DoNotDirty);
+	// }
 }
 
 void UThinkGraphEdGraph::RebuildGraphForEdge(UThinkGraph* OwningGraph, UThinkGraphEdNodeEdge* EdGraphEdge)
@@ -92,77 +93,152 @@ void UThinkGraphEdGraph::RebuildGraphForEdge(UThinkGraph* OwningGraph, UThinkGra
 	Edge->EndNode = EndNode->RuntimeNode;
 }
 
-void UThinkGraphEdGraph::RebuildGraphForNode(UThinkGraph* OwningGraph, UThinkGraphEdNode* NodeBase)
+
+void UThinkGraphEdGraph::RebuildGraphForConst(UThinkGraph* OwningGraph, UThinkGraphEdNode_Const* ConstEdNode)
 {
-	UThinkGraphEdNode* Node = Cast<UThinkGraphEdNode>(NodeBase);
-	UThinkGraphNode* RuntimeNode = Node
-		                                 ? Node->RuntimeNode
-		                                 : nullptr;
-	if (!RuntimeNode)
+	check(ConstEdNode);
+	check(OwningGraph);
+
+
+	// ConstEdNode->RuntimeNode->OutBufferIDS.Empty();
+	// for (auto Pin : ConstEdNode->Pins)
+	// {
+	// 	if (Pin->Direction == EGPD_Output && Pin->LinkedTo.Num() > 0)
+	// 	{
+	// 		uint16 BufferID = OwningGraph->AddDataBuffer();
+	// 		ConstEdNode->RuntimeNode->OutBufferIDS.Add(BufferID);
+	//
+	// 		for (auto LinkedTo : Pin->LinkedTo)
+	// 		{
+	// 			if (auto LinkedToEdNode = Cast<UThinkGraphEdNode>(LinkedTo->GetOwningNode()))
+	// 			{
+	// 				LinkedToEdNode->RuntimeNode->InBufferIDS.Add(BufferID);
+	// 				OwningGraph->GetBuffer(BufferID).Text = FText::FromString(ConstEdNode->Prompt);
+	// 			}
+	// 		}
+	// 	}
+	// }
+	//
+	// TArray<FString> EmbeddedKeys;
+	// if (UThinkGraphNode_Const* ConstNode = Cast<UThinkGraphNode_Const>(ConstEdNode->RuntimeNode))
+	// {
+	// 	FString PromptStr = ConstNode->Prompt;
+	// 	// Regular expression to match "${key}"
+	// 	const FRegexPattern Pattern(TEXT(R"(\$\{([a-zA-Z0-9_]+)\})"));
+	// 	FRegexMatcher Matcher(Pattern, PromptStr);
+	//
+	// 	// Process all matches
+	// 	while (Matcher.FindNext())
+	// 	{
+	// 		// Extract the key inside ${key}
+	// 		FString Key = Matcher.GetCaptureGroup(1);
+	// 		EmbeddedKeys.AddUnique(Key);
+	// 	}
+	// }
+
+
+	// const auto Pin = ConstEdNode->GetOutputPin();
+	// for (const auto LinkedToPin : Pin->LinkedTo)
+	// {
+	// 	if (UThinkGraphEdNode_Embed* EmbedEdNode = Cast<UThinkGraphEdNode_Embed>(LinkedToPin->GetOwningNode()))
+	// 	{
+	// 		EmbedEdNode->ClearBinds();
+	//
+	// 		for (FString Key : EmbeddedKeys)
+	// 		{
+	// 			EmbedEdNode->CreateValueBind(Key);
+	// 		}
+	// 	}
+	// }
+}
+
+
+void UThinkGraphEdGraph::RebuildGraphForNode(UThinkGraph* OwningGraph, UThinkGraphEdNode* EdNode)
+{
+	if (!EdNode->Pins.Num())
 	{
 		return;
 	}
 
-	NodeMap.Add(RuntimeNode, NodeBase);
 
-	OwningGraph->AllNodes.Add(RuntimeNode);
-	AnimIndex++;
-
-	Node->NodeIndex = AnimIndex;
-
-	for (UEdGraphPin* Pin : NodeBase->Pins)
+	for (auto Pin : EdNode->Pins)
 	{
-		if (Pin->Direction != EGPD_Output)
+		if (Pin->Direction == EGPD_Output)
 		{
-			continue;
-		}
+			FDataBuffer& Buffer = OwningGraph->AddDataBuffer();
+			Buffer.NodeDependancies.Add(EdNode->RuntimeNode);
+			EdNode->RuntimeNode->OutBufferIDS.Add(Buffer.BufferID);
 
-		for (const UEdGraphPin* LinkedTo : Pin->LinkedTo)
-		{
-			UThinkGraphNode* ChildNode = nullptr;
-
-			// Try to determine child node
-			if (const UThinkGraphEdNode* OwningNode = Cast<UThinkGraphEdNode>(
-				LinkedTo->GetOwningNode()))
+			if (auto ConstEdNode = Cast<UThinkGraphEdNode_Const>(EdNode))
 			{
-				ChildNode = OwningNode->RuntimeNode;
+				Buffer.Text = ConstEdNode->Prompt;
 			}
-			else if (const UThinkGraphEdNodeEdge* OwningEdge = Cast<UThinkGraphEdNodeEdge>(
-				LinkedTo->GetOwningNode()))
+
+			for (auto LinkedTo : Pin->LinkedTo)
 			{
-				UThinkGraphEdNode* EndNode = OwningEdge->GetEndNode();
-				if (EndNode)
+				if (auto LinkedToEdNode = Cast<UThinkGraphEdNode>(LinkedTo->GetOwningNode()))
 				{
-					ChildNode = EndNode->RuntimeNode;
+					LinkedToEdNode->RuntimeNode->InBufferIDS.Add(Buffer.BufferID);
 				}
 			}
-
-			// Update child / parent nodes for both node and containing ability graph
-			if (ChildNode)
+		}
+		else if (Pin->Direction == EGPD_Input && Pin->LinkedTo.Num() > 0)
+		{
+			for (auto LinkedTo : Pin->LinkedTo)
 			{
-				RuntimeNode->ChildrenNodes.Add(ChildNode);
-				ChildNode->ParentNodes.Add(RuntimeNode);
+				if (auto LinkedToEdNode = Cast<UThinkGraphEdNode>(LinkedTo->GetOwningNode()))
+				{
+					RebuildGraphForNode(OwningGraph, LinkedToEdNode);
+				}
+			}
+		}
+	}
+}
+
+void UThinkGraphEdGraph::RebuildGraphForMemory(UThinkGraph* OwningGraph, UThinkGraphEdNode_Memory* MemEdNode)
+{
+	check(MemEdNode);
+	check(OwningGraph);
+
+
+	if (auto MemInput = Cast<UThinkGraphEdNode>(MemEdNode->GetInputNode()))
+	{
+		if (MemInput->Pins.Num() > 0 && MemInput->Pins[0] != nullptr)
+		{
+			if (MemInput->Pins[0]->LinkedTo.Num() > 0 && MemInput->Pins[0]->LinkedTo.Contains(MemEdNode->Pins[0]))
+			{
+				RebuildGraphForNode(OwningGraph, MemInput);
 			}
 		}
 	}
 }
 
 // ReSharper disable once CppMemberFunctionMayBeConst
-void UThinkGraphEdGraph::RebuildGraphForEntry(UThinkGraph* OwningGraph, UThinkGraphEdNode_LLM* NodeEntry)
+void UThinkGraphEdGraph::RebuildGraphForLLM(UThinkGraph* OwningGraph, UThinkGraphEdNode_LLM* LLMEdNode)
 {
-	check(NodeEntry);
+	check(LLMEdNode);
 	check(OwningGraph);
 
-	UThinkGraphEdNode* ConnectedToNode = Cast<UThinkGraphEdNode>(NodeEntry->GetOutputNode());
-
-	TG_ERROR(Verbose, TEXT("UThinkGraphEdGraph::RebuildGraphForEntry ... Node: %s"),
-	         ConnectedToNode ? *ConnectedToNode->GetName() : TEXT("NONE"))
-
-	if (ConnectedToNode)
-	{
-		NodeEntry->RuntimeNode->ChildrenNodes.Add(ConnectedToNode->RuntimeNode);
-		ConnectedToNode->RuntimeNode->ParentNodes.Add(NodeEntry->RuntimeNode);
-	}
+	// for (UEdGraphPin* Pin : LLMEdNode->Pins)
+	// {
+	// 	// if (Pin->Direction == EGPD_Input && Pin->LinkedTo.Num() > 0)
+	// 	// {
+	// 	// 	if (UThinkGraphEdNode* NodeDependancy = Cast<UThinkGraphEdNode>(Pin->LinkedTo[0]->GetOwningNode()))
+	// 	// 	{
+	// 	// 		LLMEdNode->RuntimeNode->ParentNodes.Add(NodeDependancy->RuntimeNode);
+	// 	// 	}
+	// 	// }
+	// 	if (Pin->Direction == EGPD_Output && Pin->LinkedTo.Num() > 0)
+	// 	{
+	// 		LLMEdNode->RuntimeNode->OutBufferIDS.Empty();
+	// 		LLMEdNode->RuntimeNode->OutBufferIDS.AddDefaulted();
+	// 		
+	// 		if (UThinkGraphEdNode* NodeDependancy = Cast<UThinkGraphEdNode>(Pin->LinkedTo[0]->GetOwningNode()))
+	// 		{
+	// 			NodeDependancy->RuntimeNode->InBufferIDS.Add(LLMEdNode->RuntimeNode->OutBufferIDS[0]);
+	// 		}
+	// 	}
+	// }
 }
 
 void UThinkGraphEdGraph::ValidateNodes(FCompilerResultsLog* LogResults)
@@ -409,30 +485,31 @@ void UThinkGraphEdGraph::Clear()
 	EdgeMap.Reset();
 	EntryNodes.Reset();
 
+
 	for (UEdGraphNode* Node : Nodes)
 	{
 		if (const UThinkGraphEdNode* EdGraphNode = Cast<UThinkGraphEdNode>(Node))
 		{
-			UThinkGraphNode* GraphNode = EdGraphNode->RuntimeNode;
+			UTGNode* GraphNode = EdGraphNode->RuntimeNode;
 			if (GraphNode)
 			{
-				GraphNode->ParentNodes.Reset();
-				GraphNode->ChildrenNodes.Reset();
+				GraphNode->InBufferIDS.Reset();
+				GraphNode->OutBufferIDS.Reset();
 			}
 		}
 	}
 }
 
-void UThinkGraphEdGraph::SortNodes(UThinkGraphNode* RootNode)
+void UThinkGraphEdGraph::SortNodes(UTGNode* RootNode)
 {
-	TArray<UThinkGraphNode*> CurrLevelNodes = {RootNode};
-	TArray<UThinkGraphNode*> NextLevelNodes;
+	TArray<UTGNode*> CurrLevelNodes = {RootNode};
+	TArray<UTGNode*> NextLevelNodes;
 
 	while (CurrLevelNodes.Num() != 0)
 	{
-		for (UThinkGraphNode* Node : CurrLevelNodes)
+		for (UTGNode* Node : CurrLevelNodes)
 		{
-			auto Comp = [&](const UThinkGraphNode& L, const UThinkGraphNode& R)
+			auto Comp = [&](const UTGNode& L, const UTGNode& R)
 			{
 				const UThinkGraphEdNode* EdNode_LNode = NodeMap[&L];
 				const UThinkGraphEdNode* EdNode_RNode = NodeMap[&R];

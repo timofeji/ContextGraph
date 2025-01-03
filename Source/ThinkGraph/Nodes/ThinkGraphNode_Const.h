@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "TGNode.h"
-#include "ThinkGraphNode_Memory.generated.h"
+#include "ThinkGraphNode_Const.generated.h"
 
 
 /**
@@ -13,20 +13,10 @@
  *  Holds runtime properties for animation and effects / cues containers.
  */
 UCLASS(Blueprintable)
-class THINKGRAPH_API UThinkGraphNode_Memory : public UTGNode
+class THINKGRAPH_API UThinkGraphNode_Const : public UTGNode
 {
 	GENERATED_BODY()
 
 public:
-	UThinkGraphNode_Memory();
-
-
-	UFUNCTION()
-	void RecallMemory();
-	
-	FText Prompt;
-
-#if WITH_EDITOR
-	virtual FLinearColor GetBackgroundColor() const override;
-#endif
+	UThinkGraphNode_Const();
 };

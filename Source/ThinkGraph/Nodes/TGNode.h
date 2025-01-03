@@ -4,42 +4,28 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Object.h"
-#include "ThinkGraphNode.generated.h"
+#include "TGNode.generated.h"
 
 // class UThinkGraphEdge;
+class UThinkGraph;
 /**
  * 
  */
 UCLASS()
-class THINKGRAPH_API UThinkGraphNode : public UObject
+class THINKGRAPH_API UTGNode : public UObject
 {
 	GENERATED_BODY()
 
 public:
-	// TODO ~Tim: Soft pointers for anim assets and other relevant assets (particles / sounds ?)
-
-	// TODO ~Tim: Rework debug system to use BP debugger
-	
-	
-
+	UPROPERTY(BlueprintReadOnly, Category = "Think Graph")
+	TArray<UTGNode*> ChildrenNodes;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Think Graph")
-	TArray<UThinkGraphNode*> ChildrenNodes;
-
-	UPROPERTY(BlueprintReadOnly, Category = "Think Graph")
-	TArray<UThinkGraphNode*> ParentNodes;
-
-	// UPROPERTY(BlueprintReadOnly, Category = "Think Graph")
-	// TMap<UThinkGraphNode*, UThinkGraphEdge*> Edges;
+	TArray<UTGNode*> ParentNodes;
 	
-	
+	TArray<uint16> InBufferIDS;
+	TArray<uint16> OutBufferIDS;
 
-
-	// UFUNCTION(BlueprintCallable, Category = "ThinkGraph")
-	// virtual UThinkGraphEdge* GetEdge(UThinkGraphNode* ChildNode);
-
-	UFUNCTION(BlueprintCallable, Category = "ThinkGraph")
-	virtual bool IsLeafNode() const;
 
 	/** Checks all child nodes and the edge they're connected with and return the */
 	// virtual UThinkGraphEdge* GetEdgeWithInput(UInputAction* InputAction);
@@ -47,6 +33,8 @@ public:
 	/** Returns whether the class is not a direct descendant of native node classes, indicating it's implemented in BP */
 	bool IsHBActionSubclassedInBlueprint() const;
 	
+	virtual void Activate(UThinkGraph* ThinkGraph){};
+
 
 #if WITH_EDITORONLY_DATA
 	/**
@@ -79,8 +67,11 @@ public:
 
 	virtual FLinearColor GetBackgroundColor() const { return FLinearColor::White; };
 
-	virtual bool CanCreateConnection(UThinkGraphNode* Other, FText& ErrorMessage);
-	virtual bool CanCreateConnectionTo(UThinkGraphNode* Other, int32 NumberOfChildrenNodes, FText& ErrorMessage);
-	virtual bool CanCreateConnectionFrom(UThinkGraphNode* Other, int32 NumberOfParentNodes, FText& ErrorMessage);
+	virtual bool CanCreateConnection(UTGNode* Other, FText& ErrorMessage);
+	virtual bool CanCreateConnectionTo(UTGNode* Other, int32 NumberOfChildrenNodes, FText& ErrorMessage);
+	virtual bool CanCreateConnectionFrom(UTGNode* Other, int32 NumberOfParentNodes, FText& ErrorMessage);
+
+	
+	bool bIsGenerating;
 #endif
 };

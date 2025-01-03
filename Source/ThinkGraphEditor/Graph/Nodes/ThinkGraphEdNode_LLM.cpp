@@ -2,6 +2,8 @@
 
 #include "ThinkGraphEditorStyle.h"
 #include "ThinkGraphEditorTypes.h"
+#include "..\..\..\ThinkGraph\Nodes\TGNode.h"
+#include "ThinkGraph/Nodes/ThinkGraphNode_LLM.h"
 
 #define LOCTEXT_NAMESPACE "ThinkGraphEdNodeEntry"
 
@@ -17,9 +19,15 @@ void UThinkGraphEdNode_LLM::PostEditChangeProperty(FPropertyChangedEvent& Proper
 
 void UThinkGraphEdNode_LLM::AllocateDefaultPins()
 {
-	CreatePin(EGPD_Input, UThinkGraphPinNames::PinName_In, TEXT("SystemPrompt"));
-	CreatePin(EGPD_Input, UThinkGraphPinNames::PinName_In, TEXT("UserPrompt"));
 	CreatePin(EGPD_Output, UThinkGraphPinNames::PinName_Out, TEXT("Output"));
+
+	if (auto LLMNode = Cast<UThinkGraphNode_LLM>(RuntimeNode))
+	{
+		for (int i = 0; i < LLMNode->InputRoles.Num(); i++)
+		{
+			CreatePin(EGPD_Input, UThinkGraphPinNames::PinName_In, FName(LLMNode->InputRoles[i]));
+		}
+	}
 }
 
 
@@ -40,7 +48,8 @@ bool UThinkGraphEdNode_LLM::ShowPaletteIconOnNode() const
 
 FText UThinkGraphEdNode_LLM::GetTooltipText() const
 {
-	return LOCTEXT("StateEntryNodeTooltip", "Entry point for state machine");
+	return LOCTEXT("StateEntryNodeTooltip",
+	               "Generative Language Model -- Takes in message prompts and outputs a response");
 }
 
 UEdGraphNode* UThinkGraphEdNode_LLM::GetOutputNode()

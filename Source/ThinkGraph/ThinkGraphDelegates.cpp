@@ -1,7 +1,7 @@
 #include "ThinkGraphDelegates.h"
 
-FThinkGraphDelegates::FOnThinkGraphEvaluated FThinkGraphDelegates::OnGraphNodeEvaluated;
-FThinkGraphDelegates::FOnThinkGraphSelected FThinkGraphDelegates::OnGraphNodeSelected;
+FThinkGraphDelegates::FOnThinkGraphEvaluated FThinkGraphDelegates::OnNodeStartedGenerating;
+FThinkGraphDelegates::ConstNodeUpdated FThinkGraphDelegates::OnConstGraphUpdated;
 FThinkGraphDelegates::FOnThinkGraphReset FThinkGraphDelegates::OnGraphReset;
 FThinkGraphDelegates::FOnThinkGraphNodeEvaluated FThinkGraphDelegates::OnNodeEvaluated;
 

@@ -48,8 +48,43 @@ TSharedRef<FSlateStyleSet> FThinkGraphEditorStyle::Create()
 
 	Style->Set("ThinkGraphEditor.OpenPluginWindow", new IMAGE_BRUSH_SVG(TEXT("PlaceholderButtonIcon"), Icon20x20));
 
+	FSearchBoxStyle SearchBoxStyle = FCoreStyle::Get().GetWidgetStyle<FSearchBoxStyle>("SearchBox");
+	SearchBoxStyle.SetLeftAlignGlassImageAndClearButton(true);
+	SearchBoxStyle.SetLeftAlignSearchResultButtons(false);
+	Style->Set("TextEditor.SearchBoxStyle", SearchBoxStyle);
 
 	Style->Set("ThinkGraph.Text.Prompt", ICON_FONT("Fonts/Perfect DOS VGA 437", 14));
+
+	const FSlateFontInfo Consolas10 = FCoreStyle::GetDefaultFontStyle("Mono", 9);
+	const FTextBlockStyle NormalText = FTextBlockStyle()
+	                                   .SetFont(Consolas10)
+	                                   .SetColorAndOpacity(FLinearColor::White)
+	                                   .SetShadowOffset(FVector2D::ZeroVector)
+	                                   .SetShadowColorAndOpacity(FLinearColor::Black)
+	                                   .SetSelectedBackgroundColor(FLinearColor::Blue)
+	                                   .SetHighlightColor(FLinearColor::Yellow)
+	                                   .SetHighlightShape(
+		                                   BOX_BRUSH("Images/TextBlockHighlightShape", FMargin(3.f / 8.f)));
+
+	Style->Set("SyntaxHighlight.Prompt.Normal",
+	           FTextBlockStyle(NormalText).SetColorAndOpacity(FLinearColor::White)); // yellow
+	Style->Set("SyntaxHighlight.Prompt.Operator",
+	           FTextBlockStyle(NormalText).SetColorAndOpacity(FLinearColor(FColor(0xffcfcfcf)))); // light grey
+	Style->Set("SyntaxHighlight.Prompt.Keyword",
+	           FTextBlockStyle(NormalText).SetColorAndOpacity(FLinearColor(FColor(0xff006ab4)))); // blue
+	Style->Set("SyntaxHighlight.Prompt.String",
+	           FTextBlockStyle(NormalText).SetColorAndOpacity(FLinearColor(FColor(0xffdfd706)))); // pinkish
+	Style->Set("SyntaxHighlight.Prompt.Number",
+	           FTextBlockStyle(NormalText).SetColorAndOpacity(FLinearColor(FColor(0xff6db3a8)))); // cyan
+	Style->Set("SyntaxHighlight.Prompt.Variable",
+	           FTextBlockStyle(NormalText).SetColorAndOpacity(FLinearColor(FColor::FromHex("4d9458")))); // green
+	Style->Set("SyntaxHighlight.Prompt.SearchString",
+	           FTextBlockStyle(NormalText).SetColorAndOpacity(FLinearColor(FColor(0xffdfd706)))); // green
+
+	Style->Set("SyntaxHighlight.Prompt.PreProcessorKeyword",
+	           FTextBlockStyle(NormalText).SetColorAndOpacity(FLinearColor(FColor(0xffcfcfcf)))); // light gre
+	Style->Set("SyntaxHighlight.Prompt.Error",
+	           FTextBlockStyle(NormalText).SetColorAndOpacity(FLinearColor(FColor::FromHex("f5425d")))); // neon red
 
 
 	Style->Set("ThinkGraph.Text.Pin", FTextBlockStyle()
@@ -64,6 +99,7 @@ TSharedRef<FSlateStyleSet> FThinkGraphEditorStyle::Create()
 
 	Style->Set("ThinkGraph.Icon.Stimulus", new IMAGE_BRUSH("Icons/Icon_Stimulus_64x", IconNode));
 	Style->Set("ThinkGraph.Icon.Memory", new IMAGE_BRUSH("Icons/Icon_Memory_64x", IconNode));
+	Style->Set("ThinkGraph.Icon.Embed", new IMAGE_BRUSH("Icons/Icon_Embed_64x", IconNode));
 	Style->Set("ThinkGraph.Icon.Prompt", new IMAGE_BRUSH("Icons/Icon_Prompt_64x", IconNode));
 	Style->Set("ThinkGraph.Icon.LLM", new IMAGE_BRUSH("Icons/Icon_LLM_64x", IconNode));
 	Style->Set("ThinkGraph.Icon.Parse", new IMAGE_BRUSH("Icons/Icon_Parse_64x", IconNode));

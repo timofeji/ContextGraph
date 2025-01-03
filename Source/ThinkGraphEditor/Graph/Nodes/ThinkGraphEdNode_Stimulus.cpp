@@ -22,7 +22,7 @@ void UThinkGraphEdNode_Stimulus::AllocateDefaultPins()
 
 FLinearColor UThinkGraphEdNode_Stimulus::GetNodeTitleColor() const
 {
-	return FLinearColor(FColor::FromHex(TEXT("85b4ff")));
+	return FLinearColor(FColor::FromHex(TEXT("FF6961")));
 }
 
 FSlateIcon UThinkGraphEdNode_Stimulus::GetIconAndTint(FLinearColor& OutColor) const
