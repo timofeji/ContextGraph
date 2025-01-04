@@ -25,7 +25,7 @@
 #include "ThinkGraph/Nodes/ThinkGraphNode_Memory.h"
 #include "ThinkGraph/Nodes/ThinkGraphNode_Stimulus.h"
 #include "ThinkGraph/Nodes/ThinkGraphNode_LLM.h"
-#include "ThinkGraph/Nodes/ThinkGraphNode_Parse.h"
+#include "ThinkGraph/Nodes/ThinkGraphNode_Interpret.h"
 
 #define LOCTEXT_NAMESPACE "ThinkGraphSchema"
 
@@ -615,9 +615,9 @@ void UThinkGraphSchema::GetGraphContextActions(FGraphContextMenuBuilder& Context
 	const TSharedPtr<FThinkGraphSchemaAction_NewNode_Const> ConstNodeAction(
 		new FThinkGraphSchemaAction_NewNode_Const(
 			LOCTEXT("ThinkGraphNode_BasePrompt", "Data"),
-			LOCTEXT("AddPrompt", "Add Prompt..."),
-			LOCTEXT("AddPrompt",
-			        "AddPrompt"),
+			LOCTEXT("AddConst", "Add Const..."),
+			LOCTEXT("Prompt",
+			        "Const Prompt"),
 			1
 		));
 	ConstNodeAction->NodeTemplate = NewObject<UThinkGraphEdNode_Const>(ContextMenuBuilder.OwnerOfTemporaries);
@@ -669,7 +669,7 @@ void UThinkGraphSchema::GetGraphContextActions(FGraphContextMenuBuilder& Context
 			1
 		));
 	ParseNodeAction->NodeTemplate = NewObject<UThinkGraphEdNode_Parse>(ContextMenuBuilder.OwnerOfTemporaries);
-	ParseNodeAction->NodeTemplate->RuntimeNode = NewObject<UThinkGraphNode_Parse>(ParseNodeAction->NodeTemplate);
+	ParseNodeAction->NodeTemplate->RuntimeNode = NewObject<UThinkGraphNode_Interpret>(ParseNodeAction->NodeTemplate);
 	ContextMenuBuilder.AddAction(ParseNodeAction);
 
 	const TSharedPtr<FThinkGraphSchemaAction_NewNode_Memory> MemoryNodeAction(

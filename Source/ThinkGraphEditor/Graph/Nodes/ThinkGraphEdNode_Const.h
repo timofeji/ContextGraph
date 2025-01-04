@@ -27,7 +27,10 @@ public:
 	//~ End UEdGraphNode Interface
 
 	THINKGRAPHEDITOR_API UEdGraphNode* GetOutputNode();
+	
+	void UpdateEmbeddedKeys();
 
 	UPROPERTY()
 	FText Prompt;
+	TArray<FString> EmbeddedKeys;
 };

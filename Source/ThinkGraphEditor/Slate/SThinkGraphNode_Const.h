@@ -12,10 +12,10 @@
 
 class UThinkGraphEdNode_Const ;
 
-class SThinkGraphNode_Prompt : public SThinkGraphNode
+class SThinkGraphNode_Const : public SThinkGraphNode
 {
 public:
-	SLATE_BEGIN_ARGS(SThinkGraphNode_Prompt){}
+	SLATE_BEGIN_ARGS(SThinkGraphNode_Const){}
 	SLATE_END_ARGS()
 
 	void Construct(const FArguments& InArgs, UThinkGraphEdNode_Const* InNode);

@@ -37,6 +37,7 @@
 
 const FName FThinkGraphEditor::DetailsTabID(TEXT("ThinkGraph_Details"));
 const FName FThinkGraphEditor::MemoryTabID(TEXT("ThinkGraph_Memory"));
+const FName FThinkGraphEditor::ModelsTabID(TEXT("ThinkGraph_Models"));
 const FName FThinkGraphEditor::GraphViewportTabID(TEXT("ThinkGraph_Viewport"));
 
 const FName FThinkGraphEditorModes::ThinkGraphEditorMode("ThinkGraphEditor");
@@ -452,11 +453,11 @@ void FThinkGraphEditor::InitThinkGraphEditor(EToolkitMode::Type Mode,
 	                                     bInIsToolbarFocusable);
 
 
-	UThinkGraphEdGraph* HBActioGraphEd = Cast<UThinkGraphEdGraph>(GraphBeingEdited->EditorGraph);
-	check(HBActioGraphEd);
+	UThinkGraphEdGraph* ThinkEdGraph = Cast<UThinkGraphEdGraph>(GraphBeingEdited->EditorGraph);
+	check(ThinkEdGraph);
 
-	HBActioGraphEd->Debugger = MakeShareable(new FThinkGraphDebugger);
-	HBActioGraphEd->Debugger->Setup(GraphBeingEdited, SharedThis(this));
+	ThinkEdGraph->Debugger = MakeShareable(new FThinkGraphDebugger);
+	ThinkEdGraph->Debugger->Setup(GraphBeingEdited, SharedThis(this));
 
 
 	RebuildThinkGraph();
@@ -497,6 +498,27 @@ bool FThinkGraphEditor::CanRemoveValueBindPin()
 
 void FThinkGraphEditor::OnRemoveValueBindPin()
 {
+}
+
+
+TSharedRef<SDockTab> FThinkGraphEditor::SpawnTab_Models(const FSpawnTabArgs& SpawnTabArgs) const
+{
+	check(SpawnTabArgs.GetTabId() == ModelsTabID);
+
+	// TODO use DialogueEditor.Tabs.Properties
+	const auto* IconBrush = FAppStyle::GetBrush(TEXT("GenericEditor.Tabs.Properties"));
+
+
+	TSharedRef<SDockTab> NewTab = SNew(SDockTab)
+    	.Label(LOCTEXT("ThinkGraphModelsTabTitle",
+                       "Models"))
+    	.TabColorScale(GetTabColorScale())
+	[
+		DetailsBorder.ToSharedRef()
+	];
+	NewTab->SetTabIcon(IconBrush);
+
+	return NewTab;
 }
 
 TSharedRef<SDockTab> FThinkGraphEditor::SpawnTab_Memory(const FSpawnTabArgs& SpawnTabArgs) const
@@ -625,6 +647,11 @@ void FThinkGraphEditor::RegisterTabSpawners(const TSharedRef<FTabManager>& InTab
 	            .SetDisplayName(LOCTEXT("ThinkGraphMemoryTab", "MemoryDetails"))
 	            .SetGroup(WorkspaceMenuCategoryRef)
 	            .SetIcon(FSlateIcon(FAppStyle::GetAppStyleSetName(), "LevelEditor.Tabs.StatsViewer"));
+	InTabManager->RegisterTabSpawner(FThinkGraphEditor::ModelsTabID,
+    	                                 FOnSpawnTab::CreateSP(this, &FThinkGraphEditor::SpawnTab_Models))
+    	            .SetDisplayName(LOCTEXT("ThinkGraphModelsTab", "ModelsDetails"))
+    	            .SetGroup(WorkspaceMenuCategoryRef)
+    	            .SetIcon(FSlateIcon(FAppStyle::GetAppStyleSetName(), "LevelEditor.Tabs.StatsViewer"));
 }
 
 void FThinkGraphEditor::UnregisterTabSpawners(const TSharedRef<FTabManager>& InTabManager)
@@ -1086,8 +1113,8 @@ bool FThinkGraphEditor::CanRenameNodes() const
 		return false;
 	}
 
-	// UThinkGraphEdGraph* HBActioGraphEd = Cast<UThinkGraphEdGraph>(GraphBeingEdited->EditorGraph);
-	// check(HBActioGraphEd);
+	// UThinkGraphEdGraph* ThinkEdGraph = Cast<UThinkGraphEdGraph>(GraphBeingEdited->EditorGraph);
+	// check(ThinkEdGraph);
 
 	return GetSelectedNodes().Num() == 1;
 }

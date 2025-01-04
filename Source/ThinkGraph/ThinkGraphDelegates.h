@@ -34,10 +34,10 @@ struct THINKGRAPH_API FThinkGraphDelegates
 
 
 	/** delegate type for combo graph execution events (Params: const UComboGraphAbilityTask_StartGraph*, const UComboGraph* ComboGraphAsset) */
-	DECLARE_MULTICAST_DELEGATE_OneParam(FOnThinkGraphNodeEvaluated,
-	                                     const UTGNode *Node);
+	DECLARE_MULTICAST_DELEGATE_OneParam(FOnDataBufferUpdated,
+	                                     const uint16);
 
-	static FOnThinkGraphNodeEvaluated OnNodeEvaluated;
+	static FOnDataBufferUpdated OnBufferUpdated;
 
 #if WITH_EDITORONLY_DATA
 

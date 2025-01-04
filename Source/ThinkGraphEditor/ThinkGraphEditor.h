@@ -10,7 +10,7 @@ class UThinkGraphBufferEditor;
 class IHttpResponse;
 class IHttpRequest;
 class UThinkGraph;
-class UThinkGraphNode_Parse;
+class UThinkGraphNode_Interpret;
 class UThinkGraphNode_LLM;
 
 class AHBWeapon;
@@ -145,6 +145,7 @@ public:
 	static const FName ActionNameTabID;
 	static const FName DetailsTabID;
 	static const FName MemoryTabID;
+	static const FName ModelsTabID;
 	static const FName PaletteTabID;
 
 
@@ -165,6 +166,7 @@ public:
 	bool CanRemoveValueBindPin();
 	void OnRemoveValueBindPin();
 	TSharedRef<SDockTab> SpawnTab_Details(const FSpawnTabArgs& SpawnTabArgs) const;
+	TSharedRef<SDockTab>  SpawnTab_Models(const FSpawnTabArgs& SpawnTabArgs) const;
 	TSharedRef<SDockTab>  SpawnTab_Memory(const FSpawnTabArgs& SpawnTabArgs) const;
 	FEdGraphPinType GetTargetPinType() const;
 	void HandlePinTypeChanged(const FEdGraphPinType& EdGraphPin);

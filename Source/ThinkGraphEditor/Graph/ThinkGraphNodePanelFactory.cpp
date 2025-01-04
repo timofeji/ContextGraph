@@ -8,7 +8,7 @@
 #include "Nodes/ThinkGraphEdNode_Const.h"
 #include "Nodes/ThinkGraphEdNode_Embed.h"
 #include "Nodes/ThinkGraphEdNode_Parse.h"
-#include "Slate/SThinkGraphNode_Prompt.h"
+#include "Slate/SThinkGraphNode_Const.h"
 #include "Slate/SThinkGraphNode.h"
 #include "Slate/SThinkGraphNode_Embed.h"
 
@@ -23,7 +23,7 @@ TSharedPtr<SGraphNode> FThinkGraphNodePanelFactory::CreateNode(UEdGraphNode* Nod
 	
 	if (UThinkGraphEdNode_Const* PromptNode = Cast<UThinkGraphEdNode_Const>(Node))
 	{
-		return SNew(SThinkGraphNode_Prompt, PromptNode);
+		return SNew(SThinkGraphNode_Const, PromptNode);
 	}
 	
 	if (UThinkGraphEdNode* GraphNode = Cast<UThinkGraphEdNode>(Node))

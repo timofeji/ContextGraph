@@ -2,6 +2,7 @@
 
 #include "HttpModule.h"
 #include "ThinkGraph.h"
+#include "ThinkGraphDelegates.h"
 #include "ThinkGraphNode_Const.h"
 #include "Animation/AnimMontage.h"
 #include "Animation/AnimSequence.h"
@@ -107,7 +108,8 @@ void UThinkGraphNode_LLM::OnAPICallback(FHttpRequestPtr Request, FHttpResponsePt
 						
 						FDataBuffer& OutputBuffer = Graph->GetBuffer(OutBufferIDS[0]);
 						OutputBuffer.Text = FText::FromString(Content);
-						// OutputPrompt = FText::FromString(Content);
+
+						FThinkGraphDelegates::OnBufferUpdated.Broadcast(OutBufferIDS[0]);
 					}
 				}
 			}

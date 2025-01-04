@@ -3,13 +3,18 @@
 
 #include "SMemoryBufferEditor.h"
 
+#include "EditorFontGlyphs.h"
 #include "SlateOptMacros.h"
+#include "SPromptBufferEditor.h"
 #include "Fonts/FontMeasure.h"
 #include "Framework/Text/ISlateRun.h"
 #include "Framework/Text/SlateTextRun.h"
 #include "Graph/Nodes/ThinkGraphEdNode_Memory.h"
 #include "ThinkGraph/TGTypes.h"
 #include "ThinkGraph/ThinkGraph.h"
+#include "ThinkGraph/ThinkGraphDelegates.h"
+#include "Widgets/Images/SSpinningImage.h"
+#include "Widgets/Input/SSpinBox.h"
 
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 END_SLATE_FUNCTION_BUILD_OPTIMIZATION
@@ -544,15 +549,15 @@ void SMemoryBufferEditor::Construct(const FArguments& InArgs)
 	FontInfo.Size = 10;
 
 
-	auto TextStyle = FMemorySyntaxHighlighterMarshaller::FSyntaxTextStyle(
-		FThinkGraphEditorStyle::Get().GetWidgetStyle<FTextBlockStyle>("SyntaxHighlight.Memory.Normal"),
-		FThinkGraphEditorStyle::Get().GetWidgetStyle<FTextBlockStyle>("SyntaxHighlight.Memory.Variable"),
-		FThinkGraphEditorStyle::Get().GetWidgetStyle<FTextBlockStyle>("SyntaxHighlight.Memory.Error"));
-
+	auto TextStyle = FPromptSyntaxHighlighterMarshaller::FSyntaxTextStyle(
+		FThinkGraphEditorStyle::Get().GetWidgetStyle<FTextBlockStyle>("SyntaxHighlight.Prompt.Normal"),
+		FThinkGraphEditorStyle::Get().GetWidgetStyle<FTextBlockStyle>("SyntaxHighlight.Prompt.Variable"),
+		FThinkGraphEditorStyle::Get().GetWidgetStyle<FTextBlockStyle>("SyntaxHighlight.Prompt.SearchString"),
+		FThinkGraphEditorStyle::Get().GetWidgetStyle<FTextBlockStyle>("SyntaxHighlight.Prompt.Error"));
 
 	EditedNode = InArgs._Node;
-	const TSharedPtr<FMemorySyntaxHighlighterMarshaller> SyntaxHighlighter =
-		FMemorySyntaxHighlighterMarshaller::Create(TextStyle);
+	const TSharedPtr<FPromptSyntaxHighlighterMarshaller> SyntaxHighlighter =
+		FPromptSyntaxHighlighterMarshaller::Create(TextStyle);
 
 	const FSearchBoxStyle& SearchBoxStyle = FThinkGraphEditorStyle::Get().GetWidgetStyle<FSearchBoxStyle>(
 		TEXT("TextEditor.SearchBoxStyle"));
@@ -565,7 +570,12 @@ void SMemoryBufferEditor::Construct(const FArguments& InArgs)
 		  .FillHeight(1.f)
 		  .VAlign(VAlign_Fill)
 		[
-			SAssignNew(TextBox, SMultiLineEditableTextBox)
+			SNew(SOverlay)
+			+ SOverlay::Slot()
+			  .VAlign(VAlign_Fill)
+			  .HAlign(HAlign_Fill)
+			[
+				SAssignNew(TextBox, SMultiLineEditableTextBox)
 							.Marshaller(SyntaxHighlighter)
 							.Font(FontInfo)
 							.BackgroundColor(FLinearColor::Black)
@@ -573,24 +583,98 @@ void SMemoryBufferEditor::Construct(const FArguments& InArgs)
 							.AutoWrapText(true)
 							.AllowMultiLine(true)
 							.Margin(0.f)
-							.Text(this, &SMemoryBufferEditor::GetText)
+							.Text(this, &SMemoryBufferEditor::GetBufferText)
 
 						.OnTextChanged(this, &SMemoryBufferEditor::OnTextChanged)
+			]
+			+ SOverlay::Slot()
+			  .VAlign(VAlign_Center)
+			  .HAlign(HAlign_Center)
+			[
+
+				SNew(SVerticalBox)
+				+ SVerticalBox::Slot()
+				  .VAlign(VAlign_Center)
+				  .HAlign(HAlign_Center)
+				  .AutoHeight()
+				[
+					SNew(SBox)
+					.HAlign(HAlign_Fill)
+					.VAlign(VAlign_Fill)
+                        							.WidthOverride(64.0f)
+                        							.HeightOverride(64.0f)
+					[
+
+						// Spinning Image while in process
+						SNew(SSpinningImage)
+					.Visibility_Lambda([&] { return EditedNode->bWaitingForUpdate ? EVisibility::Visible : EVisibility::Hidden; })
+					.Period(1.25f)
+					.Image(FThinkGraphEditorStyle::Get().GetBrush("ThinkGraph.Icon.Loading"))
+					]
+				]
+
+				+ SVerticalBox::Slot()
+				[
+					SNew(STextBlock)
+					.Visibility_Lambda([&] { return EditedNode->bWaitingForUpdate ? EVisibility::Visible : EVisibility::Hidden; })
+					.Text_Lambda([]
+					                {
+						                return FText::FromString(FString::Printf(TEXT("%s %s"),TEXT("GENERATING"),
+							                *FThinkGraphEditorStyle::GetCommonElipsis()));
+					                })
+				]
+
+			]
 		]
 		+ SVerticalBox::Slot()
 		  .AutoHeight()
 		  .HAlign(HAlign_Fill)
 		  .VAlign(VAlign_Bottom)
 		[
-			SNew(SButton)
-					.ButtonStyle(FAppStyle::Get(), "FlatButton.Primary")
+			SNew(SOverlay)
+			+ SOverlay::Slot()
+			[
+				SNew(SButton)
+
+					.ButtonStyle(FAppStyle::Get(), "FlatButton.Success")
 					.TextStyle(FAppStyle::Get(), "FlatButton.DefaultTextStyle")
-					.ContentPadding(FMargin(6.0, 12.0))
+					// .ContentPadding(FMargin(6.0, 12.0))
                 										.IsEnabled(true)
-                										.Text(LOCTEXT("RecallButtonText", "Recall..."))
+
                 										.ToolTipText(LOCTEXT(
-				             "BrowseButtonToolTip", "Recalls the memory and fills the buffer"))
+					             "BrowseButtonToolTip", "Recalls the memory and fills the buffer"))
                 										.OnClicked(this, &SMemoryBufferEditor::HandleMemRecallDebug)
+                										.Content()
+				[
+					SNew(STextBlock)
+                                                            							.Font(
+						                FAppStyle::Get().GetFontStyle("FontAwesome.14"))
+                                                            							.Text(FEditorFontGlyphs::Cogs)
+				]
+			]
+			+ SOverlay::Slot()
+			  .HAlign(HAlign_Center)
+			  .VAlign(VAlign_Center)
+			[
+				SNew(STextBlock)
+				.LineHeightPercentage(.5f)
+					.TextStyle(FAppStyle::Get(), "FlatButton.DefaultTextStyle")
+				.Text_Lambda([&]
+				                {
+					                if (EditedNode->bWaitingForUpdate)
+					                {
+						                // Calculate the number of dots based on time (1 to 3 dots cycling every 3 seconds)
+						                int32 NumDots = (static_cast<int32>(FPlatformTime::Seconds()) % 3) + 1;
+						                FString LoadingText =
+							                FString::Printf(TEXT("%.*s"), NumDots, TEXT("..."));
+						                return FText::FromString(LoadingText);
+					                }
+					                else
+					                {
+						                return FText::FromString(TEXT("Recall Memory"));
+					                }
+				                })
+			]
 		]
 		// + SVerticalBox::Slot()
 		// .FillHeight(1.0f)
@@ -606,17 +690,26 @@ void SMemoryBufferEditor::Construct(const FArguments& InArgs)
 	];
 }
 
-FText SMemoryBufferEditor::GetText() const
+FText SMemoryBufferEditor::GetBufferText() const
 {
+	if (EditedNode->bWaitingForUpdate)
+		return FText();
+
+
 	if (EditedNode->RuntimeNode->InBufferIDS.Num() > 0)
 	{
 		auto ThinkGraph = CastChecked<UThinkGraph>(
 			EditedNode->GetGraph()->GetOuter());
-		return ThinkGraph->GetBuffer(
-			EditedNode->RuntimeNode->InBufferIDS[0]).Text;
+		FString Text = ThinkGraph->GetBuffer(
+			EditedNode->RuntimeNode->InBufferIDS[0]).Text.ToString();
+
+		// Calculate how many characters to reveal
+		double ElapsedTime = FApp::GetCurrentTime() - StartTime;
+		int32 NumVisibleChars = FMath::Clamp(FMath::FloorToInt(ElapsedTime / 0.01), 0, Text.Len());
+		return FText::FromString(Text.Left(NumVisibleChars) + (FThinkGraphEditorStyle::GetCommonElipsis()));
 	}
 
-	return FText::FromString(TEXT("NULL MEM"));
+	return FText::FromString(TEXT("EMPTY"));
 }
 
 void SMemoryBufferEditor::OnTextChanged(const FText& NewText)
@@ -625,14 +718,30 @@ void SMemoryBufferEditor::OnTextChanged(const FText& NewText)
 
 FReply SMemoryBufferEditor::HandleMemRecallDebug()
 {
+	auto RequestBufferID = EditedNode->RuntimeNode->InBufferIDS;
+	FThinkGraphDelegates::OnBufferUpdated.AddRaw(this, &SMemoryBufferEditor::OnMemRecallFinished);
+
 	auto ThinkGraph = CastChecked<UThinkGraph>(EditedNode->GetGraph()->GetOuter());
 
 	for (auto BufferID : EditedNode->RuntimeNode->InBufferIDS)
 	{
-		ThinkGraph->UpdateBuffer(BufferID);
+		ThinkGraph->RequestBufferUpdate(BufferID);
 	}
 
+	EditedNode->bWaitingForUpdate = true;
+
 	return FReply::Handled();
+}
+
+void SMemoryBufferEditor::OnMemRecallFinished(uint16 ID)
+{
+	if (ID == EditedNode->RuntimeNode->InBufferIDS[0])
+	{
+		FThinkGraphDelegates::OnBufferUpdated.RemoveAll(this);
+
+		EditedNode->bWaitingForUpdate = false;
+		StartTime = FApp::GetCurrentTime();
+	}
 }
 
 #undef LOCTEXT_NAMESPACE

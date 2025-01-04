@@ -234,11 +234,13 @@ void FThinkGraphConnectionDrawingPolicy::Internal_DrawLineWithArrow(const FVecto
 	const FVector2D StartImgDrawPos = StartPoint - .5f * ArrowStartImage->ImageSize * ZoomFactor;
 	const float AngleInRadians = static_cast<float>(FMath::Atan2((EndPoint - P3).Y, (EndPoint - P3).X));
 
+
 	FSlateDrawElement::MakeRotatedBox(
 		DrawElementsList,
 		ArrowLayerID + 5,
 		FPaintGeometry(StartImgDrawPos, ArrowStartImage->ImageSize * ZoomFactor, ZoomFactor),
-		ArrowStartImage,
+		Params.AssociatedPin1->PinType.bIsConst ? ArrowStartImage : ArrowImage,
+
 		ESlateDrawEffect::None,
 		AngleInRadians,
 		TOptional<FVector2D>(),
@@ -246,17 +248,20 @@ void FThinkGraphConnectionDrawingPolicy::Internal_DrawLineWithArrow(const FVecto
 		Params.WireColor
 	);
 
-	FSlateDrawElement::MakeRotatedBox(
-		DrawElementsList,
-		ArrowLayerID + 5,
-		FPaintGeometry(ArrowDrawPos, ArrowImage->ImageSize * ZoomFactor, ZoomFactor),
-		ArrowImage,
-		ESlateDrawEffect::None,
-		AngleInRadians,
-		TOptional<FVector2D>(),
-		FSlateDrawElement::RelativeToElement,
-		Params.WireColor
-	);
+	if (Params.AssociatedPin2)
+	{
+		FSlateDrawElement::MakeRotatedBox(
+			DrawElementsList,
+			ArrowLayerID + 5,
+			FPaintGeometry(ArrowDrawPos, ArrowImage->ImageSize * ZoomFactor, ZoomFactor),
+			Params.AssociatedPin2->PinType.bIsConst ? ArrowStartImage : ArrowImage,
+			ESlateDrawEffect::None,
+			AngleInRadians,
+			TOptional<FVector2D>(),
+			FSlateDrawElement::RelativeToElement,
+			Params.WireColor
+		);
+	}
 }
 
 void FThinkGraphConnectionDrawingPolicy::DrawSplineWithArrow(const FGeometry& StartGeom, const FGeometry& EndGeom,

@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
 #include "TGNode.h"
-#include "ThinkGraphNode_Parse.generated.h"
+#include "ThinkGraphNode_Distribution.generated.h"
 
 
 /**
@@ -14,12 +14,12 @@
  *  Holds runtime properties for animation and effects / cues containers.
  */
 UCLASS(Blueprintable)
-class THINKGRAPH_API UThinkGraphNode_Parse : public UTGNode
+class THINKGRAPH_API UThinkGraphNode_Distribution : public UTGNode
 {
 	GENERATED_BODY()
 
 public:
-	UThinkGraphNode_Parse();
+	UThinkGraphNode_Distribution();
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Animation", meta=(DisplayPriority=1))
 	FString Prompt;

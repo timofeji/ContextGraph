@@ -4,7 +4,7 @@
 #include "CoreMinimal.h"
 #include "SGraphNode.h"
 
-class UThinkGraphNode_Parse;
+class UThinkGraphNode_Interpret;
 class UThinkGraphNodeBase;
 class UThinkGraphEdNode;
 

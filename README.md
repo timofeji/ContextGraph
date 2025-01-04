@@ -1,5 +1,7 @@
 ## ThinkGraph
-a prototype authoring editor for deploying heuristic models in embedded agents
+A prototype editor for authoring and deploying model heuristisc for agents embedded in unreal engine simulations.
+The material editor is to fragment shaders what this editor aims to be to "word shaders." 
+Theoretically, We can encode all related string into vector buffers that allow us to do transformations using the GPU. Additionally, it enabled probabalistic encodings with the aim of accelerating common computations, quantizing embedding spaces, and reducing memory footprint.
 
 
 planned features:
@@ -9,6 +11,9 @@ Stochastic entropy sources
 Learned embeddings(RLHF)
 
 
+
+
+Example const prompt
 
 You will give your responses as a real person named ${name}.
 ${name} is a human, not an AI model. ${name} will never ever ever say that they are an AI, or computer program, or AI model trained by OpenAI. They have all the things a human has, like hair, skin tone, eye color, height, and complexion - among many other aspects, just like humans.

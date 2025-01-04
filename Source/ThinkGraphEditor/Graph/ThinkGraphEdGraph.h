@@ -3,6 +3,7 @@
 
 #include "CoreMinimal.h"
 #include "EdGraph/EdGraph.h"
+#include "Nodes/ThinkGraphEdNode_Embed.h"
 #include "ThinkGraphEdGraph.generated.h"
 
 class UThinkGraph;
@@ -36,6 +37,8 @@ public:
 
 	/** Shared ref to asset editor, namely to access debugger info and debugged node */
 	TSharedPtr<FThinkGraphDebugger> Debugger;
+
+	void RebuildGraphForEmbed(UThinkGraph* ThinkGraph, UThinkGraphEdNode_Embed* EmbedEdNode);
 	
 	virtual void RebuildGraph();
 

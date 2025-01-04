@@ -19,13 +19,9 @@
 
 void SThinkGraphNode_Embed::Construct(const FArguments& InArgs, UThinkGraphEdNode_Embed* InNode)
 {
-	SThinkGraphNode::Construct(SThinkGraphNode::FArguments(), InNode);
-
 	GraphNode = InNode;
-
 	SetCursor(EMouseCursor::CardinalCross);
-	//
-	// UpdateGraphNode();
+	UpdateGraphNode();
 }
 
 void SThinkGraphNode_Embed::GetNodeInfoPopups(FNodeInfoContext* Context,
@@ -327,6 +323,28 @@ void SThinkGraphNode_Embed::UpdateGraphNode()
 		  .VAlign(VAlign_Top)
 		[
 			CreateNodeContentArea()
+		]
+		+ SVerticalBox::Slot()
+		  .AutoHeight()
+		  .HAlign(HAlign_Fill)
+		  .VAlign(VAlign_Bottom)
+		[
+
+			SNew(SBorder)
+		.BorderImage(FAppStyle::GetBrush("NoBorder"))
+		.HAlign(HAlign_Fill)
+		.VAlign(VAlign_Fill)
+		.Padding(FMargin(0, 3))
+			[
+				SNew(SHorizontalBox)
+				+ SHorizontalBox::Slot()
+				  .HAlign(HAlign_Left)
+				  .FillWidth(1.0f)
+				[
+					// LEFT
+					SAssignNew(ValuesBox, SVerticalBox)
+				]
+			]
 		];
 
 	TSharedPtr<SWidget> EnabledStateWidget = GetEnabledStateWidget();
@@ -425,12 +443,12 @@ void SThinkGraphNode_Embed::UpdateGraphNode()
 
 void SThinkGraphNode_Embed::CreatePinWidgets()
 {
-	for (UEdGraphPin* Pin : GraphNode->Pins)
+for (UEdGraphPin* Pin : GraphNode->Pins)
 	{
 		if (Pin->PinType.PinCategory == UThinkGraphPinNames::PinCategory_Value)
 		{
 			TSharedPtr<SGraphPin> NewPin = SNew(SThinkGraphPin, Pin);
-			NewPin->SetShowLabel(false);
+			NewPin->SetShowLabel(true);
 			AddValuePin(NewPin.ToSharedRef());
 		}
 		else

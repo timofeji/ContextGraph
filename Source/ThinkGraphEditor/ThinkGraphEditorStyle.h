@@ -8,7 +8,6 @@
 class FThinkGraphEditorStyle
 {
 public:
-
 	static void Initialize();
 
 	static void Shutdown();
@@ -21,10 +20,19 @@ public:
 
 	static FName GetStyleSetName();
 
+	FORCEINLINE static FString GetCommonElipsis()
+	{
+		// Calculate the number of dots based on time (1 to 3 dots cycling every 3 seconds)
+		int32 NumDots = (static_cast<int32>(FPlatformTime::Seconds()) % 3) + 1;
+		FString Elipsis =
+			FString::Printf(TEXT("%.*s"), NumDots, TEXT("..."));
+		
+		return Elipsis;
+	}
+
 private:
+	static TSharedRef<class FSlateStyleSet> Create();
 
-	static TSharedRef< class FSlateStyleSet > Create();
 
-
-	static TSharedPtr< class FSlateStyleSet > StyleInstance;
+	static TSharedPtr<class FSlateStyleSet> StyleInstance;
 };

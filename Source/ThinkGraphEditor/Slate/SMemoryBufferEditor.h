@@ -83,10 +83,15 @@ public:
 
 
 	UThinkGraphEdNode_Memory* EditedNode;
+	
+	double StartTime;
+	
 
 	FReply HandleMemRecallDebug();
 
-	FText GetText() const;
+	void OnMemRecallFinished(uint16 ID);
+
+	FText GetBufferText() const;
 	void OnTextChanged(const FText& NewText);
 	
 	void Construct(const FArguments& InArgs);

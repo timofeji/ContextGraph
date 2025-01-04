@@ -19,9 +19,6 @@ class THINKGRAPH_API UThinkGraphNode_Embed : public UTGNode
 
 public:
 	UThinkGraphNode_Embed();
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(DisplayPriority=1))
-	FText Prompt;
 	
 	void AddPinValuePin();
 };

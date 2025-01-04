@@ -1,7 +1,7 @@
 // Created by Timofej Jermolaev, All rights reserved . 
 
 
-#include "SThinkGraphNode_Prompt.h"
+#include "SThinkGraphNode_Const.h"
 
 #include "ThinkGraphEditorStyle.h"
 #include "Widgets/SBoxPanel.h"
@@ -12,7 +12,7 @@
 /////////////////////////////////////////////////////
 // SThinkGraphNode_Prompt
 
-void SThinkGraphNode_Prompt::Construct(const FArguments& InArgs, UThinkGraphEdNode_Const* InNode)
+void SThinkGraphNode_Const::Construct(const FArguments& InArgs, UThinkGraphEdNode_Const* InNode)
 {
 
 	SThinkGraphNode::Construct(SThinkGraphNode::FArguments(), InNode);
@@ -24,12 +24,12 @@ void SThinkGraphNode_Prompt::Construct(const FArguments& InArgs, UThinkGraphEdNo
 	// UpdateGraphNode();
 }
 
-void SThinkGraphNode_Prompt::GetNodeInfoPopups(FNodeInfoContext* Context,
+void SThinkGraphNode_Const::GetNodeInfoPopups(FNodeInfoContext* Context,
                                                 TArray<FGraphInformationPopupInfo>& Popups) const
 {
 }
 
-FSlateColor SThinkGraphNode_Prompt::GetBorderBackgroundColor() const
+FSlateColor SThinkGraphNode_Const::GetBorderBackgroundColor() const
 {
 	constexpr FLinearColor InactiveStateColor(1.f, 1.f, 1.f, 0.07f);
 	return InactiveStateColor;
@@ -143,7 +143,7 @@ FSlateColor SThinkGraphNode_Prompt::GetBorderBackgroundColor() const
 // 	}
 // }
 //
-FText SThinkGraphNode_Prompt::GetPreviewCornerText() const
+FText SThinkGraphNode_Const::GetPreviewCornerText() const
 {
 	return NSLOCTEXT("SThinkGraphNode_Prompt", "CornerTextDescription", "Entry point for state machine");
 }

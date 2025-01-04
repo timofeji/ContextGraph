@@ -97,6 +97,7 @@ TSharedRef<FSlateStyleSet> FThinkGraphEditorStyle::Create()
 	);
 
 
+	Style->Set("ThinkGraph.Icon.Loading", new IMAGE_BRUSH("Icons/Icon_Loading_64x", IconNode));
 	Style->Set("ThinkGraph.Icon.Stimulus", new IMAGE_BRUSH("Icons/Icon_Stimulus_64x", IconNode));
 	Style->Set("ThinkGraph.Icon.Memory", new IMAGE_BRUSH("Icons/Icon_Memory_64x", IconNode));
 	Style->Set("ThinkGraph.Icon.Embed", new IMAGE_BRUSH("Icons/Icon_Embed_64x", IconNode));

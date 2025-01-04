@@ -38,7 +38,7 @@ void UThinkGraph::Tick(float DeltaTime)
 	return NewBuffer;
 }
 
-void UThinkGraph::UpdateBuffer(unsigned short BufferID)
+void UThinkGraph::RequestBufferUpdate(unsigned short BufferID)
 {
 	DataBuffers[BufferID].Time++;
 	for(auto Node :DataBuffers[BufferID].NodeDependancies)

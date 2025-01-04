@@ -27,14 +27,13 @@ public:
 	virtual FText GetTooltipText() const override;
 	void GetNodeContextMenuActions(UToolMenu* Menu, UGraphNodeContextMenuContext* Context) const override;
 	
-	void ExtractFromContextPrompt();
 
 	virtual bool CanDuplicateNode() const override	{ return false; }
 	//~ End UEdGraphNode Interface
 
 	THINKGRAPHEDITOR_API UEdGraphNode* GetOutputNode();
 	
-	void CreateValueBind(const FString& Key);
+	void ReallocateBindPins(TArray<FString>& Key);
 	void ClearBinds();
 
 	TSet<FString> ValueBindKeys;

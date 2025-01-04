@@ -44,7 +44,17 @@ void UThinkGraphEdGraph::RebuildGraph()
 		{
 			RebuildGraphForMemory(ThinkGraph, MemoryNode);
 		}
-		
+
+		//Copy const prompts into buffers
+		if (UThinkGraphEdNode_Const* ConstEdNode = Cast<UThinkGraphEdNode_Const>(CurrentNode))
+		{
+			RebuildGraphForConst(ThinkGraph, ConstEdNode);
+		}
+
+		if (UThinkGraphEdNode_Embed* EmbedEdNode = Cast<UThinkGraphEdNode_Embed>(CurrentNode))
+		{
+			RebuildGraphForEmbed(ThinkGraph, EmbedEdNode);
+		}
 	}
 
 
@@ -94,62 +104,31 @@ void UThinkGraphEdGraph::RebuildGraphForEdge(UThinkGraph* OwningGraph, UThinkGra
 }
 
 
+void UThinkGraphEdGraph::RebuildGraphForEmbed(UThinkGraph* ThinkGraph, UThinkGraphEdNode_Embed* EmbedEdNode)
+{
+}
+
+
 void UThinkGraphEdGraph::RebuildGraphForConst(UThinkGraph* OwningGraph, UThinkGraphEdNode_Const* ConstEdNode)
 {
 	check(ConstEdNode);
 	check(OwningGraph);
 
+	ConstEdNode->UpdateEmbeddedKeys();
 
-	// ConstEdNode->RuntimeNode->OutBufferIDS.Empty();
-	// for (auto Pin : ConstEdNode->Pins)
-	// {
-	// 	if (Pin->Direction == EGPD_Output && Pin->LinkedTo.Num() > 0)
-	// 	{
-	// 		uint16 BufferID = OwningGraph->AddDataBuffer();
-	// 		ConstEdNode->RuntimeNode->OutBufferIDS.Add(BufferID);
-	//
-	// 		for (auto LinkedTo : Pin->LinkedTo)
-	// 		{
-	// 			if (auto LinkedToEdNode = Cast<UThinkGraphEdNode>(LinkedTo->GetOwningNode()))
-	// 			{
-	// 				LinkedToEdNode->RuntimeNode->InBufferIDS.Add(BufferID);
-	// 				OwningGraph->GetBuffer(BufferID).Text = FText::FromString(ConstEdNode->Prompt);
-	// 			}
-	// 		}
-	// 	}
-	// }
-	//
-	// TArray<FString> EmbeddedKeys;
-	// if (UThinkGraphNode_Const* ConstNode = Cast<UThinkGraphNode_Const>(ConstEdNode->RuntimeNode))
-	// {
-	// 	FString PromptStr = ConstNode->Prompt;
-	// 	// Regular expression to match "${key}"
-	// 	const FRegexPattern Pattern(TEXT(R"(\$\{([a-zA-Z0-9_]+)\})"));
-	// 	FRegexMatcher Matcher(Pattern, PromptStr);
-	//
-	// 	// Process all matches
-	// 	while (Matcher.FindNext())
-	// 	{
-	// 		// Extract the key inside ${key}
-	// 		FString Key = Matcher.GetCaptureGroup(1);
-	// 		EmbeddedKeys.AddUnique(Key);
-	// 	}
-	// }
-
-
-	// const auto Pin = ConstEdNode->GetOutputPin();
-	// for (const auto LinkedToPin : Pin->LinkedTo)
-	// {
-	// 	if (UThinkGraphEdNode_Embed* EmbedEdNode = Cast<UThinkGraphEdNode_Embed>(LinkedToPin->GetOwningNode()))
-	// 	{
-	// 		EmbedEdNode->ClearBinds();
-	//
-	// 		for (FString Key : EmbeddedKeys)
-	// 		{
-	// 			EmbedEdNode->CreateValueBind(Key);
-	// 		}
-	// 	}
-	// }
+	for (auto Pin : ConstEdNode->Pins)
+	{
+		if (Pin->Direction == EGPD_Output)
+		{
+			for (auto LinkedToPin : Pin->LinkedTo)
+			{
+				if (auto LinkedToNode = Cast<UThinkGraphEdNode>(LinkedToPin->GetOwningNode()))
+				{
+					LinkedToNode->RuntimeNode->InBufferIDS;
+				}
+			}
+		}
+	}
 }
 
 
@@ -169,10 +148,6 @@ void UThinkGraphEdGraph::RebuildGraphForNode(UThinkGraph* OwningGraph, UThinkGra
 			Buffer.NodeDependancies.Add(EdNode->RuntimeNode);
 			EdNode->RuntimeNode->OutBufferIDS.Add(Buffer.BufferID);
 
-			if (auto ConstEdNode = Cast<UThinkGraphEdNode_Const>(EdNode))
-			{
-				Buffer.Text = ConstEdNode->Prompt;
-			}
 
 			for (auto LinkedTo : Pin->LinkedTo)
 			{
@@ -314,7 +289,8 @@ namespace ACEAutoArrangeHelpers
 		return Pin;
 	}
 
-	void AutoArrangeNodesVertically(UThinkGraphEdNode* ParentNode, FNodeBoundsInfo& BBoxTree, float PosX, float PosY)
+	void AutoArrangeNodesVertically(UThinkGraphEdNode* ParentNode, FNodeBoundsInfo& BBoxTree, float PosX,
+	                                float PosY)
 	{
 		int32 BBoxIndex = 0;
 
@@ -333,7 +309,8 @@ namespace ACEAutoArrangeHelpers
 					                           2.5f);
 					GraphNode->DEPRECATED_NodeWidget.Pin()->MoveTo(
 						FVector2D(
-							BBoxTree.Children[BBoxIndex].SubGraphBBox.X / 2 - GraphNode->DEPRECATED_NodeWidget.Pin()->
+							BBoxTree.Children[BBoxIndex].SubGraphBBox.X / 2 - GraphNode->DEPRECATED_NodeWidget.Pin()
+							->
 							GetDesiredSize().X / 2 + PosX, PosY), NodeFilter);
 					PosX += BBoxTree.Children[BBoxIndex].SubGraphBBox.X + 20;
 					BBoxIndex++;
@@ -365,7 +342,8 @@ namespace ACEAutoArrangeHelpers
 					// GraphNode->DEPRECATED_NodeWidget.Pin()->MoveTo(FVector2D(BBoxTree.Children[BBoxIndex].SubGraphBBox.X / 2 - GraphNode->DEPRECATED_NodeWidget.Pin()->GetDesiredSize().X / 2 + PosX, PosY), NodeFilter);
 					GraphNode->DEPRECATED_NodeWidget.Pin()->MoveTo(
 						FVector2D(
-							PosX, BBoxTree.Children[BBoxIndex].SubGraphBBox.Y / 2 - GraphNode->DEPRECATED_NodeWidget.
+							PosX, BBoxTree.Children[BBoxIndex].SubGraphBBox.Y / 2 - GraphNode->DEPRECATED_NodeWidget
+							.
 							Pin()->GetDesiredSize().Y / 2 + PosY), NodeFilter);
 
 					// PosX += BBoxTree.Children[BBoxIndex].SubGraphBBox.X + 20;
@@ -450,21 +428,25 @@ void UThinkGraphEdGraph::AutoArrange(const bool bVertical)
 	if (bVertical)
 	{
 		ACEAutoArrangeHelpers::AutoArrangeNodesVertically(RootNode, BBoxTree, 0,
-		                                                  RootNode->DEPRECATED_NodeWidget.Pin()->GetDesiredSize().Y *
+		                                                  RootNode->DEPRECATED_NodeWidget.Pin()->GetDesiredSize().Y
+		                                                  *
 		                                                  2.5f);
 
-		const float NewRootPosX = BBoxTree.SubGraphBBox.X / 2 - RootNode->DEPRECATED_NodeWidget.Pin()->GetDesiredSize().
-		                                                                  X / 2;
+		const float NewRootPosX = BBoxTree.SubGraphBBox.X / 2 - RootNode->
+		                                                        DEPRECATED_NodeWidget.Pin()->GetDesiredSize().
+		                                                        X / 2;
 		RootNode->DEPRECATED_NodeWidget.Pin()->MoveTo(FVector2D(NewRootPosX, 0), NodeFilter);
 	}
 	else
 	{
 		ACEAutoArrangeHelpers::AutoArrangeNodesHorizontally(RootNode, BBoxTree,
-		                                                    RootNode->DEPRECATED_NodeWidget.Pin()->GetDesiredSize().X *
+		                                                    RootNode->DEPRECATED_NodeWidget.Pin()->GetDesiredSize().
+		                                                              X *
 		                                                    2.5f, 0);
 
-		const float NewRootPosY = BBoxTree.SubGraphBBox.Y / 2 - RootNode->DEPRECATED_NodeWidget.Pin()->GetDesiredSize().
-		                                                                  Y / 2;
+		const float NewRootPosY = BBoxTree.SubGraphBBox.Y / 2 - RootNode->
+		                                                        DEPRECATED_NodeWidget.Pin()->GetDesiredSize().
+		                                                        Y / 2;
 		RootNode->DEPRECATED_NodeWidget.Pin()->MoveTo(FVector2D(0, NewRootPosY), NodeFilter);
 	}
 

@@ -5,6 +5,7 @@
 #include "ThinkGraphEditorTypes.h"
 #include "Kismet2/BlueprintEditorUtils.h"
 #include "Slate/SThinkGraphPin.h"
+#include "ThinkGraph/Nodes/ThinkGraphNode_Embed.h"
 
 #define LOCTEXT_NAMESPACE "ThinkGraphEdNodeEntry"
 
@@ -22,7 +23,6 @@ void UThinkGraphEdNode_Embed::AllocateDefaultPins()
 {
 	CreatePin(EGPD_Input, UThinkGraphPinNames::PinName_In, TEXT("Template"));
 	CreatePin(EGPD_Output, UThinkGraphPinNames::PinName_Out, TEXT("Out"));
-
 }
 
 
@@ -47,36 +47,14 @@ FText UThinkGraphEdNode_Embed::GetTooltipText() const
 	return LOCTEXT("StateEntryNodeTooltip", "Entry point for state machine");
 }
 
-void UThinkGraphEdNode_Embed::ExtractFromContextPrompt()
-{
-	// FString Result = Input;
-	//
-	// // Regular expression to match "${key}"
-	// const FRegexPattern Pattern(TEXT(R"(\$\{([a-zA-Z0-9_]+)\})"));
-	// FRegexMatcher Matcher(Pattern, Input);
-	//
-	// // Process all matches
-	// while (Matcher.FindNext())
-	// {
-	// 	// Extract the key inside ${key}
-	// 	FString Key = Matcher.GetCaptureGroup(1);
-	//
-	// 	// Check if the key exists in the map
-	// 	if (const FString* Value = ValuesMap.Find(Key))
-	// 	{
-	// 		// Replace the match with the corresponding value
-	// 		Result.ReplaceInline(*Matcher.GetCaptureGroup(0), **Value);
-	// 	}
-	// }
-}
-
 
 void UThinkGraphEdNode_Embed::GetNodeContextMenuActions(UToolMenu* Menu, UGraphNodeContextMenuContext* Context) const
 {
 	if (!Context->bIsDebugging)
 	{
 		{
-			FToolMenuSection& Section = Menu->AddSection("AnimGraphNodeLayeredBoneblend", LOCTEXT("LayeredBoneBlend", "Layered Bone Blend"));
+			FToolMenuSection& Section = Menu->AddSection("AnimGraphNodeLayeredBoneblend",
+			                                             LOCTEXT("LayeredBoneBlend", "Layered Bone Blend"));
 			if (Context->Pin != NULL)
 			{
 				// we only do this for normal BlendList/BlendList by enum, BlendList by Bool doesn't support add/remove pins
@@ -93,6 +71,7 @@ void UThinkGraphEdNode_Embed::GetNodeContextMenuActions(UToolMenu* Menu, UGraphN
 		}
 	}
 }
+
 UEdGraphNode* UThinkGraphEdNode_Embed::GetOutputNode()
 {
 	if (Pins.Num() > 0 && Pins[0] != nullptr)
@@ -107,19 +86,41 @@ UEdGraphNode* UThinkGraphEdNode_Embed::GetOutputNode()
 	return nullptr;
 }
 
-void UThinkGraphEdNode_Embed::CreateValueBind(const FString& Key)
+void UThinkGraphEdNode_Embed::ReallocateBindPins(TArray<FString>& NewKeys)
 {
-	FScopedTransaction Transaction(FText::FromString(Key));
+	if (NewKeys.IsEmpty())
+	{
+		return;
+	}
+
+
+	FScopedTransaction Transaction(FText::FromString(NewKeys[0]));
 	Modify();
 
-	ValueBindKeys.Add(Key);
-	ReconstructNode();
+	TArray<FString> OldKeys = ValueBindKeys.Array();
+	for (int i = 0; i < OldKeys.Num(); i++)
+	{
+		//Key Removed
+		if (!NewKeys.Contains(OldKeys[i]))
+		{
+			RemovePinAt(i, EGPD_Input);
+		}
+	}
+
+	ValueBindKeys.Reset();
+	for (auto Key : NewKeys)
+	{
+		ValueBindKeys.Add(Key);
+		if (!OldKeys.Contains(Key))
+		{
+			CreatePin(EGPD_Input, UThinkGraphPinNames::PinCategory_Value, FName(Key));
+		}
+	}
 
 	// FBlueprintEditorUtils::MarkBlueprintAsStructurallyModified(GetBlueprint());
 }
 
 void UThinkGraphEdNode_Embed::ClearBinds()
 {
-	ValueBindKeys.Empty();
 }
 #undef LOCTEXT_NAMESPACE

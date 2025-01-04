@@ -26,7 +26,7 @@ public:
 
 	FDataBuffer& AddDataBuffer();
 	
-	void UpdateBuffer(unsigned short BufferID);
+	void RequestBufferUpdate(unsigned short BufferID);
 	
 	FDataBuffer& GetBuffer(unsigned short Element);
 

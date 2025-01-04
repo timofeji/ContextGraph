@@ -25,10 +25,10 @@ public:
 	// End of SNodePanel::SNode interface
 
 	// SGraphNode interface
-	// virtual void UpdateGraphNode() override;
+	virtual void UpdateGraphNode() override;
 	virtual void AddValuePin(const TSharedRef<SGraphPin>& PinToAdd);
 	virtual void CreatePinWidgets() override;
-	virtual void UpdateGraphNode() override;
+	// virtual void UpdateGraphNode() override;
 
 	
 	TSharedPtr<SVerticalBox> ValuesBox;

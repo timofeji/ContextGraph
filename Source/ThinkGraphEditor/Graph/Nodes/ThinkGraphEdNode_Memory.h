@@ -29,4 +29,6 @@ public:
 	//~ End UEdGraphNode Interface
 
 	THINKGRAPHEDITOR_API UEdGraphNode* GetInputNode();
+	
+	bool bWaitingForUpdate;
 };
