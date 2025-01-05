@@ -47,7 +47,7 @@ UEdGraphNode* UThinkGraphEdNode_Const::GetOutputNode()
 
 void UThinkGraphEdNode_Const::UpdateEmbeddedKeys()
 {
-	FString PromptStr = Prompt.ToString();
+	FString PromptStr = Text;
 	// Regular expression to match "${key}"
 	const FRegexPattern Pattern(TEXT(R"(\$\{([a-zA-Z0-9_]+)\})"));
 	FRegexMatcher Matcher(Pattern, PromptStr);
@@ -67,6 +67,8 @@ void UThinkGraphEdNode_Const::UpdateEmbeddedKeys()
 	{
 		LinkedToPin->PinType.bIsConst = true;
 	}
+
+	
 }
 
 #undef LOCTEXT_NAMESPACE

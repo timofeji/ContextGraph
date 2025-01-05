@@ -57,6 +57,9 @@ public:
 	UPROPERTY()
 	FText NodeTitle;
 	
+	UPROPERTY()
+	bool bIsGenerating;
+	
 #endif
 
 #if WITH_EDITOR
@@ -71,7 +74,8 @@ public:
 	virtual bool CanCreateConnectionTo(UTGNode* Other, int32 NumberOfChildrenNodes, FText& ErrorMessage);
 	virtual bool CanCreateConnectionFrom(UTGNode* Other, int32 NumberOfParentNodes, FText& ErrorMessage);
 
-	
-	bool bIsGenerating;
+
 #endif
+
+	
 };

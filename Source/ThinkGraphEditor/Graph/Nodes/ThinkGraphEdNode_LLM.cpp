@@ -21,7 +21,7 @@ void UThinkGraphEdNode_LLM::AllocateDefaultPins()
 {
 	CreatePin(EGPD_Output, UThinkGraphPinNames::PinName_Out, TEXT("Output"));
 
-	if (auto LLMNode = Cast<UThinkGraphNode_LLM>(RuntimeNode))
+	if (const auto LLMNode = Cast<UThinkGraphNode_LLM>(RuntimeNode))
 	{
 		for (int i = 0; i < LLMNode->InputRoles.Num(); i++)
 		{

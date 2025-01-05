@@ -133,7 +133,7 @@ public:
 							.AutoWrapText(true)
 							.AllowMultiLine(true)
 							.Margin(0.f)
-							.Text_Lambda([&] { return EditedEdNode->Prompt; })
+							.Text_Lambda([&] { return FText::FromString(EditedEdNode->Text); })
 							.OnTextChanged(this, &SPromptBufferEditor::OnTextChanged)
 			]
 			+ SVerticalBox::Slot()
@@ -180,7 +180,7 @@ private:
 
 	void OnTextChanged(const FText& NewText)
 	{
-		EditedEdNode->Prompt = NewText;
+		EditedEdNode->Text = NewText.ToString();
 		UpdateTextHighlights();
 	}
 

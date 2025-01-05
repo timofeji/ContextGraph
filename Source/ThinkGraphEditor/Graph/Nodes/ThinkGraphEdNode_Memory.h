@@ -30,5 +30,4 @@ public:
 
 	THINKGRAPHEDITOR_API UEdGraphNode* GetInputNode();
 	
-	bool bWaitingForUpdate;
 };

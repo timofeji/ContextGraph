@@ -9,6 +9,7 @@
 #include "Fonts/FontMeasure.h"
 #include "Framework/Text/ISlateRun.h"
 #include "Framework/Text/SlateTextRun.h"
+#include "Graph/ThinkGraphEdGraph.h"
 #include "Graph/Nodes/ThinkGraphEdNode_Memory.h"
 #include "ThinkGraph/TGTypes.h"
 #include "ThinkGraph/ThinkGraph.h"
@@ -593,6 +594,12 @@ void SMemoryBufferEditor::Construct(const FArguments& InArgs)
 			[
 
 				SNew(SVerticalBox)
+				.Visibility_Lambda([&]
+				{
+					return bIsGenerating
+						       ? EVisibility::Visible
+						       : EVisibility::Hidden;
+				})
 				+ SVerticalBox::Slot()
 				  .VAlign(VAlign_Center)
 				  .HAlign(HAlign_Center)
@@ -607,7 +614,6 @@ void SMemoryBufferEditor::Construct(const FArguments& InArgs)
 
 						// Spinning Image while in process
 						SNew(SSpinningImage)
-					.Visibility_Lambda([&] { return EditedNode->bWaitingForUpdate ? EVisibility::Visible : EVisibility::Hidden; })
 					.Period(1.25f)
 					.Image(FThinkGraphEditorStyle::Get().GetBrush("ThinkGraph.Icon.Loading"))
 					]
@@ -616,12 +622,12 @@ void SMemoryBufferEditor::Construct(const FArguments& InArgs)
 				+ SVerticalBox::Slot()
 				[
 					SNew(STextBlock)
-					.Visibility_Lambda([&] { return EditedNode->bWaitingForUpdate ? EVisibility::Visible : EVisibility::Hidden; })
+
 					.Text_Lambda([]
-					                {
-						                return FText::FromString(FString::Printf(TEXT("%s %s"),TEXT("GENERATING"),
-							                *FThinkGraphEditorStyle::GetCommonElipsis()));
-					                })
+					{
+						return FText::FromString(FString::Printf(TEXT("%s %s"),TEXT("GENERATING"),
+						                                         *FThinkGraphEditorStyle::GetCommonElipsis()));
+					})
 				]
 
 			]
@@ -661,7 +667,7 @@ void SMemoryBufferEditor::Construct(const FArguments& InArgs)
 					.TextStyle(FAppStyle::Get(), "FlatButton.DefaultTextStyle")
 				.Text_Lambda([&]
 				                {
-					                if (EditedNode->bWaitingForUpdate)
+					                if (bIsGenerating)
 					                {
 						                // Calculate the number of dots based on time (1 to 3 dots cycling every 3 seconds)
 						                int32 NumDots = (static_cast<int32>(FPlatformTime::Seconds()) % 3) + 1;
@@ -692,7 +698,7 @@ void SMemoryBufferEditor::Construct(const FArguments& InArgs)
 
 FText SMemoryBufferEditor::GetBufferText() const
 {
-	if (EditedNode->bWaitingForUpdate)
+	if (bIsGenerating)
 		return FText();
 
 
@@ -723,25 +729,26 @@ FReply SMemoryBufferEditor::HandleMemRecallDebug()
 
 	auto ThinkGraph = CastChecked<UThinkGraph>(EditedNode->GetGraph()->GetOuter());
 
+	if (auto ThinkEdGraph = Cast<UThinkGraphEdGraph>(ThinkGraph->EditorGraph))
+	{
+		ThinkEdGraph->RebuildGraph();
+	}
+
 	for (auto BufferID : EditedNode->RuntimeNode->InBufferIDS)
 	{
 		ThinkGraph->RequestBufferUpdate(BufferID);
 	}
 
-	EditedNode->bWaitingForUpdate = true;
+	bIsGenerating= true;
 
 	return FReply::Handled();
 }
 
 void SMemoryBufferEditor::OnMemRecallFinished(uint16 ID)
 {
-	if (ID == EditedNode->RuntimeNode->InBufferIDS[0])
-	{
-		FThinkGraphDelegates::OnBufferUpdated.RemoveAll(this);
-
-		EditedNode->bWaitingForUpdate = false;
-		StartTime = FApp::GetCurrentTime();
-	}
+	FThinkGraphDelegates::OnBufferUpdated.RemoveAll(this);
+	StartTime = FApp::GetCurrentTime();
+	bIsGenerating= false;
 }
 
 #undef LOCTEXT_NAMESPACE

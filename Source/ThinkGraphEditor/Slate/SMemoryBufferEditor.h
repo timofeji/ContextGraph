@@ -85,7 +85,8 @@ public:
 	UThinkGraphEdNode_Memory* EditedNode;
 	
 	double StartTime;
-	
+	bool bIsGenerating;
+
 
 	FReply HandleMemRecallDebug();
 

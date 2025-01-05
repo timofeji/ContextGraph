@@ -31,6 +31,7 @@ public:
 	void UpdateEmbeddedKeys();
 
 	UPROPERTY()
-	FText Prompt;
+	FString Text;
+	
 	TArray<FString> EmbeddedKeys;
 };

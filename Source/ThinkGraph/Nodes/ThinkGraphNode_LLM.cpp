@@ -42,7 +42,7 @@ void UThinkGraphNode_LLM::Activate(UThinkGraph* ThinkGraph)
 	TArray<TSharedPtr<FJsonValue>> MessagesArray;
 	for (int i = 0; i < InputRoles.Num(); i++)
 	{
-		FDataBuffer Buffer = ThinkGraph->GetBuffer(InBufferIDS[i]);
+		FDataBuffer& Buffer = ThinkGraph->GetBuffer(InBufferIDS[i]);
 
 		if (!Buffer.Text.IsEmpty())
 		{
@@ -73,7 +73,7 @@ void UThinkGraphNode_LLM::Activate(UThinkGraph* ThinkGraph)
 	HttpRequest->OnProcessRequestComplete().BindUObject(this, &ThisClass::OnAPICallback);
 	HttpRequest->ProcessRequest();
 
-#if WITH_EDITOR
+#if WITH_EDITORONLY_DATA
 	bIsGenerating = true;
 #endif
 }
@@ -120,8 +120,8 @@ void UThinkGraphNode_LLM::OnAPICallback(FHttpRequestPtr Request, FHttpResponsePt
 		UE_LOG(LogTemp, Error, TEXT("ThinkGraph: Failed to get a response from LanguageModel API call"));
 	}
 
-#if WITH_EDITOR
-	bIsGenerating = false;
+#if WITH_EDITORONLY_DATA
+	// bIsGenerating = false;
 #endif
 }
 

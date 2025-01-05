@@ -34,6 +34,8 @@ void UThinkGraphEdGraph::RebuildGraph()
 
 	Clear();
 
+	TArray<UThinkGraphEdNode_Const*> ConstNodes;
+
 	for (UEdGraphNode* CurrentNode : Nodes)
 	{
 		UE_LOG(LogThinkGraphEditor, Verbose, TEXT("UThinkGraphEdGraph::RebuildGraph for node: %s (%s)"),
@@ -43,17 +45,6 @@ void UThinkGraphEdGraph::RebuildGraph()
 		if (UThinkGraphEdNode_Memory* MemoryNode = Cast<UThinkGraphEdNode_Memory>(CurrentNode))
 		{
 			RebuildGraphForMemory(ThinkGraph, MemoryNode);
-		}
-
-		//Copy const prompts into buffers
-		if (UThinkGraphEdNode_Const* ConstEdNode = Cast<UThinkGraphEdNode_Const>(CurrentNode))
-		{
-			RebuildGraphForConst(ThinkGraph, ConstEdNode);
-		}
-
-		if (UThinkGraphEdNode_Embed* EmbedEdNode = Cast<UThinkGraphEdNode_Embed>(CurrentNode))
-		{
-			RebuildGraphForEmbed(ThinkGraph, EmbedEdNode);
 		}
 	}
 
@@ -116,19 +107,8 @@ void UThinkGraphEdGraph::RebuildGraphForConst(UThinkGraph* OwningGraph, UThinkGr
 
 	ConstEdNode->UpdateEmbeddedKeys();
 
-	for (auto Pin : ConstEdNode->Pins)
-	{
-		if (Pin->Direction == EGPD_Output)
-		{
-			for (auto LinkedToPin : Pin->LinkedTo)
-			{
-				if (auto LinkedToNode = Cast<UThinkGraphEdNode>(LinkedToPin->GetOwningNode()))
-				{
-					LinkedToNode->RuntimeNode->InBufferIDS;
-				}
-			}
-		}
-	}
+	FDataBuffer OutBuffer = OwningGraph->GetBuffer(ConstEdNode->RuntimeNode->OutBufferIDS[0]);
+	OutBuffer.Text = FText::FromString(ConstEdNode->Text);
 }
 
 
@@ -147,6 +127,12 @@ void UThinkGraphEdGraph::RebuildGraphForNode(UThinkGraph* OwningGraph, UThinkGra
 			FDataBuffer& Buffer = OwningGraph->AddDataBuffer();
 			Buffer.NodeDependancies.Add(EdNode->RuntimeNode);
 			EdNode->RuntimeNode->OutBufferIDS.Add(Buffer.BufferID);
+
+			if(auto ConstEdNode = Cast<UThinkGraphEdNode_Const>(EdNode))
+			{
+				Buffer.Text = FText::FromString(ConstEdNode->Text);
+			}
+				
 
 
 			for (auto LinkedTo : Pin->LinkedTo)
