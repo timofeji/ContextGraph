@@ -22,4 +22,5 @@ public:
 	TSharedPtr< FUICommandInfo > Find;
 	TSharedPtr< FUICommandInfo > AddValueBindPin;
 	TSharedPtr< FUICommandInfo > RemoveValueBindPin;
+	TSharedPtr< FUICommandInfo > RenameValueBindPin;
 };

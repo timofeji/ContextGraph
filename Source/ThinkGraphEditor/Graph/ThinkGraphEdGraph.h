@@ -47,7 +47,6 @@ public:
 	void            RebuildGraphForNode(UThinkGraph* OwningGraph, UThinkGraphEdNode* Node);
 	void            RebuildGraphForLLM(UThinkGraph* OwningGraph, UThinkGraphEdNode_LLM* LLMEdNode);
 	void            RebuildGraphForMemory(UThinkGraph* OwningGraph, UThinkGraphEdNode_Memory* MemEdNode);
-	void			RebuildGraphForConst(UThinkGraph* OwningGraph, UThinkGraphEdNode_Const* MemEdNode);
 	/** Goes through each nodes and run a validation pass */
 	void ValidateNodes(FCompilerResultsLog* LogResults);
 

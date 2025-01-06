@@ -1,6 +1,8 @@
 #pragma once
 #include "TGTypes.generated.h"
 
+DECLARE_MULTICAST_DELEGATE(FOnBufferUpdated)
+
 USTRUCT()
 struct FDataBuffer
 {
@@ -17,4 +19,14 @@ struct FDataBuffer
 	
 	UPROPERTY(Transient)
 	TArray<UTGNode*> NodeDependancies;
+	
+#if WITH_EDITOR	
+	FOnBufferUpdated OnUpdate;
+#endif
+	
+	void Update(const FText& InText)
+	{
+		Text = InText;
+		OnUpdate.Broadcast();
+	};
 };

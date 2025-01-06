@@ -94,7 +94,8 @@ public:
 
 	FText GetBufferText() const;
 	void OnTextChanged(const FText& NewText);
-	
+
+	// const FSlateBrush* GetMainBtnIcon() const;
 	void Construct(const FArguments& InArgs);
 	
 

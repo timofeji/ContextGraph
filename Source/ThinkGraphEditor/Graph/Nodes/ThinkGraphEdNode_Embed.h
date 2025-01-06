@@ -35,6 +35,7 @@ public:
 	
 	void ReallocateBindPins(TArray<FString>& Key);
 	void ClearBinds();
+	void OnInputBufferUpdated();
 
 	TSet<FString> ValueBindKeys;
 	// // UPROPERTY()

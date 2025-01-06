@@ -6,6 +6,7 @@
 #include "EditorFontGlyphs.h"
 #include "SlateOptMacros.h"
 #include "SPromptBufferEditor.h"
+#include "Components/Image.h"
 #include "Fonts/FontMeasure.h"
 #include "Framework/Text/ISlateRun.h"
 #include "Framework/Text/SlateTextRun.h"
@@ -644,56 +645,61 @@ void SMemoryBufferEditor::Construct(const FArguments& InArgs)
 
 					.ButtonStyle(FAppStyle::Get(), "FlatButton.Success")
 					.TextStyle(FAppStyle::Get(), "FlatButton.DefaultTextStyle")
-					// .ContentPadding(FMargin(6.0, 12.0))
                 										.IsEnabled(true)
-
                 										.ToolTipText(LOCTEXT(
-					             "BrowseButtonToolTip", "Recalls the memory and fills the buffer"))
+					             "RegenerateMemoryBuffer",
+					             "Recalls the memory and fills the buffer"))
                 										.OnClicked(this, &SMemoryBufferEditor::HandleMemRecallDebug)
                 										.Content()
 				[
-					SNew(STextBlock)
-                                                            							.Font(
-						                FAppStyle::Get().GetFontStyle("FontAwesome.14"))
-                                                            							.Text(FEditorFontGlyphs::Cogs)
+					SNew(SHorizontalBox)
+					+ SHorizontalBox::Slot()
+					  .HAlign(HAlign_Left)
+					  .VAlign(VAlign_Center)
+					[
+						SNew(SImage)
+						.Image(FThinkGraphEditorStyle::Get().GetBrush("ThinkGraph.Memory.Generate.Icon"))
+					]
+					+ SHorizontalBox::Slot()
+					  .HAlign(HAlign_Left)
+					  .VAlign(VAlign_Center)
+					[
+						SNew(STextBlock)
+
+                                                                                        				.
+LineHeightPercentage(.5f)
+                                                                                        					.TextStyle(
+							                FAppStyle::Get(), "FlatButton.DefaultTextStyle")
+                                                                                        				.Text_Lambda([&]
+						                {
+							                if (bIsGenerating)
+							                {
+								                // Calculate the number of dots based on time (1 to 3 dots cycling every 3 seconds)
+								                int32 NumDots = (static_cast<int32>(FPlatformTime::Seconds()) % 3) + 1;
+								                FString LoadingText =
+									                FString::Printf(TEXT("%.*s"), NumDots, TEXT("..."));
+								                return FText::FromString(LoadingText);
+							                }
+							                else
+							                {
+								                return FText::FromString(TEXT("Recall Memory"));
+							                }
+						                })
+					]
 				]
-			]
-			+ SOverlay::Slot()
-			  .HAlign(HAlign_Center)
-			  .VAlign(VAlign_Center)
-			[
-				SNew(STextBlock)
-				.LineHeightPercentage(.5f)
-					.TextStyle(FAppStyle::Get(), "FlatButton.DefaultTextStyle")
-				.Text_Lambda([&]
-				                {
-					                if (bIsGenerating)
-					                {
-						                // Calculate the number of dots based on time (1 to 3 dots cycling every 3 seconds)
-						                int32 NumDots = (static_cast<int32>(FPlatformTime::Seconds()) % 3) + 1;
-						                FString LoadingText =
-							                FString::Printf(TEXT("%.*s"), NumDots, TEXT("..."));
-						                return FText::FromString(LoadingText);
-					                }
-					                else
-					                {
-						                return FText::FromString(TEXT("Recall Memory"));
-					                }
-				                })
-			]
-		]
-		// + SVerticalBox::Slot()
-		// .FillHeight(1.0f)
-		// [
-		// 	// SAssignNew(SearchBox, SFilterSearchBox)
-		//  //             			.AddMetaData<FTagMetaData>(FTagMetaData(TEXT("SequencerFilterSearch")))
-		//  //             			.DelayChangeNotificationsWhileTyping(true)
-		//  //             			.ShowSearchHistory(true)
-		//  //             			.OnTextChanged(this, &SPromptBufferEditor::OnBufferSearchChanged)
-		//  //             			.OnTextCommitted(this, &SPromptBufferEditor::OnBufferSearchCommitted)
-		//  //             			.OnSaveSearchClicked(this, &SPromptBufferEditor::OnBufferSearchSaved)
-		// ]
+			]]
 	];
+
+	// + SVerticalBox::Slot()
+	// .FillHeight(1.0f)
+	// [
+	// 	// SAssignNew(SearchBox, SFilterSearchBox)
+	//  //             			.AddMetaData<FTagMetaData>(FTagMetaData(TEXT("SequencerFilterSearch")))
+	//  //             			.DelayChangeNotificationsWhileTyping(true)
+	//  //             			.ShowSearchHistory(true)
+	//  //             			.OnTextChanged(this, &SPromptBufferEditor::OnBufferSearchChanged)
+	//  //             			.OnTextCommitted(this, &SPromptBufferEditor::OnBufferSearchCommitted)
+	//  //             			.OnSaveSearchClicked(this, &SPromptBufferEditor::OnBufferSearchSaved)
 }
 
 FText SMemoryBufferEditor::GetBufferText() const
@@ -722,6 +728,12 @@ void SMemoryBufferEditor::OnTextChanged(const FText& NewText)
 {
 }
 
+//
+// const FSlateBrush* SMemoryBufferEditor::GetMainBtnIcon() const
+// {
+// 	return ;
+// }
+
 FReply SMemoryBufferEditor::HandleMemRecallDebug()
 {
 	auto RequestBufferID = EditedNode->RuntimeNode->InBufferIDS;
@@ -739,7 +751,7 @@ FReply SMemoryBufferEditor::HandleMemRecallDebug()
 		ThinkGraph->RequestBufferUpdate(BufferID);
 	}
 
-	bIsGenerating= true;
+	bIsGenerating = true;
 
 	return FReply::Handled();
 }
@@ -748,7 +760,7 @@ void SMemoryBufferEditor::OnMemRecallFinished(uint16 ID)
 {
 	FThinkGraphDelegates::OnBufferUpdated.RemoveAll(this);
 	StartTime = FApp::GetCurrentTime();
-	bIsGenerating= false;
+	bIsGenerating = false;
 }
 
 #undef LOCTEXT_NAMESPACE

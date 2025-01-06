@@ -5,6 +5,8 @@
 #include "ThinkGraphEditorTypes.h"
 #include "Kismet2/BlueprintEditorUtils.h"
 #include "Slate/SThinkGraphPin.h"
+#include "ThinkGraph/TGTypes.h"
+#include "ThinkGraph/ThinkGraph.h"
 #include "ThinkGraph/Nodes/ThinkGraphNode_Embed.h"
 
 #define LOCTEXT_NAMESPACE "ThinkGraphEdNodeEntry"
@@ -54,14 +56,19 @@ void UThinkGraphEdNode_Embed::GetNodeContextMenuActions(UToolMenu* Menu, UGraphN
 	{
 		{
 			FToolMenuSection& Section = Menu->AddSection("AnimGraphNodeLayeredBoneblend",
-			                                             LOCTEXT("LayeredBoneBlend", "Layered Bone Blend"));
+			                                             LOCTEXT("ThinkGraphEmbed", "ThinkGraph Embed"));
 			if (Context->Pin != NULL)
 			{
 				// we only do this for normal BlendList/BlendList by enum, BlendList by Bool doesn't support add/remove pins
-				if (Context->Pin->Direction == EGPD_Input)
+				if (Context->Pin->PinType.PinCategory == UThinkGraphPinNames::PinName_Bind)
 				{
 					//@TODO: Only offer this option on arrayed pins
 					Section.AddMenuEntry(FThinkGraphEditorCommands::Get().RemoveValueBindPin);
+					Section.AddMenuEntry(FThinkGraphEditorCommands::Get().RenameValueBindPin);
+				}
+				else
+				{
+					Super::GetNodeContextMenuActions(Menu, Context);
 				}
 			}
 			else
@@ -117,10 +124,35 @@ void UThinkGraphEdNode_Embed::ReallocateBindPins(TArray<FString>& NewKeys)
 		}
 	}
 
+
 	// FBlueprintEditorUtils::MarkBlueprintAsStructurallyModified(GetBlueprint());
 }
 
 void UThinkGraphEdNode_Embed::ClearBinds()
 {
+}
+
+void UThinkGraphEdNode_Embed::OnInputBufferUpdated()
+{
+	// ReallocateBindPins();
+	auto ThinkGraph = CastChecked<UThinkGraph>(GetGraph()->GetOuter());
+
+	FDataBuffer& InBuffer = ThinkGraph->GetBuffer(RuntimeNode->InBufferIDS[0]);
+	FString PromptStr = InBuffer.Text.ToString();
+
+	// Regular expression to match "${key}"
+	const FRegexPattern Pattern(TEXT(R"(\$\{([a-zA-Z0-9_]+)\})"));
+	FRegexMatcher Matcher(Pattern, PromptStr);
+
+	TArray<FString> EmbeddedKeys;
+	// Process all matches
+	while (Matcher.FindNext())
+	{
+		// Extract the key inside ${key}
+		FString Key = Matcher.GetCaptureGroup(1);
+		EmbeddedKeys.AddUnique(Key);
+	}
+
+	ReallocateBindPins(EmbeddedKeys);
 }
 #undef LOCTEXT_NAMESPACE

@@ -4,6 +4,7 @@
 #include "ThinkGraphEdGraph.h"
 #include "ThinkGraphEditorStyle.h"
 #include "Slate/SThinkGraphPin.h"
+#include "ThinkGraph/Nodes/TGNode.h"
 
 FThinkGraphConnectionDrawingPolicy::FThinkGraphConnectionDrawingPolicy(
 	const int32 InBackLayerID, const int32 InFrontLayerID, const float ZoomFactor, const FSlateRect& InClippingRect,
@@ -14,7 +15,7 @@ FThinkGraphConnectionDrawingPolicy::FThinkGraphConnectionDrawingPolicy(
 	HBActionEdGraph = Cast<UThinkGraphEdGraph>(GraphObj);
 
 	ArrowImage = FAppStyle::GetBrush(TEXT("Graph.Arrow"));
-	ArrowStartImage = FThinkGraphEditorStyle::Get().GetBrush(TEXT("ThinkGraph.Pin.ArrowConnectorStart"));
+	DataBlockImage = FThinkGraphEditorStyle::Get().GetBrush(TEXT("ThinkGraph.Pin.ArrowConnectorStart"));
 }
 
 void FThinkGraphConnectionDrawingPolicy::DetermineWiringStyle(UEdGraphPin* OutputPin, UEdGraphPin* InputPin,
@@ -36,6 +37,14 @@ void FThinkGraphConnectionDrawingPolicy::DetermineWiringStyle(UEdGraphPin* Outpu
 	// 		}
 	// 	}
 	// }
+
+	if (auto EdNode = Cast<UThinkGraphEdNode>(OutputPin->GetOwningNode()))
+	{
+		if (EdNode->RuntimeNode->bIsGenerating)
+		{
+			Params.bDrawBubbles = true;
+		}
+	}
 
 	if (HoveredPins.Num() > 0)
 	{
@@ -219,7 +228,7 @@ void FThinkGraphConnectionDrawingPolicy::Internal_DrawLineWithArrow(const FVecto
 	// {
 	// 	FPaintGeometry TextGeometry = FPaintGeometry(P2, FVector2D(50.f, 50.f) * ZoomFactor, ZoomFactor * 0.5f);
 	// 	FSlateDrawElement::MakeText(
-	// 		DrawElementsList,
+	// 		DrawElementsList
 	// 		ArrowLayerID + 7,
 	// 		TextGeometry,
 	// 		Params.AssociatedPin1->PinName.ToString(),
@@ -230,16 +239,16 @@ void FThinkGraphConnectionDrawingPolicy::Internal_DrawLineWithArrow(const FVecto
 
 
 	// Draw the arrow
-	const FVector2D ArrowDrawPos = EndPoint - ArrowRadius;
-	const FVector2D StartImgDrawPos = StartPoint - .5f * ArrowStartImage->ImageSize * ZoomFactor;
+	const FVector2D EndImgDrawPos = EndPoint - .5f * DataBlockImage->ImageSize * ZoomFactor;
+	const FVector2D StartImgDrawPos = StartPoint - .5f * DataBlockImage->ImageSize * ZoomFactor;
 	const float AngleInRadians = static_cast<float>(FMath::Atan2((EndPoint - P3).Y, (EndPoint - P3).X));
 
 
 	FSlateDrawElement::MakeRotatedBox(
 		DrawElementsList,
 		ArrowLayerID + 5,
-		FPaintGeometry(StartImgDrawPos, ArrowStartImage->ImageSize * ZoomFactor, ZoomFactor),
-		Params.AssociatedPin1->PinType.bIsConst ? ArrowStartImage : ArrowImage,
+		FPaintGeometry(StartImgDrawPos, DataBlockImage->ImageSize * ZoomFactor, ZoomFactor),
+		Params.AssociatedPin1->PinType.bIsConst ? DataBlockImage : ArrowImage,
 
 		ESlateDrawEffect::None,
 		AngleInRadians,
@@ -253,10 +262,10 @@ void FThinkGraphConnectionDrawingPolicy::Internal_DrawLineWithArrow(const FVecto
 		FSlateDrawElement::MakeRotatedBox(
 			DrawElementsList,
 			ArrowLayerID + 5,
-			FPaintGeometry(ArrowDrawPos, ArrowImage->ImageSize * ZoomFactor, ZoomFactor),
-			Params.AssociatedPin2->PinType.bIsConst ? ArrowStartImage : ArrowImage,
+			FPaintGeometry(EndImgDrawPos, DataBlockImage->ImageSize * ZoomFactor, ZoomFactor),
+			Params.AssociatedPin2->PinType.bIsConst ? DataBlockImage : ArrowImage,
 			ESlateDrawEffect::None,
-			AngleInRadians,
+			-AngleInRadians,
 			TOptional<FVector2D>(),
 			FSlateDrawElement::RelativeToElement,
 			Params.WireColor

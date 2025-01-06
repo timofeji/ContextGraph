@@ -97,18 +97,8 @@ void UThinkGraphEdGraph::RebuildGraphForEdge(UThinkGraph* OwningGraph, UThinkGra
 
 void UThinkGraphEdGraph::RebuildGraphForEmbed(UThinkGraph* ThinkGraph, UThinkGraphEdNode_Embed* EmbedEdNode)
 {
-}
 
 
-void UThinkGraphEdGraph::RebuildGraphForConst(UThinkGraph* OwningGraph, UThinkGraphEdNode_Const* ConstEdNode)
-{
-	check(ConstEdNode);
-	check(OwningGraph);
-
-	ConstEdNode->UpdateEmbeddedKeys();
-
-	FDataBuffer OutBuffer = OwningGraph->GetBuffer(ConstEdNode->RuntimeNode->OutBufferIDS[0]);
-	OutBuffer.Text = FText::FromString(ConstEdNode->Text);
 }
 
 
@@ -128,18 +118,23 @@ void UThinkGraphEdGraph::RebuildGraphForNode(UThinkGraph* OwningGraph, UThinkGra
 			Buffer.NodeDependancies.Add(EdNode->RuntimeNode);
 			EdNode->RuntimeNode->OutBufferIDS.Add(Buffer.BufferID);
 
-			if(auto ConstEdNode = Cast<UThinkGraphEdNode_Const>(EdNode))
+			if (auto ConstEdNode = Cast<UThinkGraphEdNode_Const>(EdNode))
 			{
-				Buffer.Text = FText::FromString(ConstEdNode->Text);
+				ConstEdNode->UpdateEmbeddedKeys();
+				Buffer.Update(FText::FromString(ConstEdNode->Text));
 			}
-				
-
 
 			for (auto LinkedTo : Pin->LinkedTo)
 			{
 				if (auto LinkedToEdNode = Cast<UThinkGraphEdNode>(LinkedTo->GetOwningNode()))
 				{
 					LinkedToEdNode->RuntimeNode->InBufferIDS.Add(Buffer.BufferID);
+					
+					if (auto EmbedEdNode = Cast<UThinkGraphEdNode_Embed>(LinkedToEdNode))
+					{
+						Buffer.OnUpdate.AddUObject(EmbedEdNode, &UThinkGraphEdNode_Embed::OnInputBufferUpdated);
+						EmbedEdNode->OnInputBufferUpdated();
+					}
 				}
 			}
 		}

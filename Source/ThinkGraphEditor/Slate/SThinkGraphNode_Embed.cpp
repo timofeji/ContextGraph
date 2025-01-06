@@ -8,6 +8,7 @@
 #include "SCommentBubble.h"
 #include "SLevelOfDetailBranchNode.h"
 #include "SThinkGraphPin.h"
+#include "SThinkGraphPin_Value.h"
 #include "ThinkGraphEditorStyle.h"
 #include "ThinkGraphEditorTypes.h"
 #include "TutorialMetaData.h"
@@ -126,29 +127,15 @@ void SThinkGraphNode_Embed::AddValuePin(const TSharedRef<SGraphPin>& PinToAdd)
 	{
 		PinToAdd->SetVisibility(TAttribute<EVisibility>(PinToAdd, &SGraphPin::IsPinVisibleAsAdvanced));
 	}
-
-	if (PinToAdd->GetDirection() == EEdGraphPinDirection::EGPD_Input)
-	{
-		LeftNodeBox->AddSlot()
-		           .HAlign(HAlign_Fill)
-		           .VAlign(VAlign_Top)
-		           .FillHeight(1.0f)
-		[
-			PinToAdd
-		];
-		InputPins.Add(PinToAdd);
-	}
-	else // Direction == EEdGraphPinDirection::EGPD_Output
-	{
-		RightNodeBox->AddSlot()
-		            .HAlign(HAlign_Fill)
-		            .VAlign(VAlign_Top)
-		            .FillHeight(1.0f)
-		[
-			PinToAdd
-		];
-		OutputPins.Add(PinToAdd);
-	}
+	
+	ValuesBox->AddSlot()
+	           .HAlign(HAlign_Fill)
+	           .VAlign(VAlign_Top)
+	           .FillHeight(1.0f)
+	[
+		PinToAdd
+	];
+	ValuePins.Add(PinToAdd);
 }
 
 void SThinkGraphNode_Embed::UpdateGraphNode()
@@ -443,7 +430,7 @@ void SThinkGraphNode_Embed::UpdateGraphNode()
 
 void SThinkGraphNode_Embed::CreatePinWidgets()
 {
-for (UEdGraphPin* Pin : GraphNode->Pins)
+	for (UEdGraphPin* Pin : GraphNode->Pins)
 	{
 		if (Pin->PinType.PinCategory == UThinkGraphPinNames::PinCategory_Value)
 		{

@@ -45,5 +45,5 @@ protected:
 	                                const FConnectionParams& Params);
 
 	
-	const FSlateBrush* ArrowStartImage;
+	const FSlateBrush* DataBlockImage;
 };

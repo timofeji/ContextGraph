@@ -323,19 +323,22 @@ void FThinkGraphEditor::BindThinkGraphCommands()
 	}
 
 	EditorCommands = MakeShareable(new FUICommandList);
+	
 	EditorCommands->MapAction(
 		FThinkGraphEditorCommands::Get().Find,
 		FExecuteAction::CreateRaw(this, &FThinkGraphEditor::Find),
 		FCanExecuteAction());
+	
+	EditorCommands->MapAction(FThinkGraphEditorCommands::Get().AddValueBindPin,
+	                           FExecuteAction::CreateRaw(this, &FThinkGraphEditor::OnAddValueBindPin),
+	                           FCanExecuteAction::CreateRaw(this, &FThinkGraphEditor::CanAddValueBindPin));
 
 
 	DefaultCommands.Get()->Append(EditorCommands.ToSharedRef());
 
 	//
 	//
-	// EditorCommands->MapAction(FThinkGraphEditorCommands::Get().AddValueBindPin,
-	//                            FExecuteAction::CreateRaw(this, &FThinkGraphEditor::OnAddValueBindPin),
-	//                            FCanExecuteAction::CreateRaw(this, &FThinkGraphEditor::CanAddValueBindPin)
+
 	// );
 	// Auto Arrange commands
 	// ToolkitCommands->MapAction(

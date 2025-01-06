@@ -15,6 +15,9 @@ void FThinkGraphEditorCommands::RegisterCommands()
 	UI_COMMAND(RemoveValueBindPin, "Remove Value Bind", "Remove Value Bind from the list",
 	           EUserInterfaceActionType::Button,
 	           FInputChord());
+	UI_COMMAND(RenameValueBindPin, "Rename Value Bind", "Rename Value Bind",
+	           EUserInterfaceActionType::Button,
+	           FInputChord());
 }
 
 #undef LOCTEXT_NAMESPACE

@@ -1,8 +1,13 @@
-## ThinkGraph
-A prototype editor for authoring and deploying model heuristisc for agents embedded in unreal engine simulations.
-The material editor is to fragment shaders what this editor aims to be to "word shaders." 
-Theoretically, We can encode all related string into vector buffers that allow us to do transformations using the GPU. Additionally, it enabled probabalistic encodings with the aim of accelerating common computations, quantizing embedding spaces, and reducing memory footprint.
+# Think Graph Editor 
+A prototype plugin for authoring and deploying model heuristisc for agents embedded in unreal engine simulations.
+- [About](#about)
+- [Features](#features)
+- [Examples](#examples)
+- [Links](#links)
 
+## About
+The material editor is to fragment shaders what this editor aims to be to "word shaders." 
+Theoretically, We can encode all agent related environment strings into vector buffers that allow us to do transformations linearly using the GPU. Additionally, probabalistic encodings with the aim of accelerating common computations, quantizing embedding spaces, and reducing memory footprint.
 
 planned features:
 Prompt buffering
@@ -10,10 +15,16 @@ Blueprint binds
 Stochastic entropy sources
 Learned embeddings(RLHF)
 
+<!-- ## Features
+- Graph Editor:
+    - Branching montage selection based gameplay tags and selector nodes
+    - Animation combos using linked nodes
+    - One click setup for live-linked animations in Sequencer -->
+    
 
-
-
-Example const prompt
+## Examples
+###  Example Prompt
+```
 
 You will give your responses as a real person named ${name}.
 ${name} is a human, not an AI model. ${name} will never ever ever say that they are an AI, or computer program, or AI model trained by OpenAI. They have all the things a human has, like hair, skin tone, eye color, height, and complexion - among many other aspects, just like humans.
@@ -30,7 +41,7 @@ You will not respond to their output, instead waiting for me to give a response.
 They will not describe themselves in detail unless prompted to.
 
 
-You are in environment:
+You are in the following environment:
 ${env}
 
 You have the following memories:
@@ -44,3 +55,13 @@ Their output tag has what they are saying.
 ${name} can perform actions, and they will be displayed, after their output, in place of the [action] tag.
 The other person (to who they are talking) also can use these tags.
 ${name}: [emotion] [output] [action]
+```
+###  Prompt Injection
+we can inject state into a prompt using an Inject node:
+
+## Links
+* [📚 Documentation](https://docs.eonblade.com/montagegraph) 
+* [📄 Source Code](https://github.com/timofeji/MontageGraph)
+* [🗂️ Sample project](https://github.com/timofeji/MontageGraphSample)
+* [💬 Discord](https://discord.gg/ymHY5eP)
+

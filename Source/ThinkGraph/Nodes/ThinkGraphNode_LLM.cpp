@@ -107,7 +107,7 @@ void UThinkGraphNode_LLM::OnAPICallback(FHttpRequestPtr Request, FHttpResponsePt
 						UE_LOG(LogTemp, Verbose, TEXT("LanguageModel API Response: %s"), *Content);
 						
 						FDataBuffer& OutputBuffer = Graph->GetBuffer(OutBufferIDS[0]);
-						OutputBuffer.Text = FText::FromString(Content);
+						OutputBuffer.Update(FText::FromString(Content));
 
 						FThinkGraphDelegates::OnBufferUpdated.Broadcast(OutBufferIDS[0]);
 					}
@@ -121,7 +121,7 @@ void UThinkGraphNode_LLM::OnAPICallback(FHttpRequestPtr Request, FHttpResponsePt
 	}
 
 #if WITH_EDITORONLY_DATA
-	// bIsGenerating = false;
+	bIsGenerating = false;
 #endif
 }
 

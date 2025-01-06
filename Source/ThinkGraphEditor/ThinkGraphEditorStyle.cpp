@@ -135,12 +135,23 @@ TSharedRef<FSlateStyleSet> FThinkGraphEditorStyle::Create()
 
 
 	Style->Set("ThinkGraph.Pin.ArrowConnectorStart", new IMAGE_BRUSH(TEXT("Icons/Pin_ArrowConnectorStart"), Icon32));
+
+	
 	Style->Set("ThinkGraph.Pin.Empty", new IMAGE_BRUSH(TEXT("Icons/Pin_Empty"), Icon32));
 	Style->Set("ThinkGraph.Pin.EmptyHovered", new IMAGE_BRUSH(TEXT("Icons/Pin_Empty_Hovered"), Icon32));
 	Style->Set("ThinkGraph.Pin.Connected", new IMAGE_BRUSH(TEXT("Icons/Pin_Connected"), Icon32));
 	Style->Set("ThinkGraph.Pin.ConnectedHovered",
 	           new IMAGE_BRUSH(TEXT("Icons/Pin_Connected_Hovered"), Icon32));
+	
+	
+	Style->Set("ThinkGraph.Pin.Value.Empty", new IMAGE_BRUSH(TEXT("Icons/Pin_Value_Empty"), Icon32));
+	Style->Set("ThinkGraph.Pin.Value.EmptyHovered", new IMAGE_BRUSH(TEXT("Icons/Pin_Value_Empty_Hovered"), Icon32));
+	Style->Set("ThinkGraph.Pin.Value.Connected", new IMAGE_BRUSH(TEXT("Icons/Pin_Value_Connected"), Icon32));
+	Style->Set("ThinkGraph.Pin.Value.ConnectedHovered",
+	           new IMAGE_BRUSH(TEXT("Icons/Pin_Value_Connected_Hovered"), Icon32));
 
+
+	Style->Set("ThinkGraph.Memory.Generate.Icon", new IMAGE_BRUSH(TEXT("Icon_Generate_64x"), Icon32));
 	return Style;
 }
 
