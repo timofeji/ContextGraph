@@ -34,8 +34,7 @@ public:
 	THINKGRAPHEDITOR_API UEdGraphNode* GetOutputNode();
 	
 	void ReallocateBindPins(TArray<FString>& Key);
-	void ClearBinds();
-	void OnInputBufferUpdated();
+	void OnTemplateUpdated();
 
 	TSet<FString> ValueBindKeys;
 	// // UPROPERTY()

@@ -11,7 +11,7 @@ class UTGNode;
  * Delegate fired to get the path to start picking from.
  * @return the path the picker will use to start from
  */
-DECLARE_DELEGATE_RetVal(FText, FACEOnGetValueText);
+DECLARE_DELEGATE_RetVal(FText, FTGOnGetValueText);
 
 /** Draws a combo node property row to render label / values for a given property */
 class THINKGRAPHEDITOR_API SThinkGraphNodeRow : public SCompoundWidget
@@ -25,7 +25,7 @@ public:
 	SLATE_ARGUMENT(bool, IsTransparent)
 
 	/** Delegate fired to get the actual value from GetValueText */
-	SLATE_ARGUMENT(FACEOnGetValueText, OnGetValueText)
+	SLATE_ARGUMENT(FTGOnGetValueText, OnGetValueText)
 
 	SLATE_END_ARGS()
 
@@ -40,7 +40,7 @@ protected:
 	FText ValueTooltipText;
 	bool bIsTransparent = false;
 
-	FACEOnGetValueText OnGetValueText;
+	FTGOnGetValueText OnGetValueText;
 
 	FText GetValueText() const;
 };

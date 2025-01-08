@@ -487,7 +487,7 @@ void FThinkGraphEditor::OnAddValueBindPin()
 			UObject* Node = *NodeIt;
 			if (UThinkGraphNode_Embed* EmbedNode = Cast<UThinkGraphNode_Embed>(Node))
 			{
-				EmbedNode->AddPinValuePin();
+				EmbedNode->AddValuePin();
 				break;
 			}
 		}
@@ -831,14 +831,14 @@ void FThinkGraphEditor::DeleteSelectedNodes() const
 	{
 		return;
 	}
-
-	const FScopedTransaction Transaction(FGenericCommands::Get().Delete->GetDescription());
-
-	GraphEditorView->GetCurrentGraph()->Modify();
-
+	//
+	// const FScopedTransaction Transaction(FGenericCommands::Get().Delete->GetDescription());
+	//
+	// GraphEditorView->GetCurrentGraph()->Modify();
+	//
 	const FGraphPanelSelectionSet SelectedNodes = GraphEditorView->GetSelectedNodes();
-	GraphEditorView->ClearSelectionSet();
-
+	// GraphEditorView->ClearSelectionSet();
+	//
 	for (FGraphPanelSelectionSet::TConstIterator NodeIt(SelectedNodes); NodeIt; ++NodeIt)
 	{
 		UEdGraphNode* EdNode = Cast<UEdGraphNode>(*NodeIt);
@@ -849,14 +849,14 @@ void FThinkGraphEditor::DeleteSelectedNodes() const
 
 		if (UThinkGraphEdNode* ThinkGraphEdNode = Cast<UThinkGraphEdNode>(EdNode))
 		{
-			ThinkGraphEdNode->Modify();
-
-			const UEdGraphSchema* Schema = ThinkGraphEdNode->GetSchema();
-			if (Schema)
-			{
-				Schema->BreakNodeLinks(*ThinkGraphEdNode);
-			}
-
+			// ThinkGraphEdNode->Modify();
+			//
+			// const UEdGraphSchema* Schema = ThinkGraphEdNode->GetSchema();
+			// if (Schema)
+			// {
+			// 	Schema->BreakNodeLinks(*ThinkGraphEdNode);
+			// }
+			//
 			ThinkGraphEdNode->DestroyNode();
 		}
 		else
@@ -1142,7 +1142,7 @@ void FThinkGraphEditor::OnCreateComment() const
 // ReSharper disable once CppMemberFunctionMayBeConst
 void FThinkGraphEditor::OnNodeSelectionChanged(const TSet<UObject*>& NewSelection)
 {
-	TG_ERROR(Verbose, TEXT("OnNodeSelectionChanged - %d"), NewSelection.Num())
+	TGE_ERROR(Verbose, TEXT("OnNodeSelectionChanged - %d"), NewSelection.Num())
 
 	DebuggedNode = nullptr;
 	TArray<UObject*> SelectedNodes;
@@ -1196,7 +1196,7 @@ void FThinkGraphEditor::OnNodeSelectionChanged(const TSet<UObject*>& NewSelectio
 // ReSharper disable once CppMemberFunctionMayBeConst
 void FThinkGraphEditor::OnGraphNodeDoubleClicked(UEdGraphNode* Node)
 {
-	TG_ERROR(Verbose, TEXT("OnGraphNodeDoubleClicked - %s"), *GetNameSafe(Node))
+	TGE_ERROR(Verbose, TEXT("OnGraphNodeDoubleClicked - %s"), *GetNameSafe(Node))
 
 	// TODO: Handle rename of node on double click
 	// or opening of animation editor

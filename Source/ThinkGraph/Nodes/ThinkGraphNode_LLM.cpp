@@ -19,11 +19,7 @@ UThinkGraphNode_LLM::UThinkGraphNode_LLM()
 
 void UThinkGraphNode_LLM::Activate(UThinkGraph* ThinkGraph)
 {
-	if (InBufferIDS.Num() < 1)
-	{
-		return;
-	}
-	if(!ThinkGraph)
+	if (InBufferIDS.Num() < 1 || !ThinkGraph)
 	{
 		return;
 	}
@@ -42,14 +38,20 @@ void UThinkGraphNode_LLM::Activate(UThinkGraph* ThinkGraph)
 	TArray<TSharedPtr<FJsonValue>> MessagesArray;
 	for (int i = 0; i < InputRoles.Num(); i++)
 	{
+		if(!InBufferIDS.IsValidIndex(i))
+		{
+			continue;	
+		}
+			
 		FDataBuffer& Buffer = ThinkGraph->GetBuffer(InBufferIDS[i]);
+		FString BufferStr = Buffer.Text.ToString();
 
-		if (!Buffer.Text.IsEmpty())
+		if (!BufferStr.IsEmpty())
 		{
 			// Create the first message object (system message)
 			TSharedPtr<FJsonObject> Message = MakeShareable(new FJsonObject());
 			Message->SetStringField(TEXT("role"), InputRoles[i].ToLower());
-			Message->SetStringField(TEXT("content"), Buffer.Text.ToString());
+			Message->SetStringField(TEXT("content"), BufferStr);
 
 			MessagesArray.Add(MakeShareable(new FJsonValueObject(Message)));
 		}
@@ -109,7 +111,6 @@ void UThinkGraphNode_LLM::OnAPICallback(FHttpRequestPtr Request, FHttpResponsePt
 						FDataBuffer& OutputBuffer = Graph->GetBuffer(OutBufferIDS[0]);
 						OutputBuffer.Update(FText::FromString(Content));
 
-						FThinkGraphDelegates::OnBufferUpdated.Broadcast(OutBufferIDS[0]);
 					}
 				}
 			}

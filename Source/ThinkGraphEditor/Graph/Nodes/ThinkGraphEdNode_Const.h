@@ -28,10 +28,8 @@ public:
 
 	THINKGRAPHEDITOR_API UEdGraphNode* GetOutputNode();
 	
-	void UpdateEmbeddedKeys();
+	void OnDataUpdated();
 
 	UPROPERTY()
 	FString Text;
-	
-	TArray<FString> EmbeddedKeys;
 };

@@ -1,4 +1,5 @@
 #pragma once
+#include "ThinkGraphDelegates.h"
 #include "TGTypes.generated.h"
 
 DECLARE_MULTICAST_DELEGATE(FOnBufferUpdated)
@@ -14,19 +15,15 @@ struct FDataBuffer
 	UPROPERTY(Transient)
 	uint16 Time;
 	
-	UPROPERTY(Transient)
+	UPROPERTY()
 	FText Text;
 	
 	UPROPERTY(Transient)
 	TArray<UTGNode*> NodeDependancies;
 	
-#if WITH_EDITOR	
-	FOnBufferUpdated OnUpdate;
-#endif
-	
 	void Update(const FText& InText)
 	{
 		Text = InText;
-		OnUpdate.Broadcast();
+		FThinkGraphDelegates::OnBufferUpdated.Broadcast(BufferID);
 	};
 };

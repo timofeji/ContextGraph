@@ -23,7 +23,12 @@ void FThinkGraphConnectionDrawingPolicy::DetermineWiringStyle(UEdGraphPin* Outpu
 {
 	Params.AssociatedPin1 = OutputPin;
 	Params.AssociatedPin2 = InputPin;
-	Params.WireThickness = 3.f;
+	Params.WireThickness = 6.f;
+	if (OutputPin->PinType.bIsConst)
+	{
+		Params.WireThickness = 3.f;
+		Params.WireColor = FLinearColor(.9f, .9f, .9f, .75f);
+	}
 
 
 	// if (HBActionEdGraph && InputPin)
@@ -194,7 +199,7 @@ void FThinkGraphConnectionDrawingPolicy::Internal_DrawLineWithArrow(const FVecto
                                                                     const FConnectionParams& Params)
 {
 	//@TODO: Should this be scaled by zoom factor?
-	constexpr float LineSeparationAmount = 6.5f;
+	constexpr float LineSeparationAmount = 3.5f;
 
 	const FVector2D DeltaPos = EndAnchorPoint - StartAnchorPoint;
 	const FVector2D UnitDelta = DeltaPos.GetSafeNormal();
@@ -238,18 +243,20 @@ void FThinkGraphConnectionDrawingPolicy::Internal_DrawLineWithArrow(const FVecto
 	// }
 
 
-	// Draw the arrow
-	const FVector2D EndImgDrawPos = EndPoint - .5f * DataBlockImage->ImageSize * ZoomFactor;
-	const FVector2D StartImgDrawPos = StartPoint - .5f * DataBlockImage->ImageSize * ZoomFactor;
+	// Draw pin type
+	const FSlateBrush* BrushToDraw = Params.AssociatedPin1->PinType.bIsConst ? DataBlockImage : ArrowImage;
+
+	const FVector2D EndImgDrawPos = EndPoint - .5f * BrushToDraw->ImageSize * ZoomFactor;
+	const FVector2D StartImgDrawPos = StartPoint - .5f * BrushToDraw->ImageSize * ZoomFactor;
 	const float AngleInRadians = static_cast<float>(FMath::Atan2((EndPoint - P3).Y, (EndPoint - P3).X));
+	const float AngleInRadians2 = static_cast<float>(FMath::Atan2((StartPoint - P2).Y, (StartPoint - P2).X));
 
 
 	FSlateDrawElement::MakeRotatedBox(
 		DrawElementsList,
 		ArrowLayerID + 5,
-		FPaintGeometry(StartImgDrawPos, DataBlockImage->ImageSize * ZoomFactor, ZoomFactor),
-		Params.AssociatedPin1->PinType.bIsConst ? DataBlockImage : ArrowImage,
-
+		FPaintGeometry(StartImgDrawPos, BrushToDraw->ImageSize * ZoomFactor, ZoomFactor),
+		BrushToDraw,
 		ESlateDrawEffect::None,
 		AngleInRadians,
 		TOptional<FVector2D>(),
@@ -262,10 +269,10 @@ void FThinkGraphConnectionDrawingPolicy::Internal_DrawLineWithArrow(const FVecto
 		FSlateDrawElement::MakeRotatedBox(
 			DrawElementsList,
 			ArrowLayerID + 5,
-			FPaintGeometry(EndImgDrawPos, DataBlockImage->ImageSize * ZoomFactor, ZoomFactor),
-			Params.AssociatedPin2->PinType.bIsConst ? DataBlockImage : ArrowImage,
+			FPaintGeometry(EndImgDrawPos, BrushToDraw->ImageSize * ZoomFactor, ZoomFactor),
+			BrushToDraw,
 			ESlateDrawEffect::None,
-			-AngleInRadians,
+			AngleInRadians2,
 			TOptional<FVector2D>(),
 			FSlateDrawElement::RelativeToElement,
 			Params.WireColor

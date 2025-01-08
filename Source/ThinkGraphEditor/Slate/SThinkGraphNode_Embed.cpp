@@ -127,15 +127,16 @@ void SThinkGraphNode_Embed::AddValuePin(const TSharedRef<SGraphPin>& PinToAdd)
 	{
 		PinToAdd->SetVisibility(TAttribute<EVisibility>(PinToAdd, &SGraphPin::IsPinVisibleAsAdvanced));
 	}
-	
+
 	ValuesBox->AddSlot()
-	           .HAlign(HAlign_Fill)
-	           .VAlign(VAlign_Top)
-	           .FillHeight(1.0f)
+	         .HAlign(HAlign_Fill)
+	         .VAlign(VAlign_Top)
+	         .FillHeight(1.0f)
 	[
 		PinToAdd
 	];
 	ValuePins.Add(PinToAdd);
+	InputPins.Add(PinToAdd);
 }
 
 void SThinkGraphNode_Embed::UpdateGraphNode()
@@ -311,6 +312,21 @@ void SThinkGraphNode_Embed::UpdateGraphNode()
 		[
 			CreateNodeContentArea()
 		]
+
+		+ SVerticalBox::Slot()
+		.VAlign(VAlign_Top)
+		[
+			SNew(SBorder)
+		.Padding(FMargin(0, 0))
+    				.Visibility(EVisibility::HitTestInvisible)
+    				.BorderImage(FThinkGraphEditorStyle::Get().GetBrush("ThinkGraph.Node.ValueSeperator"))
+    				.BorderBackgroundColor(this, &SGraphNode::GetNodeTitleIconColor)
+			[
+				SNew(SSpacer)
+				.Size(FVector2D(24, 12))
+			]
+		]
+
 		+ SVerticalBox::Slot()
 		  .AutoHeight()
 		  .HAlign(HAlign_Fill)
@@ -321,7 +337,7 @@ void SThinkGraphNode_Embed::UpdateGraphNode()
 		.BorderImage(FAppStyle::GetBrush("NoBorder"))
 		.HAlign(HAlign_Fill)
 		.VAlign(VAlign_Fill)
-		.Padding(FMargin(0, 3))
+		.Padding(FMargin(0, 0))
 			[
 				SNew(SHorizontalBox)
 				+ SHorizontalBox::Slot()

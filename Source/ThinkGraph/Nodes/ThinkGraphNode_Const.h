@@ -19,4 +19,5 @@ class THINKGRAPH_API UThinkGraphNode_Const : public UTGNode
 
 public:
 	UThinkGraphNode_Const();
+
 };

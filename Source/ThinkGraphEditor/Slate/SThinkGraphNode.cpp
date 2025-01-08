@@ -80,14 +80,6 @@ void SThinkGraphNode::UpdateGraphNode()
 	}
 
 	TSharedRef<SOverlay> DefaultTitleAreaWidget =
-		// SNew(SOverlay)
-		// + SOverlay::Slot()
-		// [
-		// 	SNew(SImage)
-		// 	.Image(FThinkGraphEditorStyle::Get().GetBrush("ThinkGraph.Node.Title"))
-		// 	.ColorAndOpacity(this, &SGraphNode::GetNodeTitleIconColor)
-		// ]
-
 		SNew(SOverlay)
 		+ SOverlay::Slot()
 		  .HAlign(HAlign_Fill)
@@ -114,7 +106,7 @@ void SThinkGraphNode::UpdateGraphNode()
 
 						SNew(SHorizontalBox)
 						+ SHorizontalBox::Slot()
-						  .VAlign(VAlign_Top)
+						  .VAlign(VAlign_Center)
 						  // .Padding(FMargin(0.f))
 						  .Padding(FMargin(1.f, 1.f, 1.f, 0.f))
 						  .AutoWidth()
@@ -124,6 +116,8 @@ void SThinkGraphNode::UpdateGraphNode()
 						.ColorAndOpacity(this, &SGraphNode::GetNodeTitleIconColor)
 						]
 						+ SHorizontalBox::Slot()
+						  .VAlign(VAlign_Center)
+						  .HAlign(HAlign_Center)
 						[
 							SNew(SVerticalBox)
 							+ SVerticalBox::Slot()
@@ -134,7 +128,9 @@ void SThinkGraphNode::UpdateGraphNode()
 								CreateTitleWidget(NodeTitle)
 							]
 							+ SVerticalBox::Slot()
-							.AutoHeight()
+							  .VAlign(VAlign_Center)
+							  .HAlign(HAlign_Center)
+							  .AutoHeight()
 							[
 								NodeTitle.ToSharedRef()
 							]
@@ -150,18 +146,7 @@ void SThinkGraphNode::UpdateGraphNode()
 			[
 				CreateTitleRightWidget()
 			]
-			// ]
-			// + SOverlay::Slot()
-			// .VAlign(VAlign_Top)
-			// [
-			// 	SNew(SBorder)
-			// 	.Visibility(EVisibility::HitTestInvisible)
-			// 	.BorderImage(FAppStyle::GetBrush("Graph.Node.TitleHighlight"))
-			// 	.BorderBackgroundColor(this, &SGraphNode::GetNodeTitleIconColor)
-			// 	[
-			// 		SNew(SSpacer)
-			// 		.Size(FVector2D(20, 20))
-			// 	]
+
 		];
 
 	SetDefaultTitleAreaWidget(DefaultTitleAreaWidget);
@@ -204,7 +189,8 @@ void SThinkGraphNode::UpdateGraphNode()
 		  .AutoHeight()
 		  .HAlign(HAlign_Fill)
 		  .VAlign(VAlign_Top)
-		  .Padding(Settings->GetNonPinNodeBodyPadding())
+		  // .Padding(Settings->GetNonPinNodeBodyPadding())
+		  .Padding(FMargin(0.f))
 		[
 			TitleAreaWidget
 		]
@@ -213,6 +199,7 @@ void SThinkGraphNode::UpdateGraphNode()
 		  .AutoHeight()
 		  .HAlign(HAlign_Fill)
 		  .VAlign(VAlign_Top)
+		  .Padding(FMargin(0.f))
 		[
 			CreateNodeContentArea()
 		];
@@ -311,6 +298,33 @@ void SThinkGraphNode::UpdateGraphNode()
 	CreateAdvancedViewArrow(InnerVerticalBox);
 }
 
+TSharedRef<SWidget> SThinkGraphNode::CreateNodeContentArea()
+{
+	// NODE CONTENT AREA
+	return SNew(SBorder)
+		.BorderImage(FAppStyle::GetBrush("NoBorder"))
+		.HAlign(HAlign_Fill)
+		.VAlign(VAlign_Fill)
+		.Padding(FMargin(0, 0))
+	[
+		SNew(SHorizontalBox)
+		+ SHorizontalBox::Slot()
+		  .HAlign(HAlign_Left)
+		  .FillWidth(1.0f)
+		[
+			// LEFT
+			SAssignNew(LeftNodeBox, SVerticalBox)
+		]
+		+ SHorizontalBox::Slot()
+		  .AutoWidth()
+		  .HAlign(HAlign_Right)
+		[
+			// RIGHT
+			SAssignNew(RightNodeBox, SVerticalBox)
+		]
+	];
+}
+
 void SThinkGraphNode::CreatePinWidgets()
 {
 	if (GraphNode->Pins.Num() < 2)
@@ -334,7 +348,7 @@ void SThinkGraphNode::CreatePinWidgets()
 void SThinkGraphNode::AddPin(const TSharedRef<SGraphPin>& PinToAdd)
 {
 	PinToAdd->SetOwner(SharedThis(this));
-	
+
 	const UEdGraphPin* PinObj = PinToAdd->GetPinObj();
 	const bool bAdvancedParameter = PinObj && PinObj->bAdvancedView;
 	if (bAdvancedParameter)
@@ -427,7 +441,7 @@ int32 SThinkGraphNode::OnPaint(const FPaintArgs& Args, const FGeometry& Allotted
 			DebugMode = Debugger->GetDebugMode();
 		}
 	}
-	
+
 	// const FSlateBrush* BackgroundBrush = Style.GetBrush("HBEditor.ThinkGraph.Entry");
 	// FSlateFontInfo FontInfo = Style.GetFontStyle("HB.Font.Small");
 	// FontInfo.OutlineSettings.OutlineSize = 1;

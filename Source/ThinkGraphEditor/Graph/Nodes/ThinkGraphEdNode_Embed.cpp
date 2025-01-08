@@ -105,16 +105,8 @@ void UThinkGraphEdNode_Embed::ReallocateBindPins(TArray<FString>& NewKeys)
 	Modify();
 
 	TArray<FString> OldKeys = ValueBindKeys.Array();
-	for (int i = 0; i < OldKeys.Num(); i++)
-	{
-		//Key Removed
-		if (!NewKeys.Contains(OldKeys[i]))
-		{
-			RemovePinAt(i, EGPD_Input);
-		}
-	}
-
 	ValueBindKeys.Reset();
+	
 	for (auto Key : NewKeys)
 	{
 		ValueBindKeys.Add(Key);
@@ -124,17 +116,22 @@ void UThinkGraphEdNode_Embed::ReallocateBindPins(TArray<FString>& NewKeys)
 		}
 	}
 
+	for (int i = 0; i < OldKeys.Num(); i++)
+	{
+		//Key Removed
+		if (!NewKeys.Contains(OldKeys[i]))
+		{
+			RemovePinAt(i+1, EGPD_Input);
+		}
+	}
+	
 
-	// FBlueprintEditorUtils::MarkBlueprintAsStructurallyModified(GetBlueprint());
+	GetGraph()->NotifyNodeChanged(this);
 }
 
-void UThinkGraphEdNode_Embed::ClearBinds()
-{
-}
 
-void UThinkGraphEdNode_Embed::OnInputBufferUpdated()
+void UThinkGraphEdNode_Embed::OnTemplateUpdated()
 {
-	// ReallocateBindPins();
 	auto ThinkGraph = CastChecked<UThinkGraph>(GetGraph()->GetOuter());
 
 	FDataBuffer& InBuffer = ThinkGraph->GetBuffer(RuntimeNode->InBufferIDS[0]);

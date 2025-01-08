@@ -80,7 +80,7 @@ public:
 		EditAnywhere,
 		Category = "Size & Paddings",
 		meta = (ClampMin = "0.0"))
-	float PinPadding = 20.f;
+	float PinPadding = 10.f;
 
 	// /** The minimum desired sizes for pin connections. */
 	// UPROPERTY(config, EditAnywhere, Category = "Size & Paddings", meta = (ClampMin = "0.0"))
@@ -111,25 +111,4 @@ public:
 		Category = "Icons",
 		meta = (ClampMin = "0.0", ClampMax = "100.0"))
 	float IconSize;
-
-	/** The Slot Name to use with dynamic montages, created from sequences */
-	UPROPERTY(config,
-		EditAnywhere,
-		Category = "Auto Setup")
-	FName DynamicMontageSlotName;
-
-	// /** Map of Auto Setup Animation Notify States. The key is the Anim Notify State class, the value is the time start / end definition in percent */
-	// UPROPERTY(config, EditAnywhere, Category = "Auto Setup")
-	// TMap<TSoftClassPtr<UAnimNotifyState>, FHBThinkGraphNotifyStateAutoSetup> NotifyStates;
-	//
-	// /** Flag to enable / disable message warnings (logs and on screen) about Sequences being used in a networked environment */
-	UPROPERTY(config,
-		EditAnywhere,
-		Category = "Warnings",
-		AdvancedDisplay)
-	bool bSequencesNetworkedWarning = true;
-
-	/** Flag to disable validation warnings on startup (about missing config for AbilitySystemGlobals). Config writable but not exposed in editor. */
-	UPROPERTY(config)
-	bool bIgnoreStartupValidationWarnings = false;
 };

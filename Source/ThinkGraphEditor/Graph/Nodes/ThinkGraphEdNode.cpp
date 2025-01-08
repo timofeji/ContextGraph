@@ -256,7 +256,7 @@ const UTGNode* UThinkGraphEdNode::GetDebuggedNode() const
 		FThinkGraphDebugger* Debugger = ThinkGraph->Debugger.Get();
 		if (Debugger && Debugger->IsDebuggerReady())
 		{
-			// UHBActionComponent* EvaluationTask = Debugger->GetDebuggedTaskForSelectedActor();
+			// UThinkGraphComponent* EvaluationTask = Debugger->GetDebuggedTaskForSelectedActor();
 			// if (EvaluationTask)
 			// {
 			// 	return EvaluationTask->CurrentNode;

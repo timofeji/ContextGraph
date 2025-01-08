@@ -3,7 +3,9 @@
 
 #include "ThinkGraphComponent.h"
 
+#include "TGTypes.h"
 #include "ThinkGraph.h"
+#include "Nodes/ThinkGraphNode_Memory.h"
 
 
 // Sets default values for this component's properties
@@ -18,6 +20,22 @@ UThinkGraphComponent::UThinkGraphComponent()
 
 void UThinkGraphComponent::InvokeStimulus(FName StimulusName)
 {
+	
+}
+
+FText UThinkGraphComponent::GenerateMemory(FName MemoryName)
+{
+	if(DefaultThinkGraph && DefaultThinkGraph->OutNodes.Contains(MemoryName))
+	{
+		if(auto MemNode = CastChecked<UThinkGraphNode_Memory>(DefaultThinkGraph->OutNodes[MemoryName]))
+		{
+			DefaultThinkGraph->RequestBufferUpdate(MemNode->InBufferIDS[0]);
+			FDataBuffer& Out = DefaultThinkGraph->GetBuffer(MemNode->InBufferIDS[0]);
+			return Out.Text;
+		}
+	}
+
+	return FText();
 }
 
 
@@ -36,8 +54,4 @@ void UThinkGraphComponent::TickComponent(float DeltaTime, ELevelTick TickType,
                                          FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-	if (auto ThinkGraph = DefaultThinkGraph.Get())
-	{
-		ThinkGraph->Tick(DeltaTime);
-	}
 }

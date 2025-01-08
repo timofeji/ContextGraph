@@ -23,6 +23,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void InvokeStimulus(FName StimulusName);
+	
+	UFUNCTION(BlueprintCallable)
+	FText GenerateMemory(FName MemoryName);
 
 protected:
 	// Called when the game starts

@@ -148,7 +148,7 @@ void SThinkGraphPin::Construct(const FArguments& InArgs, UEdGraphPin* InPin)
 			+ SHorizontalBox::Slot()
 			  .AutoWidth()
 			  .VAlign(VAlign_Center)
-			  .Padding(0, 0, 5.f, 0)
+			  .Padding(0, 0, 0.f, 0)
 			[
 				PinWidgetRef
 			]
@@ -172,7 +172,7 @@ void SThinkGraphPin::Construct(const FArguments& InArgs, UEdGraphPin* InPin)
 			+ SHorizontalBox::Slot()
 			  .AutoWidth()
 			  .VAlign(VAlign_Center)
-			  .Padding(5.f, 0, 0, 0)
+			  .Padding(0.f, 0, 0, 0)
 			[
 				PinWidgetRef
 			];
@@ -193,11 +193,13 @@ void SThinkGraphPin::Construct(const FArguments& InArgs, UEdGraphPin* InPin)
 		];
 
 	SBorder::Construct(SBorder::FArguments()
+	                   .Padding(FMargin(0.f))
 	                   .BorderImage(this, &SThinkGraphPin::GetPinBorder)
 	                   .BorderBackgroundColor(this, &SThinkGraphPin::GetHighlightColor)
 	                   .OnMouseButtonDown(this, &SThinkGraphPin::OnPinNameMouseDown)
 		[
 			SNew(SBorder)
+				.Padding(FMargin(1.f))
     			.BorderImage(CachedImg_Pin_DiffOutline)
     			.BorderBackgroundColor(this, &SThinkGraphPin::GetPinDiffColor)
 			[
@@ -224,7 +226,8 @@ const FSlateBrush* SThinkGraphPin::GetTypeIcon() const
 			auto PinName = GraphNode->GetPinDisplayName(GraphPin);
 			if (PinName.ToString().Contains(TEXT("Prompt")))
 			{
-				Brush = FSlateIcon(FThinkGraphEditorStyle::GetStyleSetName(), "ThinkGraph.Icon.Prompt").GetOptionalIcon();
+				Brush = FSlateIcon(FThinkGraphEditorStyle::GetStyleSetName(), "ThinkGraph.Icon.Prompt").
+					GetOptionalIcon();
 			}
 		}
 	}

@@ -581,10 +581,6 @@ FPromptSyntaxHighlighterMarshaller::FPromptSyntaxHighlighterMarshaller(TSharedPt
 void SPromptBufferEditor::OnBufferSearchChanged(const FText& Text)
 {
 	TextBox->SetSearchText(Text);
-	
-	//
-	// SyntaxHighlighter->SetSearchText(Text);
-	// SyntaxHighlighter->MakeDirty();
 }
 
 void SPromptBufferEditor::OnBufferSearchCommitted(const FText& Text, ETextCommit::Type Arg)
@@ -596,10 +592,92 @@ void SPromptBufferEditor::OnBufferSearchSaved(const FText& Text)
 {
 }
 
+void SPromptBufferEditor::Construct(const FArguments& InArgs)
+{
+	FSlateFontInfo FontInfo = FThinkGraphEditorStyle::Get().GetFontStyle("ThinkGraph.Text.Prompt");
+	FontInfo.Size = 10;
+
+
+	auto PromptSyntaxStyle = FPromptSyntaxHighlighterMarshaller::FSyntaxTextStyle(
+		FThinkGraphEditorStyle::Get().GetWidgetStyle<FTextBlockStyle>("SyntaxHighlight.Prompt.Normal"),
+		FThinkGraphEditorStyle::Get().GetWidgetStyle<FTextBlockStyle>("SyntaxHighlight.Prompt.Variable"),
+		FThinkGraphEditorStyle::Get().GetWidgetStyle<FTextBlockStyle>("SyntaxHighlight.Prompt.SearchString"),
+		FThinkGraphEditorStyle::Get().GetWidgetStyle<FTextBlockStyle>("SyntaxHighlight.Prompt.Error"));
+
+
+	ViewedEdNodeConst = InArgs._Node;
+	SyntaxHighlighter =
+		FPromptSyntaxHighlighterMarshaller::Create(PromptSyntaxStyle);
+
+
+	const FSearchBoxStyle& SearchBoxStyle = FThinkGraphEditorStyle::Get().GetWidgetStyle<FSearchBoxStyle>(
+		TEXT("TextEditor.SearchBoxStyle"));
+
+	ChildSlot
+	[
+		SNew(SVerticalBox)
+		+ SVerticalBox::Slot()
+		  .FillHeight(1.f)
+		  .VAlign(VAlign_Fill)
+		[
+			SAssignNew(TextBox, SMultiLineEditableTextBox)
+							.Marshaller(SyntaxHighlighter)
+							.Font(FontInfo)
+							.BackgroundColor(FLinearColor::Black)
+							.WrappingPolicy(ETextWrappingPolicy::AllowPerCharacterWrapping)
+							.AutoWrapText(true)
+							.AllowMultiLine(true)
+							.Margin(0.f)
+							.Text_Lambda([&] { return FText::FromString(ViewedEdNodeConst->Text); })
+							.OnTextChanged(this, &SPromptBufferEditor::OnTextChanged)
+		]
+		+ SVerticalBox::Slot()
+		  .AutoHeight()
+		  .HAlign(HAlign_Fill)
+		  .VAlign(VAlign_Bottom)
+		[
+
+			// SNew(SScaleBox)
+			// .Stretch(EStretch::ScaleToFit)
+			// [
+			SAssignNew(SearchBox, SSearchBox)
+				.HintText(NSLOCTEXT("SearchBox", "HelpHint", "Search For Text"))
+				.Style(&SearchBoxStyle)
+				.OnTextChanged(this, &SPromptBufferEditor::OnBufferSearchChanged)
+				.OnTextCommitted(this, &SPromptBufferEditor::OnBufferSearchCommitted)
+				// .SearchResultData(InArgs._SearchResultData)
+				.SelectAllTextWhenFocused(true)
+			// .OnSearch(InArgs._OnResultNavigationButtonClicked);
+			// ]
+		]
+		// + SVerticalBox::Slot()
+		// .FillHeight(1.0f)
+		// [
+		// 	// SAssignNew(SearchBox, SFilterSearchBox)
+		//  //             			.AddMetaData<FTagMetaData>(FTagMetaData(TEXT("SequencerFilterSearch")))
+		//  //             			.DelayChangeNotificationsWhileTyping(true)
+		//  //             			.ShowSearchHistory(true)
+		//  //             			.OnTextChanged(this, &SPromptBufferEditor::OnBufferSearchChanged)
+		//  //             			.OnTextCommitted(this, &SPromptBufferEditor::OnBufferSearchCommitted)
+		//  //             			.OnSaveSearchClicked(this, &SPromptBufferEditor::OnBufferSearchSaved)
+		// ]
+	];
+
+	UpdateTextHighlights();
+}
+
 void SPromptBufferEditor::Find()
 {
 	if (SearchBox)
 	{
 		FSlateApplication::Get().SetKeyboardFocus(SearchBox, EFocusCause::SetDirectly);
 	}
+}
+
+void SPromptBufferEditor::OnTextChanged(const FText& NewText)
+{
+	ViewedEdNodeConst->Text = NewText.ToString();
+	ViewedEdNodeConst->OnDataUpdated();
+	
+	UpdateTextHighlights();
 }

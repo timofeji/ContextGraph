@@ -21,14 +21,6 @@ void UThinkGraph::ClearGraph()
 	DataBuffers.Empty();
 }
 
-void UThinkGraph::Tick(float DeltaTime)
-{
-	GEngine->AddOnScreenDebugMessage(uint64(this), 1.f, FColor::White,
-	                                 *FString::Printf(
-		                                 TEXT(
-			                                 "Prompt(%s)"),
-		                                 *FinalPrompt));
-}
 
  FDataBuffer& UThinkGraph::AddDataBuffer()
 {
@@ -41,6 +33,7 @@ void UThinkGraph::Tick(float DeltaTime)
 void UThinkGraph::RequestBufferUpdate(unsigned short BufferID)
 {
 	DataBuffers[BufferID].Time++;
+	
 	for(auto Node :DataBuffers[BufferID].NodeDependancies)
 	{
 		Node->Activate(this);

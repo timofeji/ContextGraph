@@ -19,6 +19,7 @@ class THINKGRAPH_API UThinkGraphNode_Embed : public UTGNode
 
 public:
 	UThinkGraphNode_Embed();
-	
-	void AddPinValuePin();
+
+	virtual void Activate(UThinkGraph* ThinkGraph) override;
+	TArray<FString> VarKeys;
 };

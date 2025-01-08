@@ -50,7 +50,7 @@ FThinkGraphDebugger::~FThinkGraphDebugger()
 
 void FThinkGraphDebugger::Tick(float DeltaTime)
 {
-	// TG_ERROR(Verbose, TEXT("FThinkGraphDebugger Tick"))
+	// TGE_ERROR(Verbose, TEXT("FThinkGraphDebugger Tick"))
 }
 
 bool FThinkGraphDebugger::IsTickable() const
@@ -142,14 +142,14 @@ void FThinkGraphDebugger::OnPausePIE(const bool bIsSimulating)
 
 void FThinkGraphDebugger::OnObjectSelected(UObject* Object)
 {
-	TG_ERROR(Verbose, TEXT("FThinkGraphDebugger TestDebugger OnObjectSelected %s"), *GetNameSafe(Object))
+	TGE_ERROR(Verbose, TEXT("FThinkGraphDebugger TestDebugger OnObjectSelected %s"), *GetNameSafe(Object))
 
 	if (Object && Object->IsSelected())
 	{
 		AActor* Actor = Cast<AActor>(Object);
 		if (Actor)
 		{
-			TG_ERROR(
+			TGE_ERROR(
 				Verbose, TEXT("FThinkGraphDebugger TestDebugger OnObjectSelected Update actor instance %s"),
 				*GetNameSafe(Actor))
 			ThinkGraphComponentOwner = Actor;
@@ -160,23 +160,23 @@ void FThinkGraphDebugger::OnObjectSelected(UObject* Object)
 
 void FThinkGraphDebugger::OnNodeGenerating(const UTGNode& EvaluatedNode)
 {
-	// const bool bAssetMatches = HBThinkGraphAsset && HBThinkGraphAsset == &InHBThinkGraphAsset;
-	// TG_ERROR(Verbose, TEXT("FThinkGraphDebugger TestDebugger OnHBThinkGraphStarted %s - %d (Ability: %s)"), *GetNameSafe(&InHBThinkGraphAsset), InHBThinkGraphAsset.GetUniqueID(), *GetNameSafe(&InOwnerTask))
-	// TG_ERROR(Verbose, TEXT("FThinkGraphDebugger TestDebugger OnHBThinkGraphStarted bAssetMatches %s)"), bAssetMatches ? TEXT("true") : TEXT("false"))
+	// const bool bAssetMatches = ThinkGraphAsset && ThinkGraphAsset == &InThinkGraphAsset;
+	// TGE_ERROR(Verbose, TEXT("FThinkGraphDebugger TestDebugger OnHBThinkGraphStarted %s - %d (Ability: %s)"), *GetNameSafe(&InHBThinkGraphAsset), InHBThinkGraphAsset.GetUniqueID(), *GetNameSafe(&InOwnerTask))
+	// TGE_ERROR(Verbose, TEXT("FThinkGraphDebugger TestDebugger OnHBThinkGraphStarted bAssetMatches %s)"), bAssetMatches ? TEXT("true") : TEXT("false"))
 	//
 	// // start debugging if combo graph asset matches, and no other actor was selected
 	// if (!ThinkGraphComponentOwner.IsValid() && bAssetMatches)
 	// {
 	// 	AActor* Avatar = InOwnerTask.Character;
 	//
-	// 	TG_ERROR(Verbose, TEXT("FThinkGraphDebugger TestDebugger OnHBThinkGraphStarted SetObjeSetActorBeingDebuggedctBeingDebugged %s"), *GetNameSafe(Avatar))
+	// 	TGE_ERROR(Verbose, TEXT("FThinkGraphDebugger TestDebugger OnHBThinkGraphStarted SetObjeSetActorBeingDebuggedctBeingDebugged %s"), *GetNameSafe(Avatar))
 	// 	ThinkGraphComponentOwner = MakeWeakObjectPtr(Avatar);
 	// }
 	//
 	// // Update known instances if combo graph asset matches
 	// if (bAssetMatches)
 	// {
-	// 	const TWeakObjectPtr<UHBActionComponent> OwnerTaskInstance = const_cast<UHBActionComponent*>(&InOwnerTask);
+	// 	const TWeakObjectPtr<UThinkGraphComponent> OwnerTaskInstance = const_cast<UThinkGraphComponent*>(&InOwnerTask);
 	// 	if (OwnerTaskInstance.IsValid())
 	// 	{
 	// 		KnownInstances.AddUnique(OwnerTaskInstance);
@@ -188,10 +188,6 @@ void FThinkGraphDebugger::OnNodeGenerating(const UTGNode& EvaluatedNode)
 	// 		KnownActors.AddUnique(OwnerActor);
 	// 	}
 	// }
-
-	SelectedNodesDebug.Empty();
-
-	// EvaluateTask.OnCancelled.AddRaw(this, &FThinkGraphDebugger::OnGraphCancelled);	
 }
 
 
@@ -224,7 +220,7 @@ UThinkGraphComponent* FThinkGraphDebugger::GetDebuggedTaskForSelectedActor()
 	}
 
 	UThinkGraphComponent* Result = nullptr;
-	// for (TWeakObjectPtr<UHBActionComponent> Component : KnownInstances)
+	// for (TWeakObjectPtr<UThinkGraphComponent> Component : KnownInstances)
 	// {
 	// 	if (!Component.IsValid())
 	// 	{
@@ -335,7 +331,7 @@ FString FThinkGraphDebugger::DescribeInstance(const AActor& ActorToDescribe) con
 
 void FThinkGraphDebugger::OnInstanceSelectedInDropdown(AActor* SelectedActor)
 {
-	TG_ERROR(Verbose, TEXT("FThinkGraphDebugger OnInstanceSelectedInDropdown Actor: %s"),
+	TGE_ERROR(Verbose, TEXT("FThinkGraphDebugger OnInstanceSelectedInDropdown Actor: %s"),
 	         *GetNameSafe(SelectedActor))
 
 	if (SelectedActor)

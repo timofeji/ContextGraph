@@ -28,6 +28,8 @@ public:
 	virtual void AddPin(const TSharedRef<SGraphPin>& PinToAdd) override;
 	virtual bool IsNameReadOnly() const override;
 
+	virtual TSharedRef<SWidget> CreateNodeContentArea() override;
+
 	virtual const FSlateBrush* GetShadowBrush(bool bSelected) const override;
 	virtual const FSlateBrush* GetNodeBodyBrush() const override;
 	FSlateColor GetNodeTitleColor() const;

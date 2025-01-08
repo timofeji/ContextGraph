@@ -18,7 +18,7 @@
 #include "Nodes/ThinkGraphEdNode_Const.h"
 #include "Nodes/ThinkGraphEdNode_Embed.h"
 #include "ThinkGraph/TGTypes.h"
-#include "ThinkGraph/Nodes/ThinkGraphNode_Const.h"
+#include "ThinkGraph/Nodes/ThinkGraphNode_Embed.h"
 
 UThinkGraph* UThinkGraphEdGraph::GetThinkGraphModel() const
 {
@@ -27,15 +27,17 @@ UThinkGraph* UThinkGraphEdGraph::GetThinkGraphModel() const
 
 void UThinkGraphEdGraph::RebuildGraph()
 {
-	TG_ERROR(Verbose, TEXT("UThinkGraphEdGraph::RebuildGraph has been called. Nodes Num: %d"), Nodes.Num())
+	TGE_ERROR(Verbose, TEXT("UThinkGraphEdGraph::RebuildGraph has been called. Nodes Num: %d"), Nodes.Num())
 
 	UThinkGraph* ThinkGraph = GetThinkGraphModel();
 	check(ThinkGraph)
 
 	Clear();
+	Modify(true);
 
-	TArray<UThinkGraphEdNode_Const*> ConstNodes;
 
+	//* REBUILD GRAPH TOPOLOGY*//
+	// Backwards pass
 	for (UEdGraphNode* CurrentNode : Nodes)
 	{
 		UE_LOG(LogThinkGraphEditor, Verbose, TEXT("UThinkGraphEdGraph::RebuildGraph for node: %s (%s)"),
@@ -44,22 +46,22 @@ void UThinkGraphEdGraph::RebuildGraph()
 
 		if (UThinkGraphEdNode_Memory* MemoryNode = Cast<UThinkGraphEdNode_Memory>(CurrentNode))
 		{
-			RebuildGraphForMemory(ThinkGraph, MemoryNode);
+			RebuildGraphForNode(ThinkGraph, MemoryNode);
 		}
 	}
 
+	//* POPULATE BUFFERS WITH INITIAL VALUES*//
+	// we traverse all nodes in reverse order since the leaf nodes should be processed first
+	// Forward pass
+	for (int i = ThinkGraph->AllNodes.Num() - 1; i >= 0; i--)
+	{
+		auto Node = ThinkGraph->AllNodes[i];
 
-	// for (UTGNode* Node : ThinkGraph->AllNodes)
-	// {
-	// 	if (Node->ParentNodes.Num() == 0)
-	// 	{
-	// 		// ThinkGraph->RootNodes.Add(Node);
-	// 		// May cause a weird issue, no crash but editor goes unresponsive
-	// 		// SortNodes(Node);
-	// 	}
-	//
-	// 	Node->Rename(nullptr, ThinkGraph, REN_DontCreateRedirectors | REN_DoNotDirty);
-	// }
+		for (const uint16 OutBufferID : Node->OutBufferIDS)
+		{
+			ThinkGraph->RequestBufferUpdate(OutBufferID);
+		}
+	}
 }
 
 void UThinkGraphEdGraph::RebuildGraphForEdge(UThinkGraph* OwningGraph, UThinkGraphEdNodeEdge* EdGraphEdge)
@@ -70,7 +72,7 @@ void UThinkGraphEdGraph::RebuildGraphForEdge(UThinkGraph* OwningGraph, UThinkGra
 
 	if (StartNode == nullptr || EndNode == nullptr || Edge == nullptr)
 	{
-		TG_ERROR(
+		TGE_ERROR(
 			Error,
 			TEXT("UThinkGraphEdGraph::RebuildGraph add edge failed. StartNode: %s, EndNode: %s, Edge: %s"),
 			StartNode ? *StartNode->GetName() : TEXT("NONE"),
@@ -97,10 +99,32 @@ void UThinkGraphEdGraph::RebuildGraphForEdge(UThinkGraph* OwningGraph, UThinkGra
 
 void UThinkGraphEdGraph::RebuildGraphForEmbed(UThinkGraph* ThinkGraph, UThinkGraphEdNode_Embed* EmbedEdNode)
 {
+	if (auto EmbedNode = Cast<UThinkGraphNode_Embed>(EmbedEdNode->RuntimeNode))
+	{
+		EmbedNode->VarKeys.Empty();
+		for (auto Pin : EmbedEdNode->Pins)
+		{
+			if (Pin->PinType.PinCategory == UThinkGraphPinNames::PinCategory_Value &&
+				!Pin->PinType.bIsConst)
+			{
+				EmbedNode->VarKeys.Add(Pin->GetName());
+			}
+		}
+	}
 
-
+	NotifyNodeChanged(EmbedEdNode);
 }
 
+
+void UThinkGraphEdGraph::PopulateBuffersForConst(UThinkGraph* OwningGraph, UThinkGraphEdNode_Const* ConstEdNode)
+{
+	if (ConstEdNode->RuntimeNode->OutBufferIDS.Num())
+	{
+		FDataBuffer* Buffer;
+		Buffer = &OwningGraph->GetBuffer(ConstEdNode->RuntimeNode->OutBufferIDS[0]);
+		Buffer->Update(FText::FromString(ConstEdNode->Text));
+	}
+}
 
 void UThinkGraphEdGraph::RebuildGraphForNode(UThinkGraph* OwningGraph, UThinkGraphEdNode* EdNode)
 {
@@ -109,31 +133,54 @@ void UThinkGraphEdGraph::RebuildGraphForNode(UThinkGraph* OwningGraph, UThinkGra
 		return;
 	}
 
+	if (auto EmbedEdNode = Cast<UThinkGraphEdNode_Embed>(EdNode))
+	{
+		RebuildGraphForEmbed(OwningGraph, EmbedEdNode);
+	}
+	
+	if (auto MemoryEdNode = Cast<UThinkGraphEdNode_Memory>(EdNode))
+	{
+		OwningGraph->OutNodes.Add(
+			FName(MemoryEdNode->RuntimeNode->GetNodeTitle().ToString()), MemoryEdNode->RuntimeNode );
+	}
+
+
+	OwningGraph->AllNodes.Add(EdNode->RuntimeNode);
+	EdNode->Modify();
+
 
 	for (auto Pin : EdNode->Pins)
 	{
 		if (Pin->Direction == EGPD_Output)
 		{
-			FDataBuffer& Buffer = OwningGraph->AddDataBuffer();
-			Buffer.NodeDependancies.Add(EdNode->RuntimeNode);
-			EdNode->RuntimeNode->OutBufferIDS.Add(Buffer.BufferID);
+			FDataBuffer* Buffer;
+			if (EdNode->RuntimeNode->OutBufferIDS.IsEmpty())
+			{
+				Buffer = &OwningGraph->AddDataBuffer();
+				EdNode->RuntimeNode->OutBufferIDS.Add(Buffer->BufferID);
+			}
+			else
+			{
+				Buffer = &OwningGraph->GetBuffer(EdNode->RuntimeNode->OutBufferIDS[0]);
+			}
+
+			Buffer->NodeDependancies.Add(EdNode->RuntimeNode);
 
 			if (auto ConstEdNode = Cast<UThinkGraphEdNode_Const>(EdNode))
 			{
-				ConstEdNode->UpdateEmbeddedKeys();
-				Buffer.Update(FText::FromString(ConstEdNode->Text));
+				PopulateBuffersForConst(OwningGraph, ConstEdNode);
 			}
+
 
 			for (auto LinkedTo : Pin->LinkedTo)
 			{
 				if (auto LinkedToEdNode = Cast<UThinkGraphEdNode>(LinkedTo->GetOwningNode()))
 				{
-					LinkedToEdNode->RuntimeNode->InBufferIDS.Add(Buffer.BufferID);
-					
+					LinkedToEdNode->RuntimeNode->InBufferIDS.AddUnique(Buffer->BufferID);
+
 					if (auto EmbedEdNode = Cast<UThinkGraphEdNode_Embed>(LinkedToEdNode))
 					{
-						Buffer.OnUpdate.AddUObject(EmbedEdNode, &UThinkGraphEdNode_Embed::OnInputBufferUpdated);
-						EmbedEdNode->OnInputBufferUpdated();
+						EmbedEdNode->OnTemplateUpdated();
 					}
 				}
 			}
@@ -151,51 +198,6 @@ void UThinkGraphEdGraph::RebuildGraphForNode(UThinkGraph* OwningGraph, UThinkGra
 	}
 }
 
-void UThinkGraphEdGraph::RebuildGraphForMemory(UThinkGraph* OwningGraph, UThinkGraphEdNode_Memory* MemEdNode)
-{
-	check(MemEdNode);
-	check(OwningGraph);
-
-
-	if (auto MemInput = Cast<UThinkGraphEdNode>(MemEdNode->GetInputNode()))
-	{
-		if (MemInput->Pins.Num() > 0 && MemInput->Pins[0] != nullptr)
-		{
-			if (MemInput->Pins[0]->LinkedTo.Num() > 0 && MemInput->Pins[0]->LinkedTo.Contains(MemEdNode->Pins[0]))
-			{
-				RebuildGraphForNode(OwningGraph, MemInput);
-			}
-		}
-	}
-}
-
-// ReSharper disable once CppMemberFunctionMayBeConst
-void UThinkGraphEdGraph::RebuildGraphForLLM(UThinkGraph* OwningGraph, UThinkGraphEdNode_LLM* LLMEdNode)
-{
-	check(LLMEdNode);
-	check(OwningGraph);
-
-	// for (UEdGraphPin* Pin : LLMEdNode->Pins)
-	// {
-	// 	// if (Pin->Direction == EGPD_Input && Pin->LinkedTo.Num() > 0)
-	// 	// {
-	// 	// 	if (UThinkGraphEdNode* NodeDependancy = Cast<UThinkGraphEdNode>(Pin->LinkedTo[0]->GetOwningNode()))
-	// 	// 	{
-	// 	// 		LLMEdNode->RuntimeNode->ParentNodes.Add(NodeDependancy->RuntimeNode);
-	// 	// 	}
-	// 	// }
-	// 	if (Pin->Direction == EGPD_Output && Pin->LinkedTo.Num() > 0)
-	// 	{
-	// 		LLMEdNode->RuntimeNode->OutBufferIDS.Empty();
-	// 		LLMEdNode->RuntimeNode->OutBufferIDS.AddDefaulted();
-	// 		
-	// 		if (UThinkGraphEdNode* NodeDependancy = Cast<UThinkGraphEdNode>(Pin->LinkedTo[0]->GetOwningNode()))
-	// 		{
-	// 			NodeDependancy->RuntimeNode->InBufferIDS.Add(LLMEdNode->RuntimeNode->OutBufferIDS[0]);
-	// 		}
-	// 	}
-	// }
-}
 
 void UThinkGraphEdGraph::ValidateNodes(FCompilerResultsLog* LogResults)
 {
@@ -396,8 +398,8 @@ void UThinkGraphEdGraph::AutoArrange(const bool bVertical)
 		return;
 	}
 
-	TG_ERROR(Verbose, TEXT("UThinkGraphEdGraph::AutoArrange Strategy: %s"),
-	         bVertical ? TEXT("Vertical") : TEXT("Horizontal"))
+	TGE_ERROR(Verbose, TEXT("UThinkGraphEdGraph::AutoArrange Strategy: %s"),
+	          bVertical ? TEXT("Vertical") : TEXT("Horizontal"))
 	const FScopedTransaction Transaction(NSLOCTEXT("ACEGraph", "ThinkGraphEditorAutoArrange",
 	                                               "Think Graph Editor: Auto Arrange"));
 
@@ -442,6 +444,7 @@ void UThinkGraphEdGraph::Clear()
 	if (ThinkGraphModel)
 	{
 		ThinkGraphModel->ClearGraph();
+		ThinkGraphModel->Modify(true);
 	}
 
 	NodeMap.Reset();

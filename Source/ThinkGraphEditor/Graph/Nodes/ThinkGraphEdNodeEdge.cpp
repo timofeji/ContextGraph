@@ -119,7 +119,7 @@ void UThinkGraphEdNodeEdge::UpdateCachedIcon()
 {
 	if (!RuntimeEdge)
 	{
-		TG_ERROR(Error, TEXT("UThinkGraphEdNodeEdge::UpdateCachedIcon - Invalid Runtime Edge"))
+		TGE_ERROR(Error, TEXT("UThinkGraphEdNodeEdge::UpdateCachedIcon - Invalid Runtime Edge"))
 		CachedIcon = nullptr;
 		return;
 	}

@@ -31,7 +31,7 @@
 
 int32 UThinkGraphSchema::CurrentCacheRefreshID = 0;
 
-class FACENodeVisitorCycleChecker
+class FTGNodeVisitorCycleChecker
 {
 public:
 	/** Check whether a loop in the graph would be caused by linking the passed-in nodes */
@@ -522,7 +522,7 @@ UEdGraphNode* FThinkGraphSchemaAction_AutoArrangeVertical::PerformAction(
 	UThinkGraphEdGraph* Graph = Cast<UThinkGraphEdGraph>(ParentGraph);
 	if (Graph)
 	{
-		TG_ERROR(Verbose, TEXT("FThinkGraphSchemaAction_AutoArrangeVertical::PerformAction"))
+		TGE_ERROR(Verbose, TEXT("FThinkGraphSchemaAction_AutoArrangeVertical::PerformAction"))
 		Graph->AutoArrange(true);
 	}
 
@@ -538,7 +538,7 @@ UEdGraphNode* FThinkGraphSchemaAction_AutoArrangeHorizontal::PerformAction(
 	UThinkGraphEdGraph* Graph = Cast<UThinkGraphEdGraph>(ParentGraph);
 	if (Graph)
 	{
-		TG_ERROR(Verbose, TEXT("FThinkGraphSchemaAction_AutoArrangeVertical::PerformAction Horizontal"))
+		TGE_ERROR(Verbose, TEXT("FThinkGraphSchemaAction_AutoArrangeVertical::PerformAction Horizontal"))
 		Graph->AutoArrange(false);
 	}
 
@@ -552,20 +552,17 @@ UEdGraphNode* FThinkGraphSchemaAction_AutoArrangeHorizontal::PerformAction(
 void UThinkGraphSchema::CreateDefaultNodesForGraph(UEdGraph& Graph) const
 {
 	UThinkGraph* ThinkGraph = Cast<UThinkGraph>(Graph.GetOuter());
-	TG_ERROR(Verbose, TEXT("CreateDefaultNodesForGraph - Graph, Outer ThinkGraph: %s"), *GetNameSafe(ThinkGraph))
+	TGE_ERROR(Verbose, TEXT("CreateDefaultNodesForGraph - Graph, Outer ThinkGraph: %s"), *GetNameSafe(ThinkGraph))
 
 	// Create the entry/exit tunnels
-	FGraphNodeCreator<UThinkGraphEdNode_LLM> NodeCreator(Graph);
-	UThinkGraphEdNode_LLM* EntryNode = NodeCreator.CreateNode();
+	FGraphNodeCreator<UThinkGraphEdNode_Memory> NodeCreator(Graph);
+	UThinkGraphEdNode_Memory* MemoryNode = NodeCreator.CreateNode();
 	NodeCreator.Finalize();
-	SetNodeMetaData(EntryNode, FNodeMetadata::DefaultGraphNode);
-
-	// // Create runtime node for this editor node. Entry nodes gets a bare bone anim base one as well with blank anim related info.
-	// EntryNode->RuntimeNode = NewObject<UThinkGraph>(ThinkGraph, UThinkGraphNode_Entry::StaticClass());
+	SetNodeMetaData(MemoryNode, FNodeMetadata::DefaultGraphNode);
 
 	if (UThinkGraphEdGraph* EdThinkGraph = CastChecked<UThinkGraphEdGraph>(&Graph))
 	{
-		EdThinkGraph->EntryNodes.Add(EntryNode);
+		EdThinkGraph->EntryNodes.Add(MemoryNode);
 	}
 }
 
@@ -622,7 +619,7 @@ void UThinkGraphSchema::GetGraphContextActions(FGraphContextMenuBuilder& Context
 		));
 	ConstNodeAction->NodeTemplate = NewObject<UThinkGraphEdNode_Const>(ContextMenuBuilder.OwnerOfTemporaries);
 	ConstNodeAction->NodeTemplate->RuntimeNode = NewObject<UThinkGraphNode_Const>(ConstNodeAction->NodeTemplate);
-	ConstNodeAction->NodeTemplate->RuntimeNode->SetNodeTitle(FText::FromString("Base Prompt"));
+	ConstNodeAction->NodeTemplate->RuntimeNode->SetNodeTitle(FText::FromString("Prompt"));
 	ContextMenuBuilder.AddAction(ConstNodeAction);
 
 
@@ -723,7 +720,7 @@ void UThinkGraphSchema::GetGraphContextActions(FGraphContextMenuBuilder& Context
 				continue;
 			}
 
-			TG_ERROR(Verbose, TEXT("GetGraphContextActions - Create action from %s"), *NodeType->GetName())
+			TGE_ERROR(Verbose, TEXT("GetGraphContextActions - Create action from %s"), *NodeType->GetName())
 			CreateAndAddActionToContextMenu(ContextMenuBuilder, NodeType);
 			Visited.Add(NodeType);
 		}
@@ -790,7 +787,7 @@ const FPinConnectionResponse UThinkGraphSchema::CanCreateConnection(const UEdGra
 	}
 
 	// check for cycles
-	FACENodeVisitorCycleChecker CycleChecker;
+	FTGNodeVisitorCycleChecker CycleChecker;
 	if (!CycleChecker.CheckForLoop(OwningNodeA, OwningNodeB))
 	{
 		return FPinConnectionResponse(CONNECT_RESPONSE_DISALLOW,
@@ -798,19 +795,19 @@ const FPinConnectionResponse UThinkGraphSchema::CanCreateConnection(const UEdGra
 	}
 
 	FText ErrorMessage;
-	if (!ThinkGraphNodeIn->RuntimeNode->CanCreateConnectionTo(ThinkGraphNodeOut->RuntimeNode,
-	                                                          ThinkGraphNodeIn->GetOutputPin()->LinkedTo.Num(),
-	                                                          ErrorMessage))
-	{
-		return FPinConnectionResponse(CONNECT_RESPONSE_DISALLOW, ErrorMessage);
-	}
-
-	if (!ThinkGraphNodeOut->RuntimeNode->CanCreateConnectionFrom(ThinkGraphNodeIn->RuntimeNode,
-	                                                             ThinkGraphNodeOut->GetInputPin()->LinkedTo.Num(),
-	                                                             ErrorMessage))
-	{
-		return FPinConnectionResponse(CONNECT_RESPONSE_DISALLOW, ErrorMessage);
-	}
+	// if (!ThinkGraphNodeIn->RuntimeNode->CanCreateConnectionTo(ThinkGraphNodeOut->RuntimeNode,
+	//                                                           ThinkGraphNodeIn->GetOutputPin()->LinkedTo.Num(),
+	//                                                           ErrorMessage))
+	// {
+	// 	return FPinConnectionResponse(CONNECT_RESPONSE_DISALLOW, ErrorMessage);
+	// }
+	//
+	// if (!ThinkGraphNodeOut->RuntimeNode->CanCreateConnectionFrom(ThinkGraphNodeIn->RuntimeNode,
+	//                                                              ThinkGraphNodeOut->GetInputPin()->LinkedTo.Num(),
+	//                                                              ErrorMessage))
+	// {
+	// 	return FPinConnectionResponse(CONNECT_RESPONSE_DISALLOW, ErrorMessage);
+	// }
 
 	return FPinConnectionResponse(CONNECT_RESPONSE_MAKE, LOCTEXT("PinConnect", "Connect nodes with Transition Input"));
 }
@@ -855,11 +852,11 @@ bool UThinkGraphSchema::CreateAutomaticConversionNodeAndConnections(UEdGraphPin*
 	// Are nodes and pins all valid?
 	if (!NodeA || !NodeA->GetOutputPin() || !NodeB || !NodeB->GetInputPin())
 	{
-		TG_ERROR(Verbose, TEXT("CreateAutomaticConversionNodeAndConnections failed"));
+		TGE_ERROR(Verbose, TEXT("CreateAutomaticConversionNodeAndConnections failed"));
 		return false;
 	}
 
-	TG_ERROR(Verbose, TEXT("CreateAutomaticConversionNodeAndConnections ok"));
+	TGE_ERROR(Verbose, TEXT("CreateAutomaticConversionNodeAndConnections ok"));
 	CreateEdgeConnection(A, B, NodeA, NodeB);
 
 	return true;
@@ -1133,7 +1130,7 @@ void UThinkGraphSchema::SpawnNodeFromAsset(UAnimationAsset* Asset, const FVector
 		UClass* NewRuntimeClass = GetRuntimeClassForAnimAsset(Asset, Graph);
 		if (NewNodeClass && NewRuntimeClass)
 		{
-			TG_ERROR(Verbose, TEXT("SpawnNodeFromAsset - NewNodeClass: %s, NewRuntimeClass: %s"),
+			TGE_ERROR(Verbose, TEXT("SpawnNodeFromAsset - NewNodeClass: %s, NewRuntimeClass: %s"),
 			         *NewNodeClass->GetName(), *NewRuntimeClass->GetName());
 			UThinkGraphEdNode* NewNode = NewObject<UThinkGraphEdNode>(Graph, NewNodeClass);
 			NewNode->RuntimeNode = NewObject<UTGNode>(NewNode, NewRuntimeClass);

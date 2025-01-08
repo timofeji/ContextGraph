@@ -1,4 +1,3 @@
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -15,7 +14,6 @@ class UThinkGraphNodeAnim;
 class UThinkGraphEdge;
 class UThinkGraphEdNodeEdge;
 class UThinkGraphEdNode;
-class UThinkGraphEdNode_LLM;
 class UThinkGraphEdNode_Const;
 class UThinkGraphEdNode_Memory;
 
@@ -38,15 +36,14 @@ public:
 	/** Shared ref to asset editor, namely to access debugger info and debugged node */
 	TSharedPtr<FThinkGraphDebugger> Debugger;
 
+	virtual void RebuildGraph();
 	void RebuildGraphForEmbed(UThinkGraph* ThinkGraph, UThinkGraphEdNode_Embed* EmbedEdNode);
 	
-	virtual void RebuildGraph();
+	void PopulateBuffersForConst(UThinkGraph* OwningGraph,UThinkGraphEdNode_Const* ConstEdNode);
 
 	UThinkGraph* GetThinkGraphModel() const;
-	void            RebuildGraphForEdge(UThinkGraph* OwningGraph, UThinkGraphEdNodeEdge* EdGraphEdge);
-	void            RebuildGraphForNode(UThinkGraph* OwningGraph, UThinkGraphEdNode* Node);
-	void            RebuildGraphForLLM(UThinkGraph* OwningGraph, UThinkGraphEdNode_LLM* LLMEdNode);
-	void            RebuildGraphForMemory(UThinkGraph* OwningGraph, UThinkGraphEdNode_Memory* MemEdNode);
+	void RebuildGraphForEdge(UThinkGraph* OwningGraph, UThinkGraphEdNodeEdge* EdGraphEdge);
+	void RebuildGraphForNode(UThinkGraph* OwningGraph, UThinkGraphEdNode* Node);
 	/** Goes through each nodes and run a validation pass */
 	void ValidateNodes(FCompilerResultsLog* LogResults);
 
@@ -67,6 +64,6 @@ protected:
 	// TODO: Is it needed anymore ?
 	void SortNodes(UTGNode* RootNode);
 
-	
+
 	uint32 AnimIndex = 0;
 };

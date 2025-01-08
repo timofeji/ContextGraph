@@ -2,6 +2,7 @@
 
 #include "ThinkGraphEditorTypes.h"
 #include "ThinkGraphEdNode_Embed.h"
+#include "Graph/ThinkGraphEdGraph.h"
 
 #define LOCTEXT_NAMESPACE "ThinkGraphEdNodeEntry"
 
@@ -45,30 +46,25 @@ UEdGraphNode* UThinkGraphEdNode_Const::GetOutputNode()
 	return nullptr;
 }
 
-void UThinkGraphEdNode_Const::UpdateEmbeddedKeys()
+void UThinkGraphEdNode_Const::OnDataUpdated()
 {
-	FString PromptStr = Text;
-	// Regular expression to match "${key}"
-	const FRegexPattern Pattern(TEXT(R"(\$\{([a-zA-Z0-9_]+)\})"));
-	FRegexMatcher Matcher(Pattern, PromptStr);
-
-	// Process all matches
-	while (Matcher.FindNext())
-	{
-		// Extract the key inside ${key}
-		FString Key = Matcher.GetCaptureGroup(1);
-		EmbeddedKeys.AddUnique(Key);
-	}
-
 	const auto Pin = GetOutputPin();
 	Pin->PinType.bIsConst = true;
+
+	if(auto TGEdGraph = CastChecked<UThinkGraphEdGraph>(GetGraph()))
+	{
+		TGEdGraph->PopulateBuffersForConst(TGEdGraph->GetThinkGraphModel(), this);
+	}
 
 	for (const auto LinkedToPin : Pin->LinkedTo)
 	{
 		LinkedToPin->PinType.bIsConst = true;
+		
+		if (auto EmbedNode = Cast<UThinkGraphEdNode_Embed>(LinkedToPin->GetOwningNode()))
+		{
+			EmbedNode->OnTemplateUpdated();
+		}
 	}
-
-	
 }
 
 #undef LOCTEXT_NAMESPACE

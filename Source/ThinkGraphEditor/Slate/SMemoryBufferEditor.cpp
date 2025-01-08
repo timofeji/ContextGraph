@@ -642,7 +642,12 @@ void SMemoryBufferEditor::Construct(const FArguments& InArgs)
 			+ SOverlay::Slot()
 			[
 				SNew(SButton)
-
+					.Visibility_Lambda([&]
+				             {
+					             return EditedNode->GetInputPin()->PinType.bIsConst
+						                    ? EVisibility::Collapsed
+						                    : EVisibility::Visible;
+				             })
 					.ButtonStyle(FAppStyle::Get(), "FlatButton.Success")
 					.TextStyle(FAppStyle::Get(), "FlatButton.DefaultTextStyle")
                 										.IsEnabled(true)
@@ -654,20 +659,21 @@ void SMemoryBufferEditor::Construct(const FArguments& InArgs)
 				[
 					SNew(SHorizontalBox)
 					+ SHorizontalBox::Slot()
+					  .AutoWidth()
 					  .HAlign(HAlign_Left)
 					  .VAlign(VAlign_Center)
 					[
 						SNew(SImage)
-						.Image(FThinkGraphEditorStyle::Get().GetBrush("ThinkGraph.Memory.Generate.Icon"))
+						.Image(FThinkGraphEditorStyle::Get().GetBrush("ThinkGraph.Icon.Stimulus"))
 					]
 					+ SHorizontalBox::Slot()
-					  .HAlign(HAlign_Left)
+					  .FillWidth(1.f)
+					  .HAlign(HAlign_Fill)
 					  .VAlign(VAlign_Center)
 					[
 						SNew(STextBlock)
+						.Justification(ETextJustify::Center)
 
-                                                                                        				.
-LineHeightPercentage(.5f)
                                                                                         					.TextStyle(
 							                FAppStyle::Get(), "FlatButton.DefaultTextStyle")
                                                                                         				.Text_Lambda([&]
@@ -682,24 +688,13 @@ LineHeightPercentage(.5f)
 							                }
 							                else
 							                {
-								                return FText::FromString(TEXT("Recall Memory"));
+								                return FText::FromString(TEXT("Generate Memory"));
 							                }
 						                })
 					]
 				]
 			]]
 	];
-
-	// + SVerticalBox::Slot()
-	// .FillHeight(1.0f)
-	// [
-	// 	// SAssignNew(SearchBox, SFilterSearchBox)
-	//  //             			.AddMetaData<FTagMetaData>(FTagMetaData(TEXT("SequencerFilterSearch")))
-	//  //             			.DelayChangeNotificationsWhileTyping(true)
-	//  //             			.ShowSearchHistory(true)
-	//  //             			.OnTextChanged(this, &SPromptBufferEditor::OnBufferSearchChanged)
-	//  //             			.OnTextCommitted(this, &SPromptBufferEditor::OnBufferSearchCommitted)
-	//  //             			.OnSaveSearchClicked(this, &SPromptBufferEditor::OnBufferSearchSaved)
 }
 
 FText SMemoryBufferEditor::GetBufferText() const
@@ -738,9 +733,9 @@ FReply SMemoryBufferEditor::HandleMemRecallDebug()
 {
 	auto RequestBufferID = EditedNode->RuntimeNode->InBufferIDS;
 	FThinkGraphDelegates::OnBufferUpdated.AddRaw(this, &SMemoryBufferEditor::OnMemRecallFinished);
+	bIsGenerating = true;
 
 	auto ThinkGraph = CastChecked<UThinkGraph>(EditedNode->GetGraph()->GetOuter());
-
 	if (auto ThinkEdGraph = Cast<UThinkGraphEdGraph>(ThinkGraph->EditorGraph))
 	{
 		ThinkEdGraph->RebuildGraph();
@@ -750,17 +745,25 @@ FReply SMemoryBufferEditor::HandleMemRecallDebug()
 	{
 		ThinkGraph->RequestBufferUpdate(BufferID);
 	}
-
-	bIsGenerating = true;
-
 	return FReply::Handled();
 }
 
 void SMemoryBufferEditor::OnMemRecallFinished(uint16 ID)
 {
-	FThinkGraphDelegates::OnBufferUpdated.RemoveAll(this);
-	StartTime = FApp::GetCurrentTime();
-	bIsGenerating = false;
+	if (!EditedNode || !EditedNode->RuntimeNode)
+	{
+		FThinkGraphDelegates::OnBufferUpdated.RemoveAll(this);
+		bIsGenerating = false;
+
+		return;
+	}
+
+	if (EditedNode->RuntimeNode->InBufferIDS.Contains(ID))
+	{
+		FThinkGraphDelegates::OnBufferUpdated.RemoveAll(this);
+		StartTime = FApp::GetCurrentTime();
+		bIsGenerating = false;
+	}
 }
 
 #undef LOCTEXT_NAMESPACE
