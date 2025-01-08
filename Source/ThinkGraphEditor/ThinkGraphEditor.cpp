@@ -480,18 +480,17 @@ bool FThinkGraphEditor::CanAddValueBindPin()
 void FThinkGraphEditor::OnAddValueBindPin()
 {
 	const FGraphPanelSelectionSet SelectedNodes = GetSelectedNodes();
-	if (SelectedNodes.Num() == 1)
-	{
-		for (FGraphPanelSelectionSet::TConstIterator NodeIt(SelectedNodes); NodeIt; ++NodeIt)
-		{
-			UObject* Node = *NodeIt;
-			if (UThinkGraphNode_Embed* EmbedNode = Cast<UThinkGraphNode_Embed>(Node))
-			{
-				EmbedNode->AddValuePin();
-				break;
-			}
-		}
-	}
+	// if (SelectedNodes.Num() == 1)
+	// {
+	// 	for (FGraphPanelSelectionSet::TConstIterator NodeIt(SelectedNodes); NodeIt; ++NodeIt)
+	// 	{
+	// 		UObject* Node = *NodeIt;
+	// 		if (UThinkGraphNode_Embed* EmbedNode = Cast<UThinkGraphNode_Embed>(Node))
+	// 		{
+	// 			break;
+	// 		}
+	// 	}
+	// }
 }
 
 bool FThinkGraphEditor::CanRemoveValueBindPin()

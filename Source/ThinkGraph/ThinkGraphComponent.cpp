@@ -6,6 +6,7 @@
 #include "TGTypes.h"
 #include "ThinkGraph.h"
 #include "Nodes/ThinkGraphNode_Memory.h"
+#include "Nodes/ThinkGraphNode_Stimulus.h"
 
 
 // Sets default values for this component's properties
@@ -18,21 +19,21 @@ UThinkGraphComponent::UThinkGraphComponent()
 	// ...
 }
 
-void UThinkGraphComponent::InvokeStimulus(FName StimulusName)
+void UThinkGraphComponent::InvokeStimulus(FName StimulusName, FText InText)
 {
-	
+	if (Graph && Graph->InBuffers.Contains(StimulusName))
+	{
+		FDataBuffer& StimulusBuffer = Graph->GetBuffer(Graph->InBuffers[StimulusName]);
+		StimulusBuffer.Update(InText);
+	}
 }
 
-FText UThinkGraphComponent::GenerateMemory(FName MemoryName)
+FText UThinkGraphComponent::RecallMemory(FName MemoryName)
 {
-	if(DefaultThinkGraph && DefaultThinkGraph->OutNodes.Contains(MemoryName))
+	if (Graph && Graph->OutBuffers.Contains(MemoryName))
 	{
-		if(auto MemNode = CastChecked<UThinkGraphNode_Memory>(DefaultThinkGraph->OutNodes[MemoryName]))
-		{
-			DefaultThinkGraph->RequestBufferUpdate(MemNode->InBufferIDS[0]);
-			FDataBuffer& Out = DefaultThinkGraph->GetBuffer(MemNode->InBufferIDS[0]);
-			return Out.Text;
-		}
+		FDataBuffer& Out = Graph->GetBuffer(Graph->OutBuffers[MemoryName]);
+		return Out.Text;
 	}
 
 	return FText();
@@ -43,7 +44,7 @@ FText UThinkGraphComponent::GenerateMemory(FName MemoryName)
 void UThinkGraphComponent::BeginPlay()
 {
 	Super::BeginPlay();
-	DefaultThinkGraph.LoadSynchronous();
+	Graph.LoadSynchronous();
 
 	// ...
 }

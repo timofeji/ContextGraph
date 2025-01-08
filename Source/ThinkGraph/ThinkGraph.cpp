@@ -17,7 +17,8 @@ void UThinkGraph::ClearGraph()
 		}
 	}
 
-	AllNodes.Empty();
+	OutBuffers.Empty();
+	InBuffers.Empty();
 	DataBuffers.Empty();
 }
 

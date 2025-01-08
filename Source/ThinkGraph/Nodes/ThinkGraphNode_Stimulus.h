@@ -20,13 +20,6 @@ class THINKGRAPH_API UThinkGraphNode_Stimulus : public UTGNode
 public:
 	UThinkGraphNode_Stimulus();
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Animation", meta=(DisplayPriority=1))
-	FString Prompt;
+	virtual  void Activate(UThinkGraph* ThinkGraph) override;
 
-	virtual bool SupportsAssetClass(UClass* AssetClass);
-
-#if WITH_EDITOR
-	virtual FText GetAnimAssetLabelTooltip() const;
-	virtual FLinearColor GetBackgroundColor() const override;
-#endif
 };

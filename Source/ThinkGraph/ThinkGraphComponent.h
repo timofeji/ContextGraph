@@ -15,17 +15,17 @@ class THINKGRAPH_API UThinkGraphComponent : public UActorComponent
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere)
-	TSoftObjectPtr<UThinkGraph> DefaultThinkGraph;
+	TSoftObjectPtr<UThinkGraph> Graph;
 
 public:
 	// Sets default values for this component's properties
 	UThinkGraphComponent();
 
 	UFUNCTION(BlueprintCallable)
-	void InvokeStimulus(FName StimulusName);
+	void InvokeStimulus(FName StimulusName, FText InText);
 	
 	UFUNCTION(BlueprintCallable)
-	FText GenerateMemory(FName MemoryName);
+	FText RecallMemory(FName MemoryName);
 
 protected:
 	// Called when the game starts

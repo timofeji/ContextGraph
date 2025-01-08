@@ -4,31 +4,19 @@
 #include "Animation/AnimMontage.h"
 #include "Animation/AnimSequence.h"
 
-#define LOCTEXT_NAMESPACE "ThinkGraphNodeSequence"
+#define LOCTEXT_NAMESPACE "ThinkGraphNodeStimulus"
 
 UThinkGraphNode_Stimulus::UThinkGraphNode_Stimulus()
 {
 #if WITH_EDITORONLY_DATA
-	ContextMenuName = LOCTEXT("ThinkGraphNodeSequence_ContextMenuName", "Montage Action Node");
+	ContextMenuName = LOCTEXT("ThinkGraphNode_ContextMenuName", "Stimulus Node");
 #endif
 }
 
-bool UThinkGraphNode_Stimulus::SupportsAssetClass(UClass* AssetClass)
+void UThinkGraphNode_Stimulus::Activate(UThinkGraph* ThinkGraph)
 {
-	return AssetClass->IsChildOf(UAnimSequence::StaticClass());
+	Super::Activate(ThinkGraph);
 }
 
-#if WITH_EDITOR
-
-FText UThinkGraphNode_Stimulus::GetAnimAssetLabelTooltip() const
-{
-	return LOCTEXT("AnimAssetLabelTooltip", "Sequence");
-}
-
-FLinearColor UThinkGraphNode_Stimulus::GetBackgroundColor() const
-{
-	return  FLinearColor::Blue.Desaturate(0.24f);
-}
-#endif
 
 #undef LOCTEXT_NAMESPACE

@@ -17,8 +17,11 @@
 #include "..\..\ThinkGraph\Nodes\TGNode.h"
 #include "Nodes/ThinkGraphEdNode_Const.h"
 #include "Nodes/ThinkGraphEdNode_Embed.h"
+#include "Nodes/ThinkGraphEdNode_Stimulus.h"
 #include "ThinkGraph/TGTypes.h"
 #include "ThinkGraph/Nodes/ThinkGraphNode_Embed.h"
+#include "ThinkGraph/Nodes/ThinkGraphNode_Memory.h"
+#include "ThinkGraph/Nodes/ThinkGraphNode_Stimulus.h"
 
 UThinkGraph* UThinkGraphEdGraph::GetThinkGraphModel() const
 {
@@ -56,6 +59,21 @@ void UThinkGraphEdGraph::RebuildGraph()
 	for (int i = ThinkGraph->AllNodes.Num() - 1; i >= 0; i--)
 	{
 		auto Node = ThinkGraph->AllNodes[i];
+
+
+		if (auto MemoryNode = Cast<UThinkGraphNode_Memory>(Node))
+		{
+			ThinkGraph->OutBuffers.Add(
+				FName(MemoryNode->GetNodeTitle().ToString()),
+				MemoryNode->InBufferIDS[0]);
+		}
+
+		if (auto StimulusNode = Cast<UThinkGraphNode_Stimulus>(Node))
+		{
+			ThinkGraph->InBuffers.Add(
+				FName(StimulusNode->GetNodeTitle().ToString()),
+				StimulusNode->OutBufferIDS[0]);
+		}
 
 		for (const uint16 OutBufferID : Node->OutBufferIDS)
 		{
@@ -136,12 +154,6 @@ void UThinkGraphEdGraph::RebuildGraphForNode(UThinkGraph* OwningGraph, UThinkGra
 	if (auto EmbedEdNode = Cast<UThinkGraphEdNode_Embed>(EdNode))
 	{
 		RebuildGraphForEmbed(OwningGraph, EmbedEdNode);
-	}
-	
-	if (auto MemoryEdNode = Cast<UThinkGraphEdNode_Memory>(EdNode))
-	{
-		OwningGraph->OutNodes.Add(
-			FName(MemoryEdNode->RuntimeNode->GetNodeTitle().ToString()), MemoryEdNode->RuntimeNode );
 	}
 
 
@@ -237,16 +249,16 @@ void UThinkGraphEdGraph::PostEditUndo()
 
 TArray<UThinkGraphEdNode*> UThinkGraphEdGraph::GetAllNodes() const
 {
-	TArray<UThinkGraphEdNode*> OutNodes;
+	TArray<UThinkGraphEdNode*> OutBuffers;
 	for (UEdGraphNode* EdNode : Nodes)
 	{
 		if (UThinkGraphEdNode* Node = Cast<UThinkGraphEdNode>(EdNode))
 		{
-			OutNodes.Add(Node);
+			OutBuffers.Add(Node);
 		}
 	}
 
-	return OutNodes;
+	return OutBuffers;
 }
 
 namespace ACEAutoArrangeHelpers

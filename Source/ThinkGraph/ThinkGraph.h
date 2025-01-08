@@ -34,7 +34,8 @@ public:
 
 	TArray<FDataBuffer> DataBuffers;
 	
-	TMap<FName, UTGNode*> OutNodes;
+	TMap<FName, uint16> OutBuffers;
+	TMap<FName, uint16> InBuffers;
 
 #if WITH_EDITORONLY_DATA
 	/** Internal Node Class type used to know which classes to consider when drawing out context menu in graphs */
