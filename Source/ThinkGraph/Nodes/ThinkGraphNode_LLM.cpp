@@ -89,7 +89,7 @@ void UThinkGraphNode_LLM::OnAPICallback(FHttpRequestPtr Request, FHttpResponsePt
 {
 	if (bWasSuccessful && Response.IsValid())
 	{
-		FString ResponseContent = Response->GetContentAsString();
+		const FString ResponseContent = Response->GetContentAsString();
 
 		// Parse the JSON response
 		TSharedPtr<FJsonObject> JsonResponse;

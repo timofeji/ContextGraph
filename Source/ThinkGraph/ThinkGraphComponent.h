@@ -3,9 +3,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "TGTypes.h"
 #include "Components/ActorComponent.h"
 #include "ThinkGraphComponent.generated.h"
-
 
 class UThinkGraph;
 
@@ -23,9 +23,12 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void InvokeStimulus(FName StimulusName, FText InText);
-	
+
 	UFUNCTION(BlueprintCallable)
-	FText RecallMemory(FName MemoryName);
+	void BindMemoryUpdateEvent(FName MemoryName, UObject* InObj, FName FuncName);
+
+	UFUNCTION(BlueprintCallable)
+	FText GetMemoryText(FName MemoryName);
 
 protected:
 	// Called when the game starts

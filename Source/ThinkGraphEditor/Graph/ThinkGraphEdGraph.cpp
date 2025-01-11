@@ -19,7 +19,9 @@
 #include "Nodes/ThinkGraphEdNode_Embed.h"
 #include "Nodes/ThinkGraphEdNode_Stimulus.h"
 #include "ThinkGraph/TGTypes.h"
+#include "ThinkGraph/Nodes/ThinkGraphNode_Const.h"
 #include "ThinkGraph/Nodes/ThinkGraphNode_Embed.h"
+#include "ThinkGraph/Nodes/ThinkGraphNode_LLM.h"
 #include "ThinkGraph/Nodes/ThinkGraphNode_Memory.h"
 #include "ThinkGraph/Nodes/ThinkGraphNode_Stimulus.h"
 
@@ -63,9 +65,12 @@ void UThinkGraphEdGraph::RebuildGraph()
 
 		if (auto MemoryNode = Cast<UThinkGraphNode_Memory>(Node))
 		{
-			ThinkGraph->OutBuffers.Add(
-				FName(MemoryNode->GetNodeTitle().ToString()),
-				MemoryNode->InBufferIDS[0]);
+			if (!MemoryNode->InBufferIDS.IsEmpty())
+			{
+				FString Key = MemoryNode->GetNodeTitle().ToString();
+				ThinkGraph->OutBuffers.Add(
+					FName(Key.IsEmpty() ? "mem" : Key), MemoryNode->InBufferIDS[0]);
+			}
 		}
 
 		if (auto StimulusNode = Cast<UThinkGraphNode_Stimulus>(Node))
@@ -75,9 +80,12 @@ void UThinkGraphEdGraph::RebuildGraph()
 				StimulusNode->OutBufferIDS[0]);
 		}
 
-		for (const uint16 OutBufferID : Node->OutBufferIDS)
+		if (auto constNode = Cast<UThinkGraphNode_Const>(Node))
 		{
-			ThinkGraph->RequestBufferUpdate(OutBufferID);
+			for (const uint16 OutBufferID : Node->OutBufferIDS)
+			{
+				ThinkGraph->GetBuffer(OutBufferID);
+			}
 		}
 	}
 }
@@ -176,7 +184,7 @@ void UThinkGraphEdGraph::RebuildGraphForNode(UThinkGraph* OwningGraph, UThinkGra
 				Buffer = &OwningGraph->GetBuffer(EdNode->RuntimeNode->OutBufferIDS[0]);
 			}
 
-			Buffer->NodeDependancies.Add(EdNode->RuntimeNode);
+			Buffer->NodeDependancies.AddUnique(EdNode->RuntimeNode);
 
 			if (auto ConstEdNode = Cast<UThinkGraphEdNode_Const>(EdNode))
 			{
@@ -189,6 +197,8 @@ void UThinkGraphEdGraph::RebuildGraphForNode(UThinkGraph* OwningGraph, UThinkGra
 				if (auto LinkedToEdNode = Cast<UThinkGraphEdNode>(LinkedTo->GetOwningNode()))
 				{
 					LinkedToEdNode->RuntimeNode->InBufferIDS.AddUnique(Buffer->BufferID);
+
+					Buffer->NodeDependancies.AddUnique(LinkedToEdNode->RuntimeNode);
 
 					if (auto EmbedEdNode = Cast<UThinkGraphEdNode_Embed>(LinkedToEdNode))
 					{

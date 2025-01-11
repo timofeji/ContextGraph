@@ -1,26 +1,29 @@
-# Think Graph Editor 
-A prototype plugin for authoring and deploying model heuristisc for agents embedded in unreal engine simulations.
+# Context Graph Editor 
+Experimental plugin for authoring and deploying probabalistic model heuristiscs for agents embedded in unreal engine simulations.
+
+## About
+This editor aims to be to "word shaders." what the material editor is to fragment/vertex shaders.
+Theoretically, We can encode all agent related environment strings into vector buffers that allow us to do transformations linearly using the GPU. Additionally, probabalistic encodings with the aim of accelerating common computations, quantizing embedding spaces, and reducing memory footprint.
+
+
 - [About](#about)
 - [Features](#features)
 - [Examples](#examples)
 - [Links](#links)
 
-## About
-The material editor is to fragment shaders what this editor aims to be to "word shaders." 
-Theoretically, We can encode all agent related environment strings into vector buffers that allow us to do transformations linearly using the GPU. Additionally, probabalistic encodings with the aim of accelerating common computations, quantizing embedding spaces, and reducing memory footprint.
-
-planned features:
-Prompt buffering
-Blueprint binds
-Stochastic entropy sources
-Learned embeddings(RLHF)
-
-<!-- ## Features
-- Graph Editor:
-    - Branching montage selection based gameplay tags and selector nodes
-    - Animation combos using linked nodes
-    - One click setup for live-linked animations in Sequencer -->
+## Features
+-  Prompt Buffers:
+    constant and dynamic prompts using variable injection. 
     
+- Memory/Stimulus:
+    inference and model sampling at runtime 
+ 
+## planned features:
+    Prompt tokenization
+    Stochastic entropy sources
+    Learned embeddings(RLHF)
+
+   
 
 ## Examples
 ###  Example Prompt
@@ -60,8 +63,8 @@ ${name}: [emotion] [output] [action]
 we can inject state into a prompt using an Inject node:
 
 ## Links
-* [📚 Documentation](https://docs.eonblade.com/montagegraph) 
-* [📄 Source Code](https://github.com/timofeji/MontageGraph)
-* [🗂️ Sample project](https://github.com/timofeji/MontageGraphSample)
+* [📚 Documentation](https://docs.eonblade.com/LanguageGraph/docs) 
+* [📄 Source Code](https://github.com/timofeji/LanguageGraph)
+* [🗂️ Sample project](https://github.com/timofeji/Dialogue)
 * [💬 Discord](https://discord.gg/ymHY5eP)
 

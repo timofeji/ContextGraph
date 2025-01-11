@@ -3,7 +3,6 @@
 
 #include "ThinkGraph.h"
 
-#include "TGTypes.h"
 #include "Nodes\TGNode.h"
 
 void UThinkGraph::ClearGraph()
@@ -20,6 +19,7 @@ void UThinkGraph::ClearGraph()
 	OutBuffers.Empty();
 	InBuffers.Empty();
 	DataBuffers.Empty();
+	AllNodes.Empty();
 }
 
 

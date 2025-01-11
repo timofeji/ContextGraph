@@ -115,16 +115,16 @@ void UThinkGraphEdNode_Embed::ReallocateBindPins(TArray<FString>& NewKeys)
 			CreatePin(EGPD_Input, UThinkGraphPinNames::PinCategory_Value, FName(Key));
 		}
 	}
-
-	for (int i = 0; i < OldKeys.Num(); i++)
-	{
-		//Key Removed
-		if (!NewKeys.Contains(OldKeys[i]))
-		{
-			RemovePinAt(i+1, EGPD_Input);
-		}
-	}
-	
+	//
+	// for (int i = 0; i < OldKeys.Num(); i++)
+	// {
+	// 	//Key Removed
+	// 	if (!NewKeys.Contains(OldKeys[i]))
+	// 	{
+	// 		RemovePinAt(i+1, EGPD_Input);
+	// 	}
+	// }
+	//
 
 	GetGraph()->NotifyNodeChanged(this);
 }

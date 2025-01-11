@@ -16,6 +16,8 @@ UThinkGraphNode_Stimulus::UThinkGraphNode_Stimulus()
 void UThinkGraphNode_Stimulus::Activate(UThinkGraph* ThinkGraph)
 {
 	Super::Activate(ThinkGraph);
+
+	
 }
 
 

@@ -20,10 +20,14 @@ struct FDataBuffer
 	
 	UPROPERTY(Transient)
 	TArray<UTGNode*> NodeDependancies;
+
+	TMulticastDelegate<void()> OnUpdate;
 	
 	void Update(const FText& InText)
 	{
 		Text = InText;
 		FThinkGraphDelegates::OnBufferUpdated.Broadcast(BufferID);
+
+		OnUpdate.Broadcast();
 	};
 };

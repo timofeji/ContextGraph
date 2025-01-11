@@ -3,10 +3,10 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "TGTypes.h"
 #include "UObject/Object.h"
 #include "ThinkGraph.generated.h"
 
-struct FDataBuffer;
 class UTGNode;
 /**
  * 

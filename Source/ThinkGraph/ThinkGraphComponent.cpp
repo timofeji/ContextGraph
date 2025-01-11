@@ -5,8 +5,6 @@
 
 #include "TGTypes.h"
 #include "ThinkGraph.h"
-#include "Nodes/ThinkGraphNode_Memory.h"
-#include "Nodes/ThinkGraphNode_Stimulus.h"
 
 
 // Sets default values for this component's properties
@@ -23,12 +21,24 @@ void UThinkGraphComponent::InvokeStimulus(FName StimulusName, FText InText)
 {
 	if (Graph && Graph->InBuffers.Contains(StimulusName))
 	{
-		FDataBuffer& StimulusBuffer = Graph->GetBuffer(Graph->InBuffers[StimulusName]);
+		const uint16 StimulusBufferID = Graph->InBuffers[StimulusName];
+		FDataBuffer& StimulusBuffer = Graph->GetBuffer(StimulusBufferID);
 		StimulusBuffer.Update(InText);
+
+		Graph->RequestBufferUpdate(StimulusBufferID);
 	}
 }
 
-FText UThinkGraphComponent::RecallMemory(FName MemoryName)
+void UThinkGraphComponent::BindMemoryUpdateEvent(FName MemoryName, UObject* InObj, FName FuncName)
+{
+	if (Graph && Graph->OutBuffers.Contains(MemoryName))
+	{
+		FDataBuffer& MemBuffer = Graph->GetBuffer(Graph->OutBuffers[MemoryName]);
+		MemBuffer.OnUpdate.AddUFunction(InObj, FuncName);
+	}
+}
+
+FText UThinkGraphComponent::GetMemoryText(FName MemoryName)
 {
 	if (Graph && Graph->OutBuffers.Contains(MemoryName))
 	{
