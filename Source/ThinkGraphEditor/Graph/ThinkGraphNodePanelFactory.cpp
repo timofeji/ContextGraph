@@ -9,6 +9,7 @@
 #include "Nodes/ThinkGraphEdNode_Embed.h"
 #include "Nodes/ThinkGraphEdNode_Memory.h"
 #include "Nodes/ThinkGraphEdNode_Stimulus.h"
+#include "Nodes/ThinkGraphEdNode_Variable.h"
 #include "Slate/SThinkGraphNode_Value.h"
 #include "Slate/SThinkGraphNode.h"
 #include "Slate/SThinkGraphNode_Embed.h"
@@ -35,6 +36,10 @@ TSharedPtr<SGraphNode> FThinkGraphNodePanelFactory::CreateNode(UEdGraphNode* Nod
 	{
 		return SNew(SThinkGraphNode_Value, StimulusNode);
 	}
+	if (UThinkGraphEdNode_Variable* VarNode = Cast<UThinkGraphEdNode_Variable>(Node))
+    	{
+    		return SNew(SThinkGraphNode_Value, VarNode);
+    	}
 
 	if (UThinkGraphEdNode* GraphNode = Cast<UThinkGraphEdNode>(Node))
 	{

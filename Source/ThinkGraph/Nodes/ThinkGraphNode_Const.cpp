@@ -10,7 +10,7 @@
 UThinkGraphNode_Const::UThinkGraphNode_Const()
 {
 #if WITH_EDITORONLY_DATA
-	ContextMenuName = LOCTEXT("ThinkGraphNodeSequence_ContextMenuName", "Montage Action Node");
+	ContextMenuName = LOCTEXT("ThinkGraphNodeSequence_ContextMenuName", "Constant Context Node");
 #endif
 }
 
