@@ -1,5 +1,5 @@
 # Context Graph Editor 
-Experimental plugin for authoring and deploying probabalistic model heuristiscs for agents embedded in unreal engine simulations.
+Experimental plugin for authoring and deploying LLMs in unreal engine.
 
 ## About
 This editor aims to be to "word shaders." what the material editor is to fragment/vertex shaders.
