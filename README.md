@@ -1,6 +1,8 @@
 # Context Graph Editor 
 Experimental plugin for authoring and deploying LLMs in unreal engine.
 
+![UnrealEditor-Win64-DebugGame_uLgrTgv8pG](https://github.com/user-attachments/assets/d7d0f881-8a6f-4c8a-b543-881ac971b9fc)
+
 ## About
 This editor aims to be to "word shaders." what the material editor is to fragment/vertex shaders.
 Theoretically, We can encode all agent related environment strings into vector buffers that allow us to do transformations linearly using the GPU. Additionally, probabalistic encodings with the aim of accelerating common computations, quantizing embedding spaces, and reducing memory footprint.
